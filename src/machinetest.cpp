@@ -19,6 +19,8 @@
 
 void OnePlusTwoIsThree()
 {
+	// 1 + 2 = 3
+
 	Machine machine;
 	std::vector<Instruction> instructions = {
 		{ OpCode::PUSH, Value::Number(1.0) },		// lhs
