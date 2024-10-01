@@ -32,6 +32,7 @@ file(GLOB HEADERS "src/*.h")
 add_executable(scribe 
   ${SOURCES} 
   ${HEADERS}
+  ${fmt_SOURCE_DIR}/src/format.cc
 )
 
 target_include_directories(scribe PRIVATE

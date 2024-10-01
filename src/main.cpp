@@ -1,5 +1,6 @@
 #include "token.h"
 #include "ast.h"
+#include "machine.h"
 
 #include <iostream>
 #include <string>
@@ -105,7 +106,10 @@ public:
     }
 };
 
-int main() {
+int main() 
+{
+	Machine::test();
+    /*
     Interpreter interpreter;
     std::string line;
 
@@ -115,6 +119,6 @@ int main() {
         if (line == "exit") break;
         interpreter.interpret(line);
     }
-
+    */
     return 0;
 }

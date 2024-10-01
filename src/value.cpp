@@ -1,0 +1,115 @@
+#include "value.h"
+
+Value::Value(const Value& rhs) : type(rhs.type)
+{
+	copy(rhs);
+}
+
+Value& Value::operator=(const Value& rhs)
+{
+	if (this == &rhs) return *this;
+	copy(rhs);
+	return *this;
+}
+
+bool Value::operator==(const Value& rhs) const
+{
+	if (type != rhs.type) return false;
+
+	switch (type) {
+	case Type::tNone: return true;
+	case Type::tNumber: return vNumber == rhs.vNumber;
+	case Type::tBoolean: return vBoolean == rhs.vBoolean;
+	case Type::tString: return *vString == *rhs.vString;
+	case Type::tArray: return *vArray == *rhs.vArray;
+	case Type::tMap: return *vMap == *rhs.vMap;
+	}
+	return false;
+}
+
+Value::~Value()
+{
+	clear();
+}
+
+Value::Value(Value&& other) noexcept
+{
+	move(other);
+}
+
+Value& Value::operator=(Value&& rhs) noexcept
+{
+	if (this == &rhs) return *this;
+	move(rhs);
+	return *this;
+}
+
+void Value::move(Value& other)
+{
+	clear();
+	type = other.type;
+	switch (type) {
+	case Type::tNone: 
+		vNumber = 0; 
+		break;
+	case Type::tNumber:
+		vNumber = other.vNumber;
+		break;
+	case Type::tBoolean:
+		vBoolean = other.vBoolean;
+		break;
+	case Type::tString:
+		vString = other.vString; 
+		other.vString = nullptr;
+		break;
+	case Type::tArray:
+		vArray = other.vArray;
+		other.vArray = nullptr;
+		break;
+	case Type::tMap:
+		vMap = other.vMap;
+		other.vMap = nullptr;
+		break;
+	}
+}
+
+void Value::clear()
+{
+	switch (type) {
+	case Type::tNone:
+	case Type::tNumber:
+	case Type::tBoolean:
+		break;
+	case Type::tString: delete vString; break;
+	case Type::tArray: delete vArray; break;
+	case Type::tMap: delete vMap; break;
+	}
+	type = Type::tNone;
+	vNumber = 0;
+}
+
+void Value::copy(const Value& rhs)
+{
+	clear();
+	type = rhs.type;
+	switch (type) {
+	case Type::tNone:
+		vNumber = 0;
+		break;
+	case Type::tNumber:
+		vNumber = rhs.vNumber;
+		break;
+	case Type::tBoolean:
+		vBoolean = rhs.vBoolean;
+		break;
+	case Type::tString: 
+		vString = new std::string(*rhs.vString); 
+		break;
+	case Type::tArray: 
+		vArray = new std::vector<Value>(*rhs.vArray); 
+		break;
+	case Type::tMap: 
+		vMap = new std::map<std::string, Value>(*rhs.vMap); 
+		break;
+	}
+}
