@@ -1,6 +1,7 @@
 #include "machine.h"
 
 #include <fmt/core.h>
+#include <assert.h>
 
 static const char* gOpCodeNames[static_cast<int>(OpCode::count)] = {
 	"NO_OP",
@@ -11,6 +12,11 @@ static const char* gOpCodeNames[static_cast<int>(OpCode::count)] = {
 	"MUL",
 	"DIV",
 };
+
+Machine::Machine()
+{
+	scope.push_back(std::map<std::string, Value>());
+}
 
 bool Machine::verifyBinaryNumberOp(const char* op)
 {
@@ -49,6 +55,42 @@ void Machine::doBinaryNumberOp(OpCode opCode)
 	}
 }
 
+void Machine::doScopeSet()
+{
+	if (stack.size() < 2) {
+		setErrorMessage("SCOPESET: stack underflow");
+		return;
+	}
+
+	size_t s = stack.size();
+	if (stack[s-2].type != Type::tString) {
+		setErrorMessage("SCOPESET: expected 'string' at stack - 2");
+		return;
+	}
+	if (stack[s - 1].type == Type::tNone) {
+		setErrorMessage("SCOPESET: expected value at stack - 1");
+		return;
+	}
+
+	std::string key = *stack[s - 2].vString;
+	Value value = stack[s - 1];
+	
+	stack.pop_back();
+	stack.pop_back();
+
+	size_t index = scope.size() - 1;
+	while (index < size_t(-1)) {
+		if (scope[index].find(key) != scope[index].end()) {
+			break;
+		}
+		index--;
+	}
+	if (index == size_t(-1))
+		index = scope.size() - 1;
+
+	assert(index < scope.size());
+	scope[index][key] = value;
+}
 
 void Machine::execute(const std::vector<Instruction>& instructions)
 {
@@ -70,6 +112,11 @@ void Machine::execute(const std::vector<Instruction>& instructions)
 			doBinaryNumberOp(instruction.opCode);
 			break;
 		}
+
+		case OpCode::SCOPESET:
+			doScopeSet();
+			break;
+
 		default:
 			setErrorMessage(fmt::format("Unknown opcode: {}", (int)instruction.opCode));
 			break;

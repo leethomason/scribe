@@ -7,17 +7,23 @@
 // - string
 // - boolean
 // - array
-// - struct or map?
+// - map
 
 enum class OpCode
 {
 	NO_OP,
+
 	PUSH,
 	POP,
+
 	ADD,
 	SUB,
 	MUL,
 	DIV,
+
+	SCOPESET,
+	SCOPEGET,
+
 	count,
 };
 
@@ -32,7 +38,7 @@ struct Instruction
 class Machine
 {
 public:
-	Machine() = default;
+	Machine();
 	~Machine() = default;
 
 	void execute(const std::vector<Instruction>& instructions);
@@ -45,8 +51,12 @@ public:
 	static void test();
 
 private:
+	// Scope 0 is the global scope
+	std::vector<std::map<std::string, Value>> scope;
+
 	void setErrorMessage(const std::string& message) { errorMessage = message; }
 
 	bool verifyBinaryNumberOp(const char* op);
 	void doBinaryNumberOp(OpCode opCode);
+	void doScopeSet();
 };

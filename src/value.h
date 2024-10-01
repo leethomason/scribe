@@ -32,6 +32,13 @@ struct Value {
 		return v;
 	}
 
+	static Value String(const std::string& a) {
+		Value v;
+		v.type = Type::tString;
+		v.vString = new std::string(a);
+		return v;
+	}
+
 	Type type;
 	union {
 		double vNumber;
