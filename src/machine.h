@@ -11,18 +11,24 @@
 
 enum class OpCode
 {
+	//						pop					push
 	NO_OP,
 
-	PUSH,
-	POP,
+	PUSH,				//  0					value	
+	POP,				//  1					0
 
-	ADD,
+	ADD,				// lhs, rhs				result
 	SUB,
 	MUL,
 	DIV,
 
-	SCOPESET,
-	SCOPEGET,
+	// There isn't really a global, just a top-level scope. And that top-level scope is per file.
+	DEFINE_GLOBAL,		// key, init-value		0 (global)
+	DEFINE_LOCAL,		// key, init-value		0 (local to current scope depth)
+	LOAD,				// key                  value
+	STORE,				// key, value			0
+	PUSH_SCOPE,			// 0					0
+	POP_SCOPE,			// 0					0
 
 	count,
 };
@@ -41,7 +47,7 @@ public:
 	Machine();
 	~Machine() = default;
 
-	void execute(const std::vector<Instruction>& instructions);
+	void execute(const std::vector<Instruction>& instructions, std::map<std::string, Value>& globalVars);
 
 	std::vector<Value> stack;
 	std::string errorMessage;
@@ -51,12 +57,24 @@ public:
 	static void test();
 
 private:
-	// Scope 0 is the global scope
-	std::vector<std::map<std::string, Value>> scope;
+	struct LocalVar {
+		int depth = 0;
+		std::string key;
+		Value value;
+	};
+	std::vector<LocalVar> localVars;
+	int scopeDepth = 0;
+	std::map<std::string, Value>* globalVars = nullptr;
 
 	void setErrorMessage(const std::string& message) { errorMessage = message; }
 
 	bool verifyBinaryNumberOp(const char* op);
 	void doBinaryNumberOp(OpCode opCode);
-	void doScopeSet();
+	
+	void doDefineGlobal();
+	void doDefineLocal();
+	void doLoad();
+	void doStore();
+	void doPushScope();
+	void doPopScope();
 };

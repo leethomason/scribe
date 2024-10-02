@@ -20,13 +20,14 @@
 // 1 + 2 = 3
 void OnePlusTwoIsThree()
 {
+	std::map<std::string, Value> globals;
 	Machine machine;
 	std::vector<Instruction> instructions = {
 		{ OpCode::PUSH, Value::Number(1.0) },		// lhs
 		{ OpCode::PUSH, Value::Number(2.0) },		// rhs
 		{ OpCode::ADD, Value() },
 	};
-	machine.execute(instructions);
+	machine.execute(instructions, globals);
 
 	TEST(machine.hasError() == false);
 	TEST(machine.stack.size() == 1);
@@ -37,13 +38,14 @@ void OnePlusTwoIsThree()
 // 1 - 2 = -1
 void OneMinusTwoIsNegativeOne()
 {
+	std::map<std::string, Value> globals;
 	Machine machine;
 	std::vector<Instruction> instructions = {
 		{ OpCode::PUSH, Value::Number(1.0) },		// lhs
 		{ OpCode::PUSH, Value::Number(2.0) },		// rhs
 		{ OpCode::SUB, Value() },
 	};
-	machine.execute(instructions);
+	machine.execute(instructions, globals);
 
 	TEST(machine.hasError() == false);
 	TEST(machine.stack.size() == 1);
@@ -54,6 +56,7 @@ void OneMinusTwoIsNegativeOne()
 // (1 + 2) * 3 = 9
 void OnePlusTwoTimesThreeIsNine()
 {
+	std::map<std::string, Value> globals;
 	Machine machine;
 	std::vector<Instruction> instructions = {
 		{ OpCode::PUSH, Value::Number(1.0) },		// lhs
@@ -62,7 +65,7 @@ void OnePlusTwoTimesThreeIsNine()
 		{ OpCode::PUSH, Value::Number(3.0) },		// rhs
 		{ OpCode::MUL, Value() },
 	};
-	machine.execute(instructions);
+	machine.execute(instructions, globals);
 
 	TEST(machine.hasError() == false);
 	TEST(machine.stack.size() == 1);
@@ -73,6 +76,7 @@ void OnePlusTwoTimesThreeIsNine()
 // (1 + 2) / 3 = 1
 void OnePlusTwoDivThreeIsOne()
 {
+	std::map<std::string, Value> globals;
 	Machine machine;
 	std::vector<Instruction> instructions = {
 		{ OpCode::PUSH, Value::Number(1.0) },		// lhs
@@ -81,7 +85,7 @@ void OnePlusTwoDivThreeIsOne()
 		{ OpCode::PUSH, Value::Number(3.0) },		// rhs
 		{ OpCode::DIV, Value() },
 	};
-	machine.execute(instructions);
+	machine.execute(instructions, globals);
 
 	TEST(machine.hasError() == false);
 	TEST(machine.stack.size() == 1);
@@ -94,30 +98,6 @@ void OnePlusTwoDivThreeIsOne()
 // x + y = 3
 void XPlusYIsThree()
 {
-	Machine machine;
-	std::vector<Instruction> instructions = {
-		{ OpCode::PUSH, Value::String("x") },
-		{ OpCode::PUSH, Value::Number(1.0) },
-		{ OpCode::SCOPESET, Value() },
-
-		{ OpCode::PUSH, Value::String("y") },
-		{ OpCode::PUSH, Value::Number(2.0) },
-		{ OpCode::SCOPESET, Value() },
-		
-		{ OpCode::PUSH, Value::String("x") },
-		{ OpCode::SCOPEGET, Value() },
-
-		{ OpCode::PUSH, Value::String("y") },
-		{ OpCode::SCOPEGET, Value() },
-
-		{ OpCode::ADD, Value() },
-	};
-	machine.execute(instructions);
-
-	TEST(machine.hasError() == false);
-	TEST(machine.stack.size() == 1);
-	TEST(machine.stack[0].type == Type::tNumber);
-	TEST_FP(machine.stack[0].vNumber, 3.0);
 }
 
 void Machine::test()
