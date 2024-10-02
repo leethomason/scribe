@@ -40,6 +40,10 @@ inline uint32_t PackOpCode(OpCode op, uint32_t poolIndex) {
 	return static_cast<uint32_t>(op) | (poolIndex << 16);
 }
 
+inline uint32_t PackOpCode(OpCode op) {
+	return static_cast<uint32_t>(op);
+}
+
 inline void UnpackOpCode(uint32_t a, OpCode& op, uint32_t& index) {
 	uint16_t u16 = static_cast<uint16_t>(a & 0xffff);
 	assert(static_cast<uint32_t>(u16) < static_cast<uint32_t>(OpCode::count));
@@ -65,7 +69,14 @@ struct ConstPool
 		values.push_back(value);
 		return static_cast<uint32_t>(values.size() - 1);
 	}
+
+	const Value& get(uint32_t index) const {
+		assert(index < values.size());
+		return values[index];
+	}
 };
+
+using Instruction = uint32_t;
 
 // The virtual machine.
 // Given a stack of instructions, executes them.
@@ -75,7 +86,7 @@ public:
 	Machine();
 	~Machine() = default;
 
-	void execute(const std::vector<Instruction>& instructions);
+	void execute(const std::vector<Instruction>& instructions, ConstPool& pool);
 
 	std::vector<Value> stack;
 	std::map<std::string, Value> globalVars;

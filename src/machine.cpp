@@ -222,16 +222,20 @@ void Machine::doPopScope()
 		localVars.end());
 }
 
-void Machine::execute(const std::vector<Instruction>& instructions)
+void Machine::execute(const std::vector<Instruction>& instructions, ConstPool& pool)
 {
 	for (const auto& instruction : instructions)
 	{
 		if (hasError()) break;
 
-		switch (instruction.opCode)
+		OpCode opCode = OpCode::NO_OP;
+		uint32_t index = 0;
+		UnpackOpCode(instruction, opCode, index);
+
+		switch (opCode)
 		{
 		case OpCode::PUSH:
-			stack.push_back(instruction.value);
+			stack.push_back(pool.get(index));
 			break;
 		case OpCode::POP:
 			stack.pop_back();
@@ -241,7 +245,7 @@ void Machine::execute(const std::vector<Instruction>& instructions)
 		case OpCode::MUL:
 		case OpCode::DIV:
 		{
-			doBinaryNumberOp(instruction.opCode);
+			doBinaryNumberOp(opCode);
 			break;
 		}
 
@@ -255,7 +259,7 @@ void Machine::execute(const std::vector<Instruction>& instructions)
 
 
 		default:
-			setErrorMessage(fmt::format("Unknown opcode: {}", (int)instruction.opCode));
+			setErrorMessage(fmt::format("Unknown opcode: {}", (int)opCode));
 			break;
 		}
 	}

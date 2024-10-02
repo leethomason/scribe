@@ -20,13 +20,17 @@
 // 1 + 2 = 3
 void OnePlusTwoIsThree()
 {
+	ConstPool pool;
+	const uint32_t one = pool.add(Value::Number(1.0));
+	const uint32_t two = pool.add(Value::Number(2.0));
+
 	Machine machine;
 	std::vector<Instruction> instructions = {
-		{ OpCode::PUSH, Value::Number(1.0) },		// lhs
-		{ OpCode::PUSH, Value::Number(2.0) },		// rhs
-		{ OpCode::ADD, Value() },
+		PackOpCode(OpCode::PUSH, one),		// lhs
+		PackOpCode(OpCode::PUSH, two),		// rhs
+		PackOpCode(OpCode::ADD),
 	};
-	machine.execute(instructions);
+	machine.execute(instructions, pool);
 
 	TEST(machine.hasError() == false);
 	TEST(machine.stack.size() == 1);
@@ -37,13 +41,18 @@ void OnePlusTwoIsThree()
 // 1 - 2 = -1
 void OneMinusTwoIsNegativeOne()
 {
+	ConstPool pool;
 	Machine machine;
+
+	const uint32_t one = pool.add(Value::Number(1.0));
+	const uint32_t two = pool.add(Value::Number(2.0));
+
 	std::vector<Instruction> instructions = {
-		{ OpCode::PUSH, Value::Number(1.0) },		// lhs
-		{ OpCode::PUSH, Value::Number(2.0) },		// rhs
-		{ OpCode::SUB, Value() },
+		PackOpCode(OpCode::PUSH, one ),		// lhs
+		PackOpCode(OpCode::PUSH, two ),		// rhs
+		PackOpCode(OpCode::SUB),
 	};
-	machine.execute(instructions);
+	machine.execute(instructions, pool);
 
 	TEST(machine.hasError() == false);
 	TEST(machine.stack.size() == 1);
@@ -54,15 +63,21 @@ void OneMinusTwoIsNegativeOne()
 // (1 + 2) * 3 = 9
 void OnePlusTwoTimesThreeIsNine()
 {
+	ConstPool pool;
 	Machine machine;
+
+	const uint32_t one = pool.add(Value::Number(1.0));
+	const uint32_t two = pool.add(Value::Number(2.0));
+	const uint32_t three = pool.add(Value::Number(3.0));
+
 	std::vector<Instruction> instructions = {
-		{ OpCode::PUSH, Value::Number(1.0) },		// lhs
-		{ OpCode::PUSH, Value::Number(2.0) },		// rhs
-		{ OpCode::ADD, Value() },
-		{ OpCode::PUSH, Value::Number(3.0) },		// rhs
-		{ OpCode::MUL, Value() },
+		PackOpCode(OpCode::PUSH, one),		// lhs
+		PackOpCode(OpCode::PUSH, two),		// rhs
+		PackOpCode(OpCode::ADD),
+		PackOpCode(OpCode::PUSH, three),	// rhs
+		PackOpCode(OpCode::MUL),
 	};
-	machine.execute(instructions);
+	machine.execute(instructions, pool);
 
 	TEST(machine.hasError() == false);
 	TEST(machine.stack.size() == 1);
@@ -73,15 +88,20 @@ void OnePlusTwoTimesThreeIsNine()
 // (1 + 2) / 3 = 1
 void OnePlusTwoDivThreeIsOne()
 {
+	ConstPool pool;
+	const uint32_t one = pool.add(Value::Number(1.0));
+	const uint32_t two = pool.add(Value::Number(2.0));
+	const uint32_t three = pool.add(Value::Number(3.0));
+
 	Machine machine;
 	std::vector<Instruction> instructions = {
-		{ OpCode::PUSH, Value::Number(1.0) },		// lhs
-		{ OpCode::PUSH, Value::Number(2.0) },		// rhs
-		{ OpCode::ADD, Value() },
-		{ OpCode::PUSH, Value::Number(3.0) },		// rhs
-		{ OpCode::DIV, Value() },
+		PackOpCode(OpCode::PUSH, one),		// lhs
+		PackOpCode(OpCode::PUSH, two),		// rhs
+		PackOpCode(OpCode::ADD),
+		PackOpCode(OpCode::PUSH, three),	// rhs
+		PackOpCode(OpCode::DIV),
 	};
-	machine.execute(instructions);
+	machine.execute(instructions, pool);
 
 	TEST(machine.hasError() == false);
 	TEST(machine.stack.size() == 1);
@@ -94,32 +114,28 @@ void OnePlusTwoDivThreeIsOne()
 // x + y = 3
 void XPlusYIsThree(OpCode def)
 {
+	ConstPool pool;
 	Machine machine;
 
-	const int x = 0;
-	const int y = 1;
+	const uint32_t x = pool.add(Value::String("x"));
+	const uint32_t y = pool.add(Value::String("y"));
+	const uint32_t one = pool.add(Value::Number(1.0));
+	const uint32_t two = pool.add(Value::Number(2.0));
 
-	std::vector<Value> constPool = {
-		Value::String("x"),
-		Value::String("y"),
-	};
+	assert(def == OpCode::DEFINE_GLOBAL || def == OpCode::DEFINE_LOCAL);
 
 	std::vector<Instruction> instructions = {
-		{ MakeOp(OpCode::PUSH, x) },
-		{ OpCode::PUSH, Value::Number(1.0) },
-		{ def, Value() },
-
-		{ OpCode::PUSH, Value::String("y") },
-		{ OpCode::PUSH, Value::Number(2.0) },
-		{ def, Value() },
-
-		{ OpCode::PUSH, Value::String("x") },
-		{ OpCode::LOAD, Value()},
-		{ OpCode::PUSH, Value::String("y") },
-		{ OpCode::LOAD, Value() },
-		{ OpCode::ADD, Value() },
+		PackOpCode(OpCode::PUSH, x),
+		PackOpCode(OpCode::PUSH, one),
+		PackOpCode(def),
+		PackOpCode(OpCode::PUSH, y),
+		PackOpCode(OpCode::PUSH, two),
+		PackOpCode(def),
+		PackOpCode(OpCode::LOAD, x),
+		PackOpCode(OpCode::LOAD, y),
+		PackOpCode(OpCode::ADD),
 	};
-	machine.execute(instructions);
+	machine.execute(instructions, pool);
 
 	TEST(machine.hasError() == false);
 	TEST(machine.stack.size() == 1);
