@@ -97,6 +97,15 @@ public:
 
 	static void test();
 
+	// Stack operations.
+	void binaryNumberOp(OpCode opCode);
+	void defineGlobal();
+	void defineLocal();
+	void load();
+	void store();
+	void pushScope();
+	void popScope();
+
 private:
 	struct LocalVar {
 		int depth = 0;
@@ -111,12 +120,4 @@ private:
 	}
 
 	bool verifyBinaryNumberOp(const char* op);
-	void doBinaryNumberOp(OpCode opCode);
-	
-	void doDefineGlobal();
-	void doDefineLocal();
-	void doLoad();
-	void doStore();
-	void doPushScope();
-	void doPopScope();
 };

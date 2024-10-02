@@ -40,7 +40,7 @@ bool Machine::verifyBinaryNumberOp(const char* op)
 	return true;
 }
 
-void Machine::doBinaryNumberOp(OpCode opCode)
+void Machine::binaryNumberOp(OpCode opCode)
 {
 	if (!verifyBinaryNumberOp(gOpCodeNames[(int)opCode])) return;
 
@@ -60,7 +60,7 @@ void Machine::doBinaryNumberOp(OpCode opCode)
 	}
 }
 
-void Machine::doDefineGlobal()
+void Machine::defineGlobal()
 {
 	size_t s = stack.size();
 	if (s < 2) {
@@ -90,7 +90,7 @@ void Machine::doDefineGlobal()
 }
 
 
-void Machine::doDefineLocal()
+void Machine::defineLocal()
 {
 	size_t s = stack.size();
 	if (s < 2) {
@@ -125,7 +125,7 @@ void Machine::doDefineLocal()
 	localVars.push_back({ scopeDepth, key, v });
 }
 
-void Machine::doLoad()
+void Machine::load()
 {
 	size_t s = stack.size();
 	if (s < 1) {
@@ -159,7 +159,7 @@ void Machine::doLoad()
 	setErrorMessage(fmt::format("LOAD: key '{}' not found", key));
 }
 
-void Machine::doStore()
+void Machine::store()
 {
 	size_t s = stack.size();
 	if (s < 2) {
@@ -207,12 +207,12 @@ void Machine::doStore()
 	setErrorMessage(fmt::format("STORE: key '{}' not found", key));
 }
 
-void Machine::doPushScope()
+void Machine::pushScope()
 {
 	scopeDepth++;
 }
 
-void Machine::doPopScope()
+void Machine::popScope()
 {
 	scopeDepth--;
 
@@ -250,21 +250,21 @@ void Machine::execute(const Instruction* instructions, size_t n, ConstPool& pool
 		case OpCode::MUL:
 		case OpCode::DIV:
 		{
-			doBinaryNumberOp(opCode);
+			binaryNumberOp(opCode);
 			break;
 		}
 
-		case OpCode::DEFINE_GLOBAL: doDefineGlobal(); break;
-		case OpCode::DEFINE_LOCAL: doDefineLocal(); break;
+		case OpCode::DEFINE_GLOBAL: defineGlobal(); break;
+		case OpCode::DEFINE_LOCAL: defineLocal(); break;
 		case OpCode::LOAD: 
-			doLoad(); 
+			load(); 
 			break;
 		case OpCode::STORE: 
-			doStore(); 
+			store(); 
 			break;
 
-		case OpCode::PUSH_SCOPE: doPushScope(); break;
-		case OpCode::POP_SCOPE: doPopScope(); break;
+		case OpCode::PUSH_SCOPE: pushScope(); break;
+		case OpCode::POP_SCOPE: popScope(); break;
 
 
 		default:
