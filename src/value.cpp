@@ -1,6 +1,6 @@
 #include "value.h"
 
-Value::Value(const Value& rhs) : type(rhs.type)
+Value::Value(const Value& rhs) : type(Type::tNone)
 {
 	copy(rhs);
 }
@@ -48,6 +48,8 @@ void Value::move(Value& other)
 {
 	clear();
 	type = other.type;
+	other.type = Type::tNone;
+
 	switch (type) {
 	case Type::tNone: 
 		vNumber = 0; 

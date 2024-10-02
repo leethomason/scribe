@@ -82,12 +82,11 @@ void Machine::doDefineGlobal()
 	stack.pop_back();
 	stack.pop_back();
 
-	assert(globalVars);
-	if (globalVars->find(key) != globalVars->end()) {
+	if (globalVars.find(key) != globalVars.end()) {
 		setErrorMessage(fmt::format("DEFINE_GLOBAL: key '{}' already exists", key));
 		return;
 	}
-	(*globalVars)[key] = v;
+	globalVars[key] = v;
 }
 
 
@@ -150,8 +149,8 @@ void Machine::doLoad()
 		return;
 	}
 
-	const auto globalIt = globalVars->find(key);
-	if (globalIt != globalVars->end()) {
+	const auto globalIt = globalVars.find(key);
+	if (globalIt != globalVars.end()) {
 		// Found in global scope.
 		stack.push_back(globalIt->second);
 		return;
@@ -194,8 +193,8 @@ void Machine::doStore()
 		return;
 	}
 
-	const auto globalIt = globalVars->find(key);
-	if (globalIt != globalVars->end()) {
+	const auto globalIt = globalVars.find(key);
+	if (globalIt != globalVars.end()) {
 		// Found in global scope.
 		if (globalIt->second.type != v.type) {
 			setErrorMessage(fmt::format("STORE: type mismatch for key '{}'", key));
@@ -223,11 +222,12 @@ void Machine::doPopScope()
 		localVars.end());
 }
 
-void Machine::execute(const std::vector<Instruction>& instructions, std::map<std::string, Value>& globals)
+void Machine::execute(const std::vector<Instruction>& instructions)
 {
-	globalVars = &globals;
 	for (const auto& instruction : instructions)
 	{
+		if (hasError()) break;
+
 		switch (instruction.opCode)
 		{
 		case OpCode::PUSH:

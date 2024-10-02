@@ -1,6 +1,8 @@
 #pragma once
 
 #include "value.h"
+#include <assert.h>
+#include <stdint.h>
 
 // Types:
 // - number
@@ -9,7 +11,7 @@
 // - array
 // - map
 
-enum class OpCode
+enum class OpCode : uint16_t
 {
 	//						pop					push
 	NO_OP,
@@ -33,10 +35,36 @@ enum class OpCode
 	count,
 };
 
-struct Instruction
+inline uint32_t PackOpCode(OpCode op, uint32_t poolIndex) {
+	assert(poolIndex < 0x10000);
+	return static_cast<uint32_t>(op) | (poolIndex << 16);
+}
+
+inline void UnpackOpCode(uint32_t a, OpCode& op, uint32_t& index) {
+	uint16_t u16 = static_cast<uint16_t>(a & 0xffff);
+	assert(static_cast<uint32_t>(u16) < static_cast<uint32_t>(OpCode::count));
+	op = static_cast<OpCode>(u16);
+	index = a >> 16;
+}
+
+struct ConstPool
 {
-	OpCode opCode = OpCode::NO_OP;
-	Value value;
+	ConstPool() {
+		// Useful, and this way there is always a 0 index.
+		values.push_back(Value::Number(0.0));
+	}
+
+	std::vector<Value> values;
+
+	uint32_t add(const Value& value) {
+		auto it = std::find(values.begin(), values.end(), value);
+		if (it != values.end()) {
+			return (uint32_t) std::distance(values.begin(), it);
+		}
+
+		values.push_back(value);
+		return static_cast<uint32_t>(values.size() - 1);
+	}
 };
 
 // The virtual machine.
@@ -47,9 +75,10 @@ public:
 	Machine();
 	~Machine() = default;
 
-	void execute(const std::vector<Instruction>& instructions, std::map<std::string, Value>& globalVars);
+	void execute(const std::vector<Instruction>& instructions);
 
 	std::vector<Value> stack;
+	std::map<std::string, Value> globalVars;
 	std::string errorMessage;
 
 	bool hasError() const { return !errorMessage.empty(); }
@@ -64,9 +93,10 @@ private:
 	};
 	std::vector<LocalVar> localVars;
 	int scopeDepth = 0;
-	std::map<std::string, Value>* globalVars = nullptr;
 
-	void setErrorMessage(const std::string& message) { errorMessage = message; }
+	void setErrorMessage(const std::string& message) { 
+		errorMessage = message; 
+	}
 
 	bool verifyBinaryNumberOp(const char* op);
 	void doBinaryNumberOp(OpCode opCode);
