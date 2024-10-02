@@ -87,6 +87,7 @@ public:
 	~Machine() = default;
 
 	void execute(const std::vector<Instruction>& instructions, ConstPool& pool);
+	void execute(const Instruction* start, size_t n, ConstPool& pool);
 
 	std::vector<Value> stack;
 	std::map<std::string, Value> globalVars;

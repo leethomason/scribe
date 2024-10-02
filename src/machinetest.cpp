@@ -125,18 +125,28 @@ void XPlusYIsThree(OpCode def)
 	assert(def == OpCode::DEFINE_GLOBAL || def == OpCode::DEFINE_LOCAL);
 
 	std::vector<Instruction> instructions = {
-		PackOpCode(OpCode::PUSH, x),
-		PackOpCode(OpCode::PUSH, one),
-		PackOpCode(def),
+		PackOpCode(OpCode::PUSH, x),			// "x"
+		PackOpCode(OpCode::PUSH, one),			// 1
+		PackOpCode(def),						// 1 stored to var "x"
 		PackOpCode(OpCode::PUSH, y),
 		PackOpCode(OpCode::PUSH, two),
-		PackOpCode(def),
-		PackOpCode(OpCode::LOAD, x),
-		PackOpCode(OpCode::LOAD, y),
+		PackOpCode(def),						// 2 stored to var "y"
+		PackOpCode(OpCode::PUSH, x),			// "x"
+		PackOpCode(OpCode::LOAD),				// -> 1
+		PackOpCode(OpCode::PUSH, y),			// "y"
+		PackOpCode(OpCode::LOAD, y),			// -> 2
 		PackOpCode(OpCode::ADD),
 	};
-	machine.execute(instructions, pool);
 
+	machine.execute(instructions.data(), 3, pool);
+	TEST(machine.hasError() == false);
+	TEST(machine.stack.size() == 0);
+
+	machine.execute(instructions.data() + 3, 3, pool);
+	TEST(machine.hasError() == false);
+	TEST(machine.stack.size() == 0);
+
+	machine.execute(instructions.data() + 6, instructions.size() - 6, pool);
 	TEST(machine.hasError() == false);
 	TEST(machine.stack.size() == 1);
 	TEST(machine.stack[0].type == Type::tNumber);

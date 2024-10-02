@@ -224,13 +224,18 @@ void Machine::doPopScope()
 
 void Machine::execute(const std::vector<Instruction>& instructions, ConstPool& pool)
 {
-	for (const auto& instruction : instructions)
+	execute(instructions.data(), static_cast<int>(instructions.size()), pool);
+}
+
+void Machine::execute(const Instruction* instructions, size_t n, ConstPool& pool)
+{
+	for(int i=0; i<n; i++)
 	{
 		if (hasError()) break;
 
 		OpCode opCode = OpCode::NO_OP;
 		uint32_t index = 0;
-		UnpackOpCode(instruction, opCode, index);
+		UnpackOpCode(instructions[i], opCode, index);
 
 		switch (opCode)
 		{
@@ -251,8 +256,12 @@ void Machine::execute(const std::vector<Instruction>& instructions, ConstPool& p
 
 		case OpCode::DEFINE_GLOBAL: doDefineGlobal(); break;
 		case OpCode::DEFINE_LOCAL: doDefineLocal(); break;
-		case OpCode::LOAD: doLoad(); break;
-		case OpCode::STORE: doStore(); break;
+		case OpCode::LOAD: 
+			doLoad(); 
+			break;
+		case OpCode::STORE: 
+			doStore(); 
+			break;
 
 		case OpCode::PUSH_SCOPE: doPushScope(); break;
 		case OpCode::POP_SCOPE: doPopScope(); break;
