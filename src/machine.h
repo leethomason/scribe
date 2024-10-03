@@ -97,15 +97,6 @@ public:
 
 	static void test();
 
-	// Stack operations.
-	void binaryNumberOp(OpCode opCode);
-	void defineGlobal();
-	void defineLocal();
-	void load();
-	void store();
-	void pushScope();
-	void popScope();
-
 private:
 	struct LocalVar {
 		int depth = 0;
@@ -120,4 +111,16 @@ private:
 	}
 
 	bool verifyBinaryNumberOp(const char* op);
+
+	// Stack operations.
+	// FIXME: these should be public so the machine can be operated programmatically.
+	//        The trick is how to handle the ConstPool - it's currently passed in to execute(),
+	//        but individual ops need it.
+	void binaryNumberOp(OpCode opCode);
+	void defineGlobal();
+	void defineLocal();
+	void load();
+	void store();
+	void pushScope();
+	void popScope();
 };

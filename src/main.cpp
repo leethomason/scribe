@@ -100,6 +100,7 @@ public:
             ASTNode* root = parser.parse();
             int result = root->evaluate(variables);
             std::cout << "Result: " << result << std::endl;
+            delete root;
         } catch (std::exception& ex) {
             std::cout << "Error: " << ex.what() << std::endl;
         }
@@ -109,7 +110,7 @@ public:
 int main() 
 {
 	Machine::test();
-    /*
+
     Interpreter interpreter;
     std::string line;
 
@@ -119,6 +120,5 @@ int main()
         if (line == "exit") break;
         interpreter.interpret(line);
     }
-    */
     return 0;
 }

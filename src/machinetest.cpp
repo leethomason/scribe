@@ -153,6 +153,19 @@ void XPlusYIsThree(OpCode def)
 	TEST_FP(machine.stack[0].vNumber, 3.0);
 }
 
+// a = "Hello";
+// a += " World";
+
+// a = true/false
+// x = 0
+// if (a) 
+//   x = 1
+// else
+//   x = 2
+
+// a = [1, 2, 3]
+// a[1]
+
 void Machine::test()
 {
 	RUN_TEST(OnePlusTwoIsThree());
