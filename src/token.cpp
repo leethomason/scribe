@@ -21,7 +21,7 @@ Token Tokenizer::getNext()
         const char* start = &_input[_pos];
         char* end = nullptr;
         double val = std::strtod(start, &end);
-        if (start > end) {
+        if (end > start) {
             _pos += (end - start);
             Token tok(TokenType::number, std::string(start, end - start));
             tok.dValue = val;
@@ -46,6 +46,7 @@ Token Tokenizer::getNext()
     // Symbols
     std::string sym;
     sym += c0;
+    _pos++;
 
     switch (c0) {
     case '=': return Token(TokenType::assign, sym);
@@ -55,6 +56,8 @@ Token Tokenizer::getNext()
     case '/': return Token(TokenType::divide, sym);
     case '(': return Token(TokenType::leftParen, sym);
     case ')': return Token(TokenType::rightParen, sym);
+    default:
+        break;
     }
 
     return Token(TokenType::error);

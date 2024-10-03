@@ -109,6 +109,7 @@ public:
 int main() 
 {
 	Machine::test();
+    Tokenizer::test();
 
     Interpreter interpreter;
     std::string line;

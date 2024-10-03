@@ -1,5 +1,8 @@
 #pragma once
 
+#include <fmt/core.h>
+#include <assert.h>
+
 #define TEST(x)                                                 \
 	if (!(x)) {	                                                \
 		fmt::print("Test failure line {} in {}\n", __LINE__, __FILE__);\
