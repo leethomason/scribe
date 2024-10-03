@@ -4,8 +4,11 @@
 
 enum class TokenType {
     eof,        // End of file/input
+    error,      // Parsing error
+
     number,     // Number
     identifier, // Variable name
+
     assign,     // '='
     plus,       // '+'
     minus,      // '-'
@@ -19,22 +22,20 @@ enum class TokenType {
 struct Token {
     TokenType type;
     std::string value;
+    double dValue = 0;
 
     Token() : type(TokenType::eof) {}
     Token(TokenType type, std::string value = "") : type(type), value(value) {}
+    Token(double d) : type(TokenType::number), dValue(d) {}
 };
 
 // Tokenizer to break input into tokens
 class Tokenizer {
 public:
-    enum {
-        cNumber = 0x01,
-        cIdent = 0x02,
-        cOperator = 0x04,
-    };
-
     Tokenizer(const std::string& input) : _input(input) {}
-    Token getNext(uint32_t classFlags);
+    Token getNext();
+
+    static void test();
 
 private:
     const std::string& _input;
@@ -45,7 +46,7 @@ private:
     }
 
     void skipWhitespace() {
-        while (std::isspace(_pos)) {
+        while (std::isspace(_input[_pos])) {
             advance();
         }
     }
@@ -53,11 +54,11 @@ private:
     static bool isDigit(char c) {
 		return c >= '0' && c <= '9';
 	}
-    static bool isNumber(char c) {
+    static bool isNumberPart(char c) {
         return isDigit(c) || c == '.';
 	}
     static bool isNumberStart(char c) {
-        return isNumber(c) || c == '-' || c == '+';
+        return isNumberPart(c) || c == '-' || c == '+';
     }
     static bool isIdent(char c) {
         return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_' || (c >= '0' && c <= '9');
@@ -65,7 +66,4 @@ private:
     static bool isIdentStart(char c) {
 		return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
 	}
-
-    size_t readIdentifier(size_t start);
-    size_t readNumber(size_t start);
 };

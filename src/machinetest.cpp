@@ -122,7 +122,7 @@ void XPlusYIsThree(OpCode def)
 	const uint32_t one = pool.add(Value::Number(1.0));
 	const uint32_t two = pool.add(Value::Number(2.0));
 
-	assert(def == OpCode::DEFINE_GLOBAL || def == OpCode::DEFINE_LOCAL);
+	REQUIRE(def == OpCode::DEFINE_GLOBAL || def == OpCode::DEFINE_LOCAL);
 
 	std::vector<Instruction> instructions = {
 		PackOpCode(OpCode::PUSH, x),			// "x"

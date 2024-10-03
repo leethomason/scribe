@@ -2,86 +2,60 @@
 
 #include "token.h"
 
-size_t Tokenizer::readNumber(size_t start)
-{
-    if (isNumberStart(_input[start])) {
-        start++;
-        while(start < _input.size() && isNumber(_input[start])) {
-			start++;
-		}
-    }
-    return start;
-}
-
-Token Tokenizer::getNext(uint32_t classFlags)
+Token Tokenizer::getNext()
 {
     skipWhitespace();
     if (_pos == _input.size()) {
 		return Token(TokenType::eof);
 	}
 
-    if (classFlags & cNumber) {
-        size_t end = readNumber(_pos);
-        if (end != _pos) {
-            std::string number = _input.substr(_pos, end - _pos);
-            _pos = end;
-            return Token(TokenType::number, number);
+    char c0 = _input[_pos];
+    char c1 = (_pos + 1) < _input.size() ? _input[_pos + 1] : 0;
+    char c2 = (_pos + 2) < _input.size() ? _input[_pos + 2] : 0;
+
+    // Number:
+    if (isNumberPart(c0)                                                // 0 .0
+        || (isNumberStart(c0) && isDigit(c1))                           // -0
+        || (isNumberStart(c0) && isNumberPart(c1) && isDigit(c2)))      // +.0
+    {
+        const char* start = &_input[_pos];
+        char* end = nullptr;
+        double val = std::strtod(start, &end);
+        if (start > end) {
+            _pos += (end - start);
+            Token tok(TokenType::number, std::string(start, end - start));
+            tok.dValue = val;
+            return tok;
         }
     }
 
+    // Identifier or Keyword
+    if (isIdentStart(c0)) {
+        std::string t;
+        t += c0;
+        _pos++;
+        while (_pos < _input.size() && isIdent(_input[_pos])) {
+            t += _input[_pos];
+            _pos++;
+        }
+        // FIXME: check here for keyword
 
-    while (_pos < _input.size()) {
-
-
-        if (std::isdigit(_current)) {
-            std::string number;
-            while (std::isdigit(_current)) {
-                number += _current;
-                advance();
-            }
-            return Token(TokenType::number, number);
-        }
-
-        if (std::isalpha(_current)) {
-            std::string identifier;
-            while (std::isalnum(_current)) {
-                identifier += _current;
-                advance();
-            }
-            return Token(TokenType::identifier, identifier);
-        }
-
-        if (_current == '+') {
-            advance();
-            return Token(TokenType::plus);
-        }
-        if (_current == '-') {
-            advance();
-            return Token(TokenType::minus);
-        }
-        if (_current == '*') {
-            advance();
-            return Token(TokenType::multiply);
-        }
-        if (_current == '/') {
-            advance();
-            return Token(TokenType::divide);
-        }
-        if (_current == '(') {
-            advance();
-            return Token(TokenType::leftParen);
-        }
-        if (_current == ')') {
-            advance();
-            return Token(TokenType::rightParen);
-        }
-        if (_current == '=') {
-            advance();
-            return Token(TokenType::assign);
-        }
-
-        throw std::runtime_error("Invalid character");
+        return Token(TokenType::identifier, t);
     }
 
-    return Token(TokenType::eof);
+    // Symbols
+    std::string sym;
+    sym += c0;
+
+    switch (c0) {
+    case '=': return Token(TokenType::assign, sym);
+    case '+': return Token(TokenType::plus, sym);
+    case '-': return Token(TokenType::minus, sym);
+    case '*': return Token(TokenType::multiply, sym);
+    case '/': return Token(TokenType::divide, sym);
+    case '(': return Token(TokenType::leftParen, sym);
+    case ')': return Token(TokenType::rightParen, sym);
+    }
+
+    return Token(TokenType::error);
 }

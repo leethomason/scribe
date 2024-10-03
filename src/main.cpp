@@ -17,7 +17,7 @@ class Parser {
 
     void eat(TokenType type) {
         if (current_token.type == type) {
-            current_token = tokenizer.get_next_token();
+            current_token = tokenizer.getNext();
         } else {
             throw std::runtime_error("Invalid syntax");
         }
@@ -75,7 +75,7 @@ public:
     Parser(Tokenizer tokenizer) : tokenizer(tokenizer) {}
 
     ASTNode* parse() {
-        current_token = tokenizer.get_next_token();
+        current_token = tokenizer.getNext();
         if (current_token.type == TokenType::identifier) {
             Token var_token = current_token;
             eat(TokenType::identifier);
@@ -100,7 +100,6 @@ public:
             ASTNode* root = parser.parse();
             int result = root->evaluate(variables);
             std::cout << "Result: " << result << std::endl;
-            delete root;
         } catch (std::exception& ex) {
             std::cout << "Error: " << ex.what() << std::endl;
         }

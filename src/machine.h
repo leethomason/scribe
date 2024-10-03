@@ -1,6 +1,8 @@
 #pragma once
 
 #include "value.h"
+#include "error.h"
+
 #include <assert.h>
 #include <stdint.h>
 
@@ -36,7 +38,7 @@ enum class OpCode : uint16_t
 };
 
 inline uint32_t PackOpCode(OpCode op, uint32_t poolIndex) {
-	assert(poolIndex < 0x10000);
+	REQUIRE(poolIndex < 0x10000);
 	return static_cast<uint32_t>(op) | (poolIndex << 16);
 }
 
@@ -46,7 +48,7 @@ inline uint32_t PackOpCode(OpCode op) {
 
 inline void UnpackOpCode(uint32_t a, OpCode& op, uint32_t& index) {
 	uint16_t u16 = static_cast<uint16_t>(a & 0xffff);
-	assert(static_cast<uint32_t>(u16) < static_cast<uint32_t>(OpCode::count));
+	REQUIRE(static_cast<uint32_t>(u16) < static_cast<uint32_t>(OpCode::count));
 	op = static_cast<OpCode>(u16);
 	index = a >> 16;
 }
@@ -71,7 +73,7 @@ struct ConstPool
 	}
 
 	const Value& get(uint32_t index) const {
-		assert(index < values.size());
+		REQUIRE(index < values.size());
 		return values[index];
 	}
 };
