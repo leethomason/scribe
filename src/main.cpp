@@ -25,17 +25,17 @@ class Parser {
 
     ASTNode* factor() {
         Token token = current_token;
-        if (token.type == TOK_NUMBER) {
-            eat(TOK_NUMBER);
+        if (token.type == TokenType::number) {
+            eat(TokenType::number);
             return new NumberNode(std::stoi(token.value));
-        } else if (token.type == TOK_IDENTIFIER) {
+        } else if (token.type == TokenType::identifier) {
             std::string var_name = token.value;
-            eat(TOK_IDENTIFIER);
+            eat(TokenType::identifier);
             return new VariableNode(var_name);
-        } else if (token.type == TOK_LPAREN) {
-            eat(TOK_LPAREN);
+        } else if (token.type == TokenType::leftParen) {
+            eat(TokenType::leftParen);
             ASTNode* node = expr();
-            eat(TOK_RPAREN);
+            eat(TokenType::rightParen);
             return node;
         }
         throw std::runtime_error("Invalid syntax");
@@ -43,13 +43,13 @@ class Parser {
 
     ASTNode* term() {
         ASTNode* node = factor();
-        while (current_token.type == TOK_MUL || current_token.type == TOK_DIV) {
+        while (current_token.type == TokenType::multiply || current_token.type == TokenType::divide) {
             Token token = current_token;
-            if (token.type == TOK_MUL) {
-                eat(TOK_MUL);
+            if (token.type == TokenType::multiply) {
+                eat(TokenType::multiply);
                 node = new BinaryOpNode('*', node, factor());
-            } else if (token.type == TOK_DIV) {
-                eat(TOK_DIV);
+            } else if (token.type == TokenType::divide) {
+                eat(TokenType::divide);
                 node = new BinaryOpNode('/', node, factor());
             }
         }
@@ -58,13 +58,13 @@ class Parser {
 
     ASTNode* expr() {
         ASTNode* node = term();
-        while (current_token.type == TOK_PLUS || current_token.type == TOK_MINUS) {
+        while (current_token.type == TokenType::plus || current_token.type == TokenType::minus) {
             Token token = current_token;
-            if (token.type == TOK_PLUS) {
-                eat(TOK_PLUS);
+            if (token.type == TokenType::plus) {
+                eat(TokenType::plus);
                 node = new BinaryOpNode('+', node, term());
-            } else if (token.type == TOK_MINUS) {
-                eat(TOK_MINUS);
+            } else if (token.type == TokenType::minus) {
+                eat(TokenType::minus);
                 node = new BinaryOpNode('-', node, term());
             }
         }
@@ -76,10 +76,10 @@ public:
 
     ASTNode* parse() {
         current_token = tokenizer.get_next_token();
-        if (current_token.type == TOK_IDENTIFIER) {
+        if (current_token.type == TokenType::identifier) {
             Token var_token = current_token;
-            eat(TOK_IDENTIFIER);
-            eat(TOK_ASSIGN);
+            eat(TokenType::identifier);
+            eat(TokenType::assign);
             ASTNode* expr_node = expr();
             return new AssignmentNode(var_token.value, expr_node);
         } else {

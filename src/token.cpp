@@ -15,7 +15,7 @@ Token Tokenizer::get_next_token() {
                 number += _current;
                 advance();
             }
-            return Token(TOK_NUMBER, number);
+            return Token(TokenType::number, number);
         }
 
         if (std::isalpha(_current)) {
@@ -24,40 +24,40 @@ Token Tokenizer::get_next_token() {
                 identifier += _current;
                 advance();
             }
-            return Token(TOK_IDENTIFIER, identifier);
+            return Token(TokenType::identifier, identifier);
         }
 
         if (_current == '+') {
             advance();
-            return Token(TOK_PLUS);
+            return Token(TokenType::plus);
         }
         if (_current == '-') {
             advance();
-            return Token(TOK_MINUS);
+            return Token(TokenType::minus);
         }
         if (_current == '*') {
             advance();
-            return Token(TOK_MUL);
+            return Token(TokenType::multiply);
         }
         if (_current == '/') {
             advance();
-            return Token(TOK_DIV);
+            return Token(TokenType::divide);
         }
         if (_current == '(') {
             advance();
-            return Token(TOK_LPAREN);
+            return Token(TokenType::leftParen);
         }
         if (_current == ')') {
             advance();
-            return Token(TOK_RPAREN);
+            return Token(TokenType::rightParen);
         }
         if (_current == '=') {
             advance();
-            return Token(TOK_ASSIGN);
+            return Token(TokenType::assign);
         }
 
         throw std::runtime_error("Invalid character");
     }
 
-    return Token(TOK_EOF);
+    return Token(TokenType::eof);
 }

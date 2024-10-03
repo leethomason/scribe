@@ -3,17 +3,17 @@
 #include <string>
 
 // Token types
-enum TokenType {
-    TOK_EOF,      // End of file/input
-    TOK_NUMBER,   // Number
-    TOK_IDENTIFIER, // Variable name
-    TOK_ASSIGN,   // '='
-    TOK_PLUS,     // '+'
-    TOK_MINUS,    // '-'
-    TOK_MUL,      // '*'
-    TOK_DIV,      // '/'
-    TOK_LPAREN,   // '('
-    TOK_RPAREN,   // ')'
+enum class TokenType {
+    eof,        // End of file/input
+    number,     // Number
+    identifier, // Variable name
+    assign,     // '='
+    plus,       // '+'
+    minus,      // '-'
+    multiply,   // '*'
+    divide,     // '/'
+    leftParen,  // '('
+    rightParen, // ')'
 };
 
 // Token structure
@@ -21,7 +21,7 @@ struct Token {
     TokenType type;
     std::string value;
 
-    Token() : type(TOK_EOF) {}
+    Token() : type(TokenType::eof) {}
     Token(TokenType type, std::string value = "") : type(type), value(value) {}
 };
 
