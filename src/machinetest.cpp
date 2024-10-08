@@ -127,7 +127,7 @@ void XPlusYIsThree(OpCode def)
 	std::vector<Instruction> instructions = {
 		PackOpCode(OpCode::PUSH, x),			// "x"
 		PackOpCode(OpCode::PUSH, one),			// 1
-		PackOpCode(def),						// 1 stored to var "x"
+		PackOpCode(def),						// 1 stored to var "x" and assigns type
 		PackOpCode(OpCode::PUSH, y),
 		PackOpCode(OpCode::PUSH, two),
 		PackOpCode(def),						// 2 stored to var "y"

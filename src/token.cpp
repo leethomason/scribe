@@ -2,8 +2,23 @@
 
 #include "token.h"
 
+Token Tokenizer::peekNext()
+{
+    if (!_hasPeek) {
+        _peek = getNext();
+        _hasPeek = true;
+    }
+    return _peek;
+}
+
+
 Token Tokenizer::getNext()
 {
+    if (_hasPeek) {
+        _hasPeek = false;
+        return _peek;
+    }
+
     skipWhitespace();
     if (_pos == _input.size()) {
 		return Token(TokenType::eof);
@@ -38,7 +53,9 @@ Token Tokenizer::getNext()
             t += _input[_pos];
             _pos++;
         }
-        // FIXME: check here for keyword
+
+        if (t == "var") return Token(TokenType::var);
+        if (t == "return") return Token(TokenType::ret);
 
         return Token(TokenType::identifier, t);
     }

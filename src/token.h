@@ -6,9 +6,15 @@ enum class TokenType {
     eof,        // End of file/input
     error,      // Parsing error
 
+    // Numbers & vars
     number,     // Number
     identifier, // Variable name
 
+    // Keywords
+    var,        // variable declaration
+    ret,        // push to stack
+
+    // Sybols & operations
     assign,     // '='
     plus,       // '+'
     minus,      // '-'
@@ -34,12 +40,15 @@ class Tokenizer {
 public:
     Tokenizer(const std::string& input) : _input(input) {}
     Token getNext();
+    Token peekNext();
 
     static void test();
 
 private:
     const std::string& _input;
     size_t _pos = 0;
+    Token _peek;
+    bool _hasPeek = false;
 
     void advance() {
         _pos++;

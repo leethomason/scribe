@@ -1,58 +1,53 @@
 #pragma once
 
+#include "bytecode.h"
+#include "value.h"
+#include "token.h"
+
 #include <map>
 #include <string>
-#include <stdexcept>
+#include <vector>
 
 // Abstract syntax tree (AST) nodes
 class ASTNode {
 public:
-    virtual int evaluate(std::map<std::string, int>& variables) = 0;
+    virtual ~ASTNode() = default;
+    virtual void evaluate(std::vector<Instruction>& bc, ConstPool& pool) = 0;
 };
 
-class NumberNode : public ASTNode {
-    int value;
+class ValueNode : public ASTNode {
+    Value value;
 public:
-    NumberNode(int value) : value(value) {}
-    int evaluate(std::map<std::string, int>&) override {
-        return value;
-    }
+    ValueNode(const Value& value) : value(value) {}
+
+    void evaluate(std::vector<Instruction>& bc, ConstPool& pool) override;
 };
 
-class VariableNode : public ASTNode {
+class DeclareVariableNode : public ASTNode {
     std::string name;
+    ASTNode* expr = nullptr;
 public:
-    VariableNode(std::string name) : name(name) {}
-    int evaluate(std::map<std::string, int>& variables) override {
-        return variables[name];
-    }
+    DeclareVariableNode(std::string name, ASTNode* expr) : name(name), expr(expr) {}
+    ~DeclareVariableNode() { delete expr; }
+
+    void evaluate(std::vector<Instruction>& bc, ConstPool& pool) override;
 };
 
 class BinaryOpNode : public ASTNode {
-    char op;
+    TokenType type;
     ASTNode* left;
     ASTNode* right;
 public:
-    BinaryOpNode(char op, ASTNode* left, ASTNode* right) : op(op), left(left), right(right) {}
-    int evaluate(std::map<std::string, int>& variables) override {
-        switch (op) {
-        case '+': return left->evaluate(variables) + right->evaluate(variables);
-        case '-': return left->evaluate(variables) - right->evaluate(variables);
-        case '*': return left->evaluate(variables) * right->evaluate(variables);
-        case '/': return left->evaluate(variables) / right->evaluate(variables);
-        default: throw std::runtime_error("Invalid operator");
-        }
-    }
+    BinaryOpNode(TokenType type, ASTNode* left, ASTNode* right) : type(type), left(left), right(right) {}
+    ~BinaryOpNode() { delete left; delete right; }
+    void evaluate(std::vector<Instruction>& bc, ConstPool& pool) override;
 };
 
 class AssignmentNode : public ASTNode {
-    std::string variable_name;
+    std::string varName;
     ASTNode* expr;
 public:
-    AssignmentNode(std::string variable_name, ASTNode* expr) : variable_name(variable_name), expr(expr) {}
-    int evaluate(std::map<std::string, int>& variables) override {
-        int result = expr->evaluate(variables);
-        variables[variable_name] = result;
-        return result;
-    }
+    AssignmentNode(std::string varName, ASTNode* expr) : varName(varName), expr(expr) {}
+    ~AssignmentNode() { delete expr; }
+    void evaluate(std::vector<Instruction>& bc, ConstPool& pool) override;
 };
