@@ -12,9 +12,9 @@ class Interpreter {
 
 public:
     void interpret(std::string input) {
-        const bool debugAST = false;
+        const bool debugAST = true;
         const bool debugBC = false;
-        const bool debugTokens = true;
+        const bool debugTokens = false;
 
         Tokenizer tokenizer(input);
         tokenizer.debug = debugTokens;
