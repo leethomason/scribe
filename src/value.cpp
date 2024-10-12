@@ -1,5 +1,8 @@
 #include "value.h"
 
+#include <fmt/core.h>
+#include <assert.h>
+
 Value::Value(const Value& rhs) : type(Type::tNone)
 {
 	copy(rhs);
@@ -115,3 +118,24 @@ void Value::copy(const Value& rhs)
 		break;
 	}
 }
+
+std::string Value::toString() const
+{
+	switch (type) {
+	case Type::tNone:
+		return "none";
+	case Type::tNumber:
+		return fmt::format("{}", vNumber);
+	case Type::tBoolean:
+		return vBoolean ? "true" : "false";
+	case Type::tString:
+		return *vString;
+	case Type::tArray:
+		return "[]";
+	case Type::tMap:
+		return "{}";
+	}
+	assert(false);
+	return "";
+}
+

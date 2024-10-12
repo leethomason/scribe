@@ -1,77 +1,77 @@
 #include "parser.h"
+#include "ast.h"
 
-ASTNode* Parser::parse(Tokenizer& tokenizer)
+/*
+	PrimaryExpr :
+		Number
+		Name
+		(Expr)
+
+	MulExpr :
+		PrimaryExpr ( * PrimaryExpr | / PrimaryExpr )*
+
+	Expr :
+		MulExpr ( + MulExpr | - MulExpr )*
+*/
+
+ASTPtr Parser::parsePrimaryExpr(Tokenizer& izer)
 {
-	// FIXME: parses a line. Need to generalize.
-	Token tok = tokenizer.getNext();
-	if (tok.type == TokenType::eof)
-		return nullptr;
-
-	if (tok.type == TokenType::error) {
-		fmt::print("Error parsing.\n");
-		return nullptr;
+	Token t = izer.peekNext();
+	if (t.type == TokenType::number) {
+		izer.getNext();
+		return std::make_shared<ValueASTNode>(Value::Number(t.dValue));
 	}
-
-	// Variable declaration.
-	// var x = y + 1
-	// Variable assignment
-	// x = 2 + 5 * 3
-	if (tok.type == TokenType::var || tok.type == TokenType::identifier) {
-		Token var;
-		if (tok.type == TokenType::var) {
-			var = tokenizer.getNext();
-			if (var.type != TokenType::identifier) {
-				fmt::print("Expected identifier\n");
-				return nullptr;
-			}
-		}
-		else {
-			var = tok;
-		}
-
-		Token assign = tokenizer.getNext();
-		if (assign.type != TokenType::assign) {
-			fmt::print("Expected =\n");
+	else if (t.type == TokenType::identifier) {
+		izer.getNext();
+		return std::make_shared<IdentifierASTNode>(t.value);
+	}
+	else if (t.type == TokenType::leftParen) {
+		izer.getNext();
+		ASTPtr expr = parseExpr(izer);
+		if (izer.getNext().type != TokenType::rightParen) {
+			setError("Expected right paren.");
 			return nullptr;
 		}
-
-		ASTNode* e = expr(tokenizer);
-		if (!e) return nullptr;
-
-		if (tok.type == TokenType::var)
-			return new DeclareVariableNode(var.value, e);
-		else
-			return new AssignmentNode(tok.value, e);
+		return expr;
 	}
-	return nullptr;
+	else {
+		setError("Expected number, identifier, or left paren.");
+		return nullptr;
+	}
 }
 
-ASTNode* Parser::expr(Tokenizer& izer)
+ASTPtr Parser::parseMulExpr(Tokenizer& izer)
 {
-	// x + (3 + y)
-	// x + (3)
+	ASTPtr expr = parsePrimaryExpr(izer);
+	if (!expr)
+		return nullptr;
 
-	Token tok = izer.getNext();
-	if (tok.type == TokenType::leftParen) {
-		ASTNode* node = expr(izer);
-		
-		Token right = izer.getNext();
-		if (right.type != TokenType::rightParen) {
-			fmt::print("Expected right paren.\n");
+	Token t = izer.peekNext();
+	while (t.type == TokenType::multiply || t.type == TokenType::divide) {
+		izer.getNext();
+		ASTPtr right = parsePrimaryExpr(izer);
+		if (!right)
 			return nullptr;
-		}
-		return node;
-	}
 
-	// FIXME: other types (bool, int, array, map, etc....)
-	// 3 + x
-	// x + 3
-	// 3
-	// x
-	if (tok.type == TokenType::number) {
-		ValueNode* left = new ValueNode(Value::Number(tok.dValue));
-		Token op = izer.getNext();
-
-		BinaryOpNode* node = new BinaryOpNode()
+		// Note the recursive use of 'expr'
+		expr = std::make_shared<BinaryASTNode>(t.type, expr, right);
+		t = izer.peekNext();
 	}
-}p
+	return expr;
+}
+
+ASTPtr Parser::parseExpr(Tokenizer& izer)
+{
+	ASTPtr expr = parseMulExpr(izer);
+	Token t = izer.peekNext();
+	while (t.type == TokenType::plus || t.type == TokenType::minus) {
+		izer.getNext();
+		ASTPtr right = parseMulExpr(izer);
+
+		// Note the recursive use of 'expr'
+		expr = std::make_shared<BinaryASTNode>(t.type, expr, right);
+		t = izer.peekNext();
+	}
+	return expr;
+}
+

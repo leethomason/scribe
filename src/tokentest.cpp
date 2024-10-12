@@ -128,10 +128,25 @@ static void SimLang()
 	}
 }
 
+static void TwoNumbers()
+{
+	std::string s = "1+2";
+	Tokenizer izer(s);
+	Token t = izer.getNext();
+	TEST(t.type == TokenType::number);
+	TEST(t.value == "1");
+	t = izer.getNext();
+	TEST(t.type == TokenType::plus);
+	t = izer.getNext();
+	TEST(t.type == TokenType::number);
+	TEST(t.value == "2");
+}
+
 void Tokenizer::test()
 {
 	RUN_TEST(Numbers());
 	RUN_TEST(Identifiers());
 	RUN_TEST(Symbols());
 	RUN_TEST(SimLang());
+//	RUN_TEST(TwoNumbers()); FIXME bug
 }

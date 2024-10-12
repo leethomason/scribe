@@ -1,11 +1,14 @@
-#include <stdexcept>
-
 #include "token.h"
+
+#include <fmt/core.h>
 
 Token Tokenizer::peekNext()
 {
     if (!_hasPeek) {
+        bool savedDebug = debug;
+        debug = false;
         _peek = getNext();
+        debug = savedDebug;
         _hasPeek = true;
     }
     return _peek;
@@ -16,6 +19,7 @@ Token Tokenizer::getNext()
 {
     if (_hasPeek) {
         _hasPeek = false;
+        if (debug) fmt::print("{}\n", _peek.dump());
         return _peek;
     }
 
@@ -40,6 +44,7 @@ Token Tokenizer::getNext()
             _pos += (end - start);
             Token tok(TokenType::number, std::string(start, end - start));
             tok.dValue = val;
+            if (debug) fmt::print("{}\n", tok.dump());
             return tok;
         }
     }
@@ -57,7 +62,9 @@ Token Tokenizer::getNext()
         if (t == "var") return Token(TokenType::var);
         if (t == "return") return Token(TokenType::ret);
 
-        return Token(TokenType::identifier, t);
+        Token token(TokenType::identifier, t);
+        if (debug) fmt::print("{}\n", token.dump());
+        return token;
     }
 
     // Symbols
@@ -65,17 +72,39 @@ Token Tokenizer::getNext()
     sym += c0;
     _pos++;
 
+    Token token(TokenType::error);
+
     switch (c0) {
-    case '=': return Token(TokenType::assign, sym);
-    case '+': return Token(TokenType::plus, sym);
-    case '-': return Token(TokenType::minus, sym);
-    case '*': return Token(TokenType::multiply, sym);
-    case '/': return Token(TokenType::divide, sym);
-    case '(': return Token(TokenType::leftParen, sym);
-    case ')': return Token(TokenType::rightParen, sym);
+    case '=': token = Token(TokenType::assign, sym); break;
+    case '+': token = Token(TokenType::plus, sym); break;
+    case '-': token = Token(TokenType::minus, sym); break;
+    case '*': token = Token(TokenType::multiply, sym); break;
+    case '/': token = Token(TokenType::divide, sym); break;
+    case '(': token = Token(TokenType::leftParen, sym); break;
+    case ')': token = Token(TokenType::rightParen, sym); break;
     default:
         break;
     }
+    if (debug) fmt::print("{}\n", token.dump());
+    return token;
+}
 
-    return Token(TokenType::error);
+std::string Token::dump() const 
+{
+    switch (type) {
+    case TokenType::eof: return "EOF";
+    case TokenType::error: return "ERROR";
+    case TokenType::number: return "NUMBER: " + std::to_string(dValue);
+    case TokenType::identifier: return "IDENTIFIER: " + value;
+    case TokenType::var: return "VAR";
+    case TokenType::ret: return "RET";
+    case TokenType::assign: return "ASSIGN";
+    case TokenType::plus: return "PLUS";
+    case TokenType::minus: return "MINUS";
+    case TokenType::multiply: return "MULTIPLY";
+    case TokenType::divide: return "DIVIDE";
+    case TokenType::leftParen: return "LEFT PAREN";
+    case TokenType::rightParen: return "RIGHT PAREN";
+    default: return "UNKNOWN";
+    }
 }

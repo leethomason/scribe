@@ -33,6 +33,12 @@ struct Token {
     Token() : type(TokenType::eof) {}
     Token(TokenType type, std::string value = "") : type(type), value(value) {}
     Token(double d) : type(TokenType::number), dValue(d) {}
+
+    bool isBinOp() const {
+        return type >= TokenType::plus && type <= TokenType::divide;
+    }
+
+    std::string dump() const;
 };
 
 // Tokenizer to break input into tokens
@@ -43,6 +49,8 @@ public:
     Token peekNext();
 
     static void test();
+
+    bool debug = false;
 
 private:
     const std::string& _input;

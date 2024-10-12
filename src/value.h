@@ -25,6 +25,8 @@ struct Value {
 	bool operator==(const Value& rhs) const;
 	bool operator!=(const Value& rhs) const { return !(*this == rhs); }
 
+	std::string toString() const;
+
 	static Value Number(double a) {
 		Value v;
 		v.type = Type::tNumber;

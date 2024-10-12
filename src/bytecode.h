@@ -10,7 +10,7 @@ enum class OpCode : uint16_t
 {
 	//						pop					push
 	NO_OP,
-
+		
 	PUSH,				//  0					value	
 	POP,				//  1					0
 

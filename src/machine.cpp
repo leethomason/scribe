@@ -222,12 +222,12 @@ void Machine::popScope()
 		localVars.end());
 }
 
-void Machine::execute(const std::vector<Instruction>& instructions, ConstPool& pool)
+void Machine::execute(const std::vector<Instruction>& instructions, const ConstPool& pool)
 {
 	execute(instructions.data(), static_cast<int>(instructions.size()), pool);
 }
 
-void Machine::execute(const Instruction* instructions, size_t n, ConstPool& pool)
+void Machine::execute(const Instruction* instructions, size_t n, const ConstPool& pool)
 {
 	for(int i=0; i<n; i++)
 	{
@@ -270,6 +270,27 @@ void Machine::execute(const Instruction* instructions, size_t n, ConstPool& pool
 		default:
 			setErrorMessage(fmt::format("Unknown opcode: {}", (int)opCode));
 			break;
+		}
+	}
+}
+
+void Machine::dump(const std::vector<Instruction>& instructions, const ConstPool& pool)
+{
+	fmt::print("Bytecode:\n");
+	for (size_t i = 0; i < instructions.size(); i++)
+	{
+		OpCode opCode = OpCode::NO_OP;
+		uint32_t index = 0;
+		UnpackOpCode(instructions[i], opCode, index);
+
+		fmt::print("{: >4}: {: <16}", i, gOpCodeNames[(int)opCode]);
+		if (opCode == OpCode::PUSH || opCode == OpCode::DEFINE_GLOBAL || opCode == OpCode::DEFINE_LOCAL || opCode == OpCode::LOAD)
+		{
+			fmt::print("{: >4}: {}\n", index, pool.get(index).toString());
+		}
+		else
+		{
+			fmt::print("\n");
 		}
 	}
 }

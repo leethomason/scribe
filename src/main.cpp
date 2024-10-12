@@ -1,12 +1,9 @@
 #include "parser.h"
 #include "machine.h"
 
-#include <iostream>
+#include <fmt/core.h>
 #include <string>
-#include <map>
-#include <cctype>
-#include <stdexcept>
-#include <sstream>
+#include <iostream>
 
 // Interpreter
 class Interpreter {
@@ -15,22 +12,39 @@ class Interpreter {
 
 public:
     void interpret(std::string input) {
-        try {
-            Tokenizer tokenizer(input);
-            Parser parser;
-            ASTNode* root = parser.parse(tokenizer);
+        const bool debugAST = false;
+        const bool debugBC = false;
+        const bool debugTokens = true;
 
-            std::vector<Instruction> instructions;
+        Tokenizer tokenizer(input);
+        tokenizer.debug = debugTokens;
+        Parser parser;
 
-            root->evaluate(instructions, constPool);
-            delete root; root = 0;
+        ASTPtr root = parser.parse(tokenizer);
 
-            machine.execute(instructions, constPool);
-
-            //std::cout << "Result: " << result << std::endl;
-        } catch (std::exception& ex) {
-            std::cout << "Error: " << ex.what() << std::endl;
+        if (parser.hasError()) {
+            fmt::print("Parser error: {}\n", parser.errorMessage());
         }
+        else if (debugAST)
+            root->dump(0);
+
+        std::vector<Instruction> instructions;
+        root->evaluate(instructions, constPool);
+        if (debugBC)
+            machine.dump(instructions, constPool);
+
+        machine.execute(instructions, constPool);
+        if (machine.hasError()) {
+            fmt::print("Machine error: {}\n", machine.errorMessage());
+        }
+
+        if (machine.stack.size()) {
+            fmt::print("Result = {}\n", machine.stack[0].toString());
+        }
+        else {
+            fmt::print("Stack empty.\n");
+        }
+        machine.stack.clear();
     }
 };
 
@@ -49,7 +63,7 @@ int main()
     std::string line;
 
     while (true) {
-        std::cout << ">> ";
+        fmt::print(">> ");
         std::getline(std::cin, line);
         if (line == "exit") break;
         interpreter.interpret(line);

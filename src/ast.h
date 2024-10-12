@@ -8,46 +8,49 @@
 #include <string>
 #include <vector>
 
+class ASTNode;
+using ASTPtr = std::shared_ptr<ASTNode>;
+
 // Abstract syntax tree (AST) nodes
 class ASTNode {
 public:
     virtual ~ASTNode() = default;
     virtual void evaluate(std::vector<Instruction>& bc, ConstPool& pool) = 0;
+    virtual void dump(int depth) const = 0;
+
+    ASTPtr left;
+    ASTPtr right;
 };
 
-class ValueNode : public ASTNode {
+class ValueASTNode : public ASTNode
+{
+public:
+    ValueASTNode(const Value& value) : value(value) {}
+    void evaluate(std::vector<Instruction>& bc, ConstPool& pool) override;
+    virtual void dump(int depth) const override;
+  
     Value value;
-public:
-    ValueNode(const Value& value) : value(value) {}
-
-    void evaluate(std::vector<Instruction>& bc, ConstPool& pool) override;
 };
 
-class DeclareVariableNode : public ASTNode {
+class IdentifierASTNode : public ASTNode
+{ 
+public:
+	IdentifierASTNode(const std::string& name) : name(name) {}
+    void evaluate(std::vector<Instruction>& bc, ConstPool& pool) override;
+    virtual void dump(int depth) const override;
+
     std::string name;
-    ASTNode* expr = nullptr;
-public:
-    DeclareVariableNode(std::string name, ASTNode* expr) : name(name), expr(expr) {}
-    ~DeclareVariableNode() { delete expr; }
-
-    void evaluate(std::vector<Instruction>& bc, ConstPool& pool) override;
 };
 
-class BinaryOpNode : public ASTNode {
+class BinaryASTNode : public ASTNode
+{
+public:
+    BinaryASTNode(TokenType type, ASTPtr left, ASTPtr right) : type(type) {
+        this->left = left;
+        this->right = right;
+    }
+    void evaluate(std::vector<Instruction>& bc, ConstPool& pool) override;
+    virtual void dump(int depth) const override;
+
     TokenType type;
-    ASTNode* left;
-    ASTNode* right;
-public:
-    BinaryOpNode(TokenType type, ASTNode* left, ASTNode* right) : type(type), left(left), right(right) {}
-    ~BinaryOpNode() { delete left; delete right; }
-    void evaluate(std::vector<Instruction>& bc, ConstPool& pool) override;
-};
-
-class AssignmentNode : public ASTNode {
-    std::string varName;
-    ASTNode* expr;
-public:
-    AssignmentNode(std::string varName, ASTNode* expr) : varName(varName), expr(expr) {}
-    ~AssignmentNode() { delete expr; }
-    void evaluate(std::vector<Instruction>& bc, ConstPool& pool) override;
 };

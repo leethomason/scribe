@@ -23,18 +23,21 @@ public:
 	Machine();
 	~Machine() = default;
 
-	void execute(const std::vector<Instruction>& instructions, ConstPool& pool);
-	void execute(const Instruction* start, size_t n, ConstPool& pool);
+	void execute(const std::vector<Instruction>& instructions, const ConstPool& pool);
+	void execute(const Instruction* start, size_t n, const ConstPool& pool);
 
 	std::vector<Value> stack;
 	std::map<std::string, Value> globalVars;
-	std::string errorMessage;
 
-	bool hasError() const { return !errorMessage.empty(); }
+	bool hasError() const { return !error.empty(); }
+	const std::string& errorMessage() const { return error;}
+
+	void dump(const std::vector<Instruction>& instructions, const ConstPool& pool);
 
 	static void test();
 
 private:
+	std::string error;
 	struct LocalVar {
 		int depth = 0;
 		std::string key;
@@ -44,7 +47,7 @@ private:
 	int scopeDepth = 0;
 
 	void setErrorMessage(const std::string& message) { 
-		errorMessage = message; 
+		error = message; 
 	}
 
 	bool verifyBinaryNumberOp(const char* op);

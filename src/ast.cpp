@@ -1,30 +1,43 @@
 #include "ast.h"
 #include "error.h"
 
-void ValueNode::evaluate(std::vector<Instruction>& bc, ConstPool& pool)
+void ValueASTNode::evaluate(std::vector<Instruction>& bc, ConstPool& pool)
 {
+	REQUIRE(!left);
+	REQUIRE(!right);
+
 	uint32_t slot = pool.add(value);
 	bc.push_back(PackOpCode(OpCode::PUSH, slot));
 }
 
-void DeclareVariableNode::evaluate(std::vector<Instruction>& bc, ConstPool& pool)
+void ValueASTNode::dump(int depth) const
 {
+	fmt::print("{: >{}}", "", depth * 2);
+	fmt::print("Value: {}\n", value.toString());
+}
+
+
+void IdentifierASTNode::evaluate(std::vector<Instruction>& bc, ConstPool& pool)
+{
+	REQUIRE(!left);
+	REQUIRE(!right);
+
 	uint32_t slot = pool.add(Value::String(name));
-	bc.push_back(PackOpCode(OpCode::PUSH, slot));	// push the name
-	expr->evaluate(bc, pool);						// push the value
-	// FIXME: local or global?
-	bc.push_back(PackOpCode(OpCode::DEFINE_LOCAL));
+	bc.push_back(PackOpCode(OpCode::PUSH, slot));
+	bc.push_back(PackOpCode(OpCode::LOAD));
 }
 
-void AssignmentNode::evaluate(std::vector<Instruction>& bc, ConstPool& pool)
+void IdentifierASTNode::dump(int depth) const
 {
-	uint32_t slot = pool.add(Value::String(varName));
-	expr->evaluate(bc, pool);
-	bc.push_back(PackOpCode(OpCode::STORE, slot));
+	fmt::print("{: >{}}", "", depth * 2);
+	fmt::print("Identifier: {}\n", name);
 }
 
-void BinaryOpNode::evaluate(std::vector<Instruction>& bc, ConstPool& pool)
+void BinaryASTNode::evaluate(std::vector<Instruction>& bc, ConstPool& pool)
 {
+	REQUIRE(left);
+	REQUIRE(right);
+
 	left->evaluate(bc, pool);
 	right->evaluate(bc, pool);
 
@@ -37,3 +50,20 @@ void BinaryOpNode::evaluate(std::vector<Instruction>& bc, ConstPool& pool)
 	}
 }
 
+void BinaryASTNode::dump(int depth) const
+{
+	left->dump(depth + 1);
+	right->dump(depth + 1);
+
+	std::string opName;
+	switch (type) {
+	case TokenType::plus: opName = "Add"; break;
+	case TokenType::minus: opName = "Sub"; break;
+	case TokenType::multiply: opName = "Mul"; break;
+	case TokenType::divide: opName = "Div"; break;
+	default: REQUIRE(false);
+	}
+
+	fmt::print("{: >{}}", "", depth * 2);
+	fmt::print("Binary: {}\n", opName);
+}
