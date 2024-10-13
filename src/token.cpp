@@ -2,12 +2,12 @@
 
 #include <fmt/core.h>
 
-Token Tokenizer::peekNext()
+Token Tokenizer::peek()
 {
     if (!_hasPeek) {
         bool savedDebug = debug;
         debug = false;
-        _peek = getNext();
+        _peek = get();
         debug = savedDebug;
         _hasPeek = true;
     }
@@ -15,7 +15,7 @@ Token Tokenizer::peekNext()
 }
 
 
-Token Tokenizer::getNext()
+Token Tokenizer::get()
 {
     if (_hasPeek) {
         _hasPeek = false;

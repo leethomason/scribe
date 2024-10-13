@@ -5,6 +5,9 @@
 
 #include <vector>
 
+/* 
+* The Parser produces the AST
+*/
 class Parser
 {
 public:

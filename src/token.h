@@ -41,12 +41,12 @@ struct Token {
     std::string dump() const;
 };
 
-// Tokenizer to break input into tokens
+// Tokenizer (scanner or lexar) to break input into tokens
 class Tokenizer {
 public:
     Tokenizer(const std::string& input) : _input(input) {}
-    Token getNext();
-    Token peekNext();
+    Token get();
+    Token peek();
 
     static void test();
 

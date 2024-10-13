@@ -16,19 +16,19 @@
 
 ASTPtr Parser::parsePrimaryExpr(Tokenizer& izer)
 {
-	Token t = izer.peekNext();
+	Token t = izer.peek();
 	if (t.type == TokenType::number) {
-		izer.getNext();
+		izer.get();
 		return std::make_shared<ValueASTNode>(Value::Number(t.dValue));
 	}
 	else if (t.type == TokenType::identifier) {
-		izer.getNext();
+		izer.get();
 		return std::make_shared<IdentifierASTNode>(t.value);
 	}
 	else if (t.type == TokenType::leftParen) {
-		izer.getNext();
+		izer.get();
 		ASTPtr expr = parseExpr(izer);
-		if (izer.getNext().type != TokenType::rightParen) {
+		if (izer.get().type != TokenType::rightParen) {
 			setError("Expected right paren.");
 			return nullptr;
 		}
@@ -46,16 +46,16 @@ ASTPtr Parser::parseMulExpr(Tokenizer& izer)
 	if (!expr)
 		return nullptr;
 
-	Token t = izer.peekNext();
+	Token t = izer.peek();
 	while (t.type == TokenType::multiply || t.type == TokenType::divide) {
-		izer.getNext();
+		izer.get();
 		ASTPtr right = parsePrimaryExpr(izer);
 		if (!right)
 			return nullptr;
 
 		// Note the recursive use of 'expr'
 		expr = std::make_shared<BinaryASTNode>(t.type, expr, right);
-		t = izer.peekNext();
+		t = izer.peek();
 	}
 	return expr;
 }
@@ -63,14 +63,14 @@ ASTPtr Parser::parseMulExpr(Tokenizer& izer)
 ASTPtr Parser::parseExpr(Tokenizer& izer)
 {
 	ASTPtr expr = parseMulExpr(izer);
-	Token t = izer.peekNext();
+	Token t = izer.peek();
 	while (t.type == TokenType::plus || t.type == TokenType::minus) {
-		izer.getNext();
+		izer.get();
 		ASTPtr right = parseMulExpr(izer);
 
 		// Note the recursive use of 'expr'
 		expr = std::make_shared<BinaryASTNode>(t.type, expr, right);
-		t = izer.peekNext();
+		t = izer.peek();
 	}
 	return expr;
 }
