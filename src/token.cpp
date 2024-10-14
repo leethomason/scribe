@@ -14,6 +14,28 @@ Token Tokenizer::peek()
     return _peek;
 }
 
+void Tokenizer::skipWhitespace()
+{
+    while (_pos < _input.size()) {
+        const char c = current();
+		if (c == ' ' || c == '\t' || c == '\r') {
+			_pos++;
+		}
+		else if (c == '\n') {
+			_line++;
+			_pos++;
+		}
+		else if (c == '/' && peekChar() == '/') {
+			while (_pos < _input.size() && _input[_pos] != '\n') {
+				_pos++;
+			}
+            _line++;
+		}
+		else {
+			break;
+		}
+	}
+}
 
 Token Tokenizer::get()
 {
@@ -25,7 +47,7 @@ Token Tokenizer::get()
 
     skipWhitespace();
     if (_pos == _input.size()) {
-		return Token(TokenType::eof);
+		return Token(TokenType::eof, _line);
 	}
 
     const char c = _input[_pos];
@@ -37,7 +59,7 @@ Token Tokenizer::get()
         double val = std::strtod(start, &end);
         if (end > start) {
             _pos += (end - start);
-            Token tok(TokenType::NUMBER, std::string(start, end - start));
+            Token tok(TokenType::NUMBER, _line, std::string(start, end - start));
             tok.dValue = val;
             if (debug) fmt::print("{}\n", tok.dump());
             return tok;
@@ -54,10 +76,10 @@ Token Tokenizer::get()
             _pos++;
         }
 
-        if (t == "var") return Token(TokenType::VAR);
-        if (t == "return") return Token(TokenType::RET);
+        if (t == "var") return Token(TokenType::VAR, _line);
+        if (t == "return") return Token(TokenType::RET, _line);
 
-        Token token(TokenType::IDENT, t);
+        Token token(TokenType::IDENT, _line, t);
         if (debug) fmt::print("{}\n", token.dump());
         return token;
     }
@@ -66,22 +88,21 @@ Token Tokenizer::get()
     std::string sym;
     sym += c;
     _pos++;
-    Token token(TokenType::error);
+    Token token(TokenType::error, -1);
 
     switch (c) {
-    case '=': token = match('=') ? Token(TokenType::EQUAL_EQUAL, "==") : Token(TokenType::EQUAL, sym); break;
-
-    case '+': token = Token(TokenType::PLUS, sym); break;
-    case '-': token = Token(TokenType::MINUS, sym); break;
-    case '*': token = Token(TokenType::MULT, sym); break;
-    case '/': token = Token(TokenType::DIVIDE, sym); break;
-    case '(': token = Token(TokenType::LEFT_PAREN, sym); break;
-    case ')': token = Token(TokenType::RIGHT_PAREN, sym); break;
-    case '{': token = Token(TokenType::LEFT_BRACE, sym); break;
-    case '}': token = Token(TokenType::RIGHT_BRACE, sym); break;
-    case '!': token = match('=') ? Token(TokenType::BANG_EQUAL, "!=") : Token(TokenType::BANG, sym); break;
-    case '>': token = match('=') ? Token(TokenType::GREATER_EQUAL, ">=") : Token(TokenType::GREATER, sym); break;
-    case '<': token = match('=') ? Token(TokenType::LESS_EQUAL, "<=") : Token(TokenType::LESS, sym); break;
+    case '=': token = match('=') ? Token(TokenType::EQUAL_EQUAL, _line, "==") : Token(TokenType::EQUAL, _line, sym); break;
+    case '+': token = Token(TokenType::PLUS, _line, sym); break;
+    case '-': token = Token(TokenType::MINUS, _line, sym); break;
+    case '*': token = Token(TokenType::MULT, _line, sym); break;
+    case '/': token = Token(TokenType::DIVIDE, _line, sym); break;
+    case '(': token = Token(TokenType::LEFT_PAREN, _line, sym); break;
+    case ')': token = Token(TokenType::RIGHT_PAREN, _line, sym); break;
+    case '{': token = Token(TokenType::LEFT_BRACE, _line, sym); break;
+    case '}': token = Token(TokenType::RIGHT_BRACE, _line, sym); break;
+    case '!': token = match('=') ? Token(TokenType::BANG_EQUAL, _line, "!=") : Token(TokenType::BANG, _line, sym); break;
+    case '>': token = match('=') ? Token(TokenType::GREATER_EQUAL, _line, ">=") : Token(TokenType::GREATER, _line, sym); break;
+    case '<': token = match('=') ? Token(TokenType::LESS_EQUAL, _line, "<=") : Token(TokenType::LESS, _line, sym); break;
 
     default:
         break;

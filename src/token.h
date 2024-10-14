@@ -39,12 +39,14 @@ enum class TokenType {
 // Token structure
 struct Token {
     TokenType type;
+    int line = 0;
     std::string lexeme;
-    double dValue = 0;
 
-    Token() : type(TokenType::eof) {}
-    Token(TokenType type, std::string lexeme = "") : type(type), lexeme(lexeme) {}
-    Token(double d) : type(TokenType::NUMBER), dValue(d) {}
+    double dValue = 0;      // if number
+
+    Token() : type(TokenType::error) {}
+    Token(TokenType type, int line, std::string lexeme = "") : type(type), line(line), lexeme(lexeme) {}
+    Token(double d, int line) : type(TokenType::NUMBER), line(line), dValue(d) {}
 
     bool isBinOp() const {
         return type >= TokenType::PLUS && type <= TokenType::DIVIDE;
@@ -69,10 +71,24 @@ private:
     size_t _pos = 0;
     Token _peek;
     bool _hasPeek = false;
+    int _line = 0;
+
+    char current() const {
+        return _input[_pos];
+    }
+
+    char peekChar() const {
+		return _pos + 1 < _input.size() ? _input[_pos + 1] : 0;
+	}
 
     void advance() {
-        _pos++;
+        if (_pos > _input.size())
+            _pos++;
     }
+
+    bool inputEnd() const {
+		return _pos >= _input.size();
+	}
 
     bool match(char m) {
         if (_pos >= _input.size()) return false;
@@ -83,11 +99,7 @@ private:
         return false;
     }
 
-    void skipWhitespace() {
-        while (std::isspace(_input[_pos])) {
-            advance();
-        }
-    }
+    void skipWhitespace();
 
     static bool isDigit(char c) {
 		return c >= '0' && c <= '9';

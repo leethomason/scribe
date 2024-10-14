@@ -138,5 +138,5 @@ void Tokenizer::test()
 	RUN_TEST(Identifiers());
 	RUN_TEST(Symbols());
 	RUN_TEST(SimLang());
-//	RUN_TEST(TwoNumbers()); FIXME bug
+	RUN_TEST(TwoNumbers());
 }
