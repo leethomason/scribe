@@ -1,5 +1,6 @@
 #include "parser.h"
 #include "ast.h"
+#include "errorreporting.h"
 
 /*
 	PrimaryExpr :
@@ -29,13 +30,13 @@ ASTPtr Parser::parsePrimaryExpr(Tokenizer& izer)
 		izer.get();
 		ASTPtr expr = parseExpr(izer);
 		if (izer.get().type != TokenType::rightParen) {
-			setError("Expected right paren.");
+			
 			return nullptr;
 		}
 		return expr;
 	}
 	else {
-		setError("Expected number, identifier, or left paren.");
+		ErrorReporter::report("fixme", 0, "Expected number, identifier, or left paren.");
 		return nullptr;
 	}
 }
