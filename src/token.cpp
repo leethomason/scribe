@@ -14,6 +14,28 @@ Token Tokenizer::peek()
     return _peek;
 }
 
+void Tokenizer::skipWhitespace()
+{
+    while (_pos < _input.size()) {
+        const char c = current();
+		if (c == ' ' || c == '\t' || c == '\r') {
+			_pos++;
+		}
+		else if (c == '\n') {
+			_line++;
+			_pos++;
+		}
+		else if (c == '/' && peekChar() == '/') {
+			while (_pos < _input.size() && _input[_pos] != '\n') {
+				_pos++;
+			}
+            _line++;
+		}
+		else {
+			break;
+		}
+	}
+}
 
 Token Tokenizer::get()
 {
@@ -25,24 +47,19 @@ Token Tokenizer::get()
 
     skipWhitespace();
     if (_pos == _input.size()) {
-		return Token(TokenType::eof);
+		return Token(TokenType::eof, _line);
 	}
 
-    char c0 = _input[_pos];
-    char c1 = (_pos + 1) < _input.size() ? _input[_pos + 1] : 0;
-    char c2 = (_pos + 2) < _input.size() ? _input[_pos + 2] : 0;
+    const char c = _input[_pos];
 
     // Number:
-    if (isNumberPart(c0)                                                // 0 .0
-        || (isNumberStart(c0) && isDigit(c1))                           // -0
-        || (isNumberStart(c0) && isNumberPart(c1) && isDigit(c2)))      // +.0
-    {
+    if (isDigitStart(c)) {
         const char* start = &_input[_pos];
         char* end = nullptr;
         double val = std::strtod(start, &end);
         if (end > start) {
             _pos += (end - start);
-            Token tok(TokenType::number, std::string(start, end - start));
+            Token tok(TokenType::NUMBER, _line, std::string(start, end - start));
             tok.dValue = val;
             if (debug) fmt::print("{}\n", tok.dump());
             return tok;
@@ -50,38 +67,43 @@ Token Tokenizer::get()
     }
 
     // Identifier or Keyword
-    if (isIdentStart(c0)) {
+    if (isAlpha(c)) {
         std::string t;
-        t += c0;
+        t += c;
         _pos++;
-        while (_pos < _input.size() && isIdent(_input[_pos])) {
+        while (_pos < _input.size() && isAplhaNum(_input[_pos])) {
             t += _input[_pos];
             _pos++;
         }
 
-        if (t == "var") return Token(TokenType::var);
-        if (t == "return") return Token(TokenType::ret);
+        if (t == "var") return Token(TokenType::VAR, _line);
+        if (t == "return") return Token(TokenType::RET, _line);
 
-        Token token(TokenType::identifier, t);
+        Token token(TokenType::IDENT, _line, t);
         if (debug) fmt::print("{}\n", token.dump());
         return token;
     }
 
     // Symbols
     std::string sym;
-    sym += c0;
+    sym += c;
     _pos++;
+    Token token(TokenType::error, -1);
 
-    Token token(TokenType::error);
+    switch (c) {
+    case '=': token = match('=') ? Token(TokenType::EQUAL_EQUAL, _line, "==") : Token(TokenType::EQUAL, _line, sym); break;
+    case '+': token = Token(TokenType::PLUS, _line, sym); break;
+    case '-': token = Token(TokenType::MINUS, _line, sym); break;
+    case '*': token = Token(TokenType::MULT, _line, sym); break;
+    case '/': token = Token(TokenType::DIVIDE, _line, sym); break;
+    case '(': token = Token(TokenType::LEFT_PAREN, _line, sym); break;
+    case ')': token = Token(TokenType::RIGHT_PAREN, _line, sym); break;
+    case '{': token = Token(TokenType::LEFT_BRACE, _line, sym); break;
+    case '}': token = Token(TokenType::RIGHT_BRACE, _line, sym); break;
+    case '!': token = match('=') ? Token(TokenType::BANG_EQUAL, _line, "!=") : Token(TokenType::BANG, _line, sym); break;
+    case '>': token = match('=') ? Token(TokenType::GREATER_EQUAL, _line, ">=") : Token(TokenType::GREATER, _line, sym); break;
+    case '<': token = match('=') ? Token(TokenType::LESS_EQUAL, _line, "<=") : Token(TokenType::LESS, _line, sym); break;
 
-    switch (c0) {
-    case '=': token = Token(TokenType::assign, sym); break;
-    case '+': token = Token(TokenType::plus, sym); break;
-    case '-': token = Token(TokenType::minus, sym); break;
-    case '*': token = Token(TokenType::multiply, sym); break;
-    case '/': token = Token(TokenType::divide, sym); break;
-    case '(': token = Token(TokenType::leftParen, sym); break;
-    case ')': token = Token(TokenType::rightParen, sym); break;
     default:
         break;
     }
@@ -91,20 +113,42 @@ Token Tokenizer::get()
 
 std::string Token::dump() const 
 {
-    switch (type) {
-    case TokenType::eof: return "EOF";
-    case TokenType::error: return "ERROR";
-    case TokenType::number: return "NUMBER: " + std::to_string(dValue);
-    case TokenType::identifier: return "IDENTIFIER: " + value;
-    case TokenType::var: return "VAR";
-    case TokenType::ret: return "RET";
-    case TokenType::assign: return "ASSIGN";
-    case TokenType::plus: return "PLUS";
-    case TokenType::minus: return "MINUS";
-    case TokenType::multiply: return "MULTIPLY";
-    case TokenType::divide: return "DIVIDE";
-    case TokenType::leftParen: return "LEFT PAREN";
-    case TokenType::rightParen: return "RIGHT PAREN";
-    default: return "UNKNOWN";
+    static const char* name[static_cast<int>(TokenType::count)] = {
+        "EOF",
+        "ERROR",
+        "NUMBER",
+        "IDENT",
+
+        "VAR",
+        "RET",
+
+        "PLUS",
+        "MINUS",
+        "MULT",
+        "DIVIDE",
+        "LEFT_PAREN",
+        "RIGHT_PAREN",
+        "LEFT_BRACE",
+        "RIGHT_BRACE",
+        "BANG",
+
+        "EQUAL",
+        "EQUAL_EQUAL",
+        "BANG_EQUAL",
+        "GREATER",
+        "GREATER_EQUAL",
+        "LESS",
+        "LESS_EQUAL",
+    };
+
+    std::string r = name[static_cast<int>(type)];
+    if (type == TokenType::NUMBER) {
+        r += ":";
+        r += std::to_string(dValue);
     }
+    else if (type == TokenType::IDENT) {
+        r += ":";
+        r += lexeme;
+    }
+    return r;
 }

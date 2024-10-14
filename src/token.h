@@ -7,35 +7,49 @@ enum class TokenType {
     error,      // Parsing error
 
     // Numbers & vars
-    number,     // Number
-    identifier, // Variable name
+    NUMBER,     // Number
+    IDENT, // Variable name
 
     // Keywords
-    var,        // variable declaration
-    ret,        // push to stack
+    VAR,        // variable declaration
+    RET,        // push to stack
 
     // Sybols & operations
-    assign,     // '='
-    plus,       // '+'
-    minus,      // '-'
-    multiply,   // '*'
-    divide,     // '/'
-    leftParen,  // '('
-    rightParen, // ')'
+    PLUS,       // '+'
+    MINUS,      // '-'
+    MULT,   // '*'
+    DIVIDE,     // '/'
+    LEFT_PAREN,  // '('
+    RIGHT_PAREN, // ')'
+    LEFT_BRACE,  // '{'
+    RIGHT_BRACE, // '}'
+    BANG,       // '!'
+
+    EQUAL,     // '='
+    EQUAL_EQUAL, // '=='
+    BANG_EQUAL,  // '!='
+    GREATER,     // '>'
+    GREATER_EQUAL, // '>='
+    LESS,        // '<'
+    LESS_EQUAL,  // '<='
+
+    count
 };
 
 // Token structure
 struct Token {
     TokenType type;
-    std::string value;
-    double dValue = 0;
+    int line = 0;
+    std::string lexeme;
 
-    Token() : type(TokenType::eof) {}
-    Token(TokenType type, std::string value = "") : type(type), value(value) {}
-    Token(double d) : type(TokenType::number), dValue(d) {}
+    double dValue = 0;      // if number
+
+    Token() : type(TokenType::error) {}
+    Token(TokenType type, int line, std::string lexeme = "") : type(type), line(line), lexeme(lexeme) {}
+    Token(double d, int line) : type(TokenType::NUMBER), line(line), dValue(d) {}
 
     bool isBinOp() const {
-        return type >= TokenType::plus && type <= TokenType::divide;
+        return type >= TokenType::PLUS && type <= TokenType::DIVIDE;
     }
 
     std::string dump() const;
@@ -57,30 +71,46 @@ private:
     size_t _pos = 0;
     Token _peek;
     bool _hasPeek = false;
+    int _line = 0;
+
+    char current() const {
+        return _input[_pos];
+    }
+
+    char peekChar() const {
+		return _pos + 1 < _input.size() ? _input[_pos + 1] : 0;
+	}
 
     void advance() {
-        _pos++;
+        if (_pos > _input.size())
+            _pos++;
     }
 
-    void skipWhitespace() {
-        while (std::isspace(_input[_pos])) {
-            advance();
+    bool inputEnd() const {
+		return _pos >= _input.size();
+	}
+
+    bool match(char m) {
+        if (_pos >= _input.size()) return false;
+        if (_input[_pos] == m) {
+            _pos++;
+            return true;
         }
+        return false;
     }
+
+    void skipWhitespace();
 
     static bool isDigit(char c) {
 		return c >= '0' && c <= '9';
 	}
-    static bool isNumberPart(char c) {
-        return isDigit(c) || c == '.';
+    static bool isDigitStart(char c) {
+		return isDigit(c) || c == '.';
 	}
-    static bool isNumberStart(char c) {
-        return isNumberPart(c) || c == '-' || c == '+';
+    static bool isAlpha(char c) {
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
     }
-    static bool isIdent(char c) {
-        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_' || (c >= '0' && c <= '9');
+    static bool isAplhaNum(char c) {
+        return isDigit(c) || isAlpha(c);
     }
-    static bool isIdentStart(char c) {
-		return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
-	}
 };

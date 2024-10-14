@@ -42,10 +42,10 @@ void BinaryASTNode::evaluate(std::vector<Instruction>& bc, ConstPool& pool)
 	right->evaluate(bc, pool);
 
 	switch (type) {
-	case TokenType::plus: bc.push_back(PackOpCode(OpCode::ADD)); break;
-	case TokenType::minus: bc.push_back(PackOpCode(OpCode::SUB)); break;
-	case TokenType::multiply: bc.push_back(PackOpCode(OpCode::MUL)); break;
-	case TokenType::divide: bc.push_back(PackOpCode(OpCode::DIV)); break;
+	case TokenType::PLUS: bc.push_back(PackOpCode(OpCode::ADD)); break;
+	case TokenType::MINUS: bc.push_back(PackOpCode(OpCode::SUB)); break;
+	case TokenType::MULT: bc.push_back(PackOpCode(OpCode::MUL)); break;
+	case TokenType::DIVIDE: bc.push_back(PackOpCode(OpCode::DIV)); break;
 	default: REQUIRE(false);
 	}
 }
@@ -57,10 +57,10 @@ void BinaryASTNode::dump(int depth) const
 
 	std::string opName;
 	switch (type) {
-	case TokenType::plus: opName = "Add"; break;
-	case TokenType::minus: opName = "Sub"; break;
-	case TokenType::multiply: opName = "Mul"; break;
-	case TokenType::divide: opName = "Div"; break;
+	case TokenType::PLUS: opName = "Add"; break;
+	case TokenType::MINUS: opName = "Sub"; break;
+	case TokenType::MULT: opName = "Mul"; break;
+	case TokenType::DIVIDE: opName = "Div"; break;
 	default: REQUIRE(false);
 	}
 

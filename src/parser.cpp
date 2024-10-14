@@ -1,5 +1,6 @@
 #include "parser.h"
 #include "ast.h"
+#include "errorreporting.h"
 
 /*
 	PrimaryExpr :
@@ -17,25 +18,25 @@
 ASTPtr Parser::parsePrimaryExpr(Tokenizer& izer)
 {
 	Token t = izer.peek();
-	if (t.type == TokenType::number) {
+	if (t.type == TokenType::NUMBER) {
 		izer.get();
 		return std::make_shared<ValueASTNode>(Value::Number(t.dValue));
 	}
-	else if (t.type == TokenType::identifier) {
+	else if (t.type == TokenType::IDENT) {
 		izer.get();
-		return std::make_shared<IdentifierASTNode>(t.value);
+		return std::make_shared<IdentifierASTNode>(t.lexeme);
 	}
-	else if (t.type == TokenType::leftParen) {
+	else if (t.type == TokenType::LEFT_PAREN) {
 		izer.get();
 		ASTPtr expr = parseExpr(izer);
-		if (izer.get().type != TokenType::rightParen) {
-			setError("Expected right paren.");
+		if (izer.get().type != TokenType::RIGHT_PAREN) {
+			
 			return nullptr;
 		}
 		return expr;
 	}
 	else {
-		setError("Expected number, identifier, or left paren.");
+		ErrorReporter::report("fixme", 0, "Expected number, identifier, or left paren.");
 		return nullptr;
 	}
 }
@@ -47,7 +48,7 @@ ASTPtr Parser::parseMulExpr(Tokenizer& izer)
 		return nullptr;
 
 	Token t = izer.peek();
-	while (t.type == TokenType::multiply || t.type == TokenType::divide) {
+	while (t.type == TokenType::MULT || t.type == TokenType::DIVIDE) {
 		izer.get();
 		ASTPtr right = parsePrimaryExpr(izer);
 		if (!right)
@@ -64,7 +65,7 @@ ASTPtr Parser::parseExpr(Tokenizer& izer)
 {
 	ASTPtr expr = parseMulExpr(izer);
 	Token t = izer.peek();
-	while (t.type == TokenType::plus || t.type == TokenType::minus) {
+	while (t.type == TokenType::PLUS || t.type == TokenType::MINUS) {
 		izer.get();
 		ASTPtr right = parseMulExpr(izer);
 

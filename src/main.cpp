@@ -1,5 +1,6 @@
 #include "parser.h"
 #include "machine.h"
+#include "errorreporting.h"
 
 #include <fmt/core.h>
 #include <string>
@@ -22,8 +23,11 @@ public:
 
         ASTPtr root = parser.parse(tokenizer);
 
-        if (parser.hasError()) {
-            fmt::print("Parser error: {}\n", parser.errorMessage());
+        if (ErrorReporter::hasError()) {
+            for(auto& report : ErrorReporter::reports()) {
+				fmt::print("Error: {}:{} {}\n", report.file, report.line, report.message);
+			}
+            ErrorReporter::clear();
         }
         else if (debugAST && root)
             root->dump(0);
