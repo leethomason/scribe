@@ -7,35 +7,47 @@ enum class TokenType {
     error,      // Parsing error
 
     // Numbers & vars
-    number,     // Number
-    identifier, // Variable name
+    NUMBER,     // Number
+    IDENT, // Variable name
 
     // Keywords
-    var,        // variable declaration
-    ret,        // push to stack
+    VAR,        // variable declaration
+    RET,        // push to stack
 
     // Sybols & operations
-    assign,     // '='
-    plus,       // '+'
-    minus,      // '-'
-    multiply,   // '*'
-    divide,     // '/'
-    leftParen,  // '('
-    rightParen, // ')'
+    PLUS,       // '+'
+    MINUS,      // '-'
+    MULT,   // '*'
+    DIVIDE,     // '/'
+    LEFT_PAREN,  // '('
+    RIGHT_PAREN, // ')'
+    LEFT_BRACE,  // '{'
+    RIGHT_BRACE, // '}'
+    BANG,       // '!'
+
+    EQUAL,     // '='
+    EQUAL_EQUAL, // '=='
+    BANG_EQUAL,  // '!='
+    GREATER,     // '>'
+    GREATER_EQUAL, // '>='
+    LESS,        // '<'
+    LESS_EQUAL,  // '<='
+
+    count
 };
 
 // Token structure
 struct Token {
     TokenType type;
-    std::string value;
+    std::string lexeme;
     double dValue = 0;
 
     Token() : type(TokenType::eof) {}
-    Token(TokenType type, std::string value = "") : type(type), value(value) {}
-    Token(double d) : type(TokenType::number), dValue(d) {}
+    Token(TokenType type, std::string lexeme = "") : type(type), lexeme(lexeme) {}
+    Token(double d) : type(TokenType::NUMBER), dValue(d) {}
 
     bool isBinOp() const {
-        return type >= TokenType::plus && type <= TokenType::divide;
+        return type >= TokenType::PLUS && type <= TokenType::DIVIDE;
     }
 
     std::string dump() const;
@@ -62,6 +74,15 @@ private:
         _pos++;
     }
 
+    bool match(char m) {
+        if (_pos >= _input.size()) return false;
+        if (_input[_pos] == m) {
+            _pos++;
+            return true;
+        }
+        return false;
+    }
+
     void skipWhitespace() {
         while (std::isspace(_input[_pos])) {
             advance();
@@ -71,16 +92,13 @@ private:
     static bool isDigit(char c) {
 		return c >= '0' && c <= '9';
 	}
-    static bool isNumberPart(char c) {
-        return isDigit(c) || c == '.';
+    static bool isDigitStart(char c) {
+		return isDigit(c) || c == '.';
 	}
-    static bool isNumberStart(char c) {
-        return isNumberPart(c) || c == '-' || c == '+';
+    static bool isAlpha(char c) {
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
     }
-    static bool isIdent(char c) {
-        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_' || (c >= '0' && c <= '9');
+    static bool isAplhaNum(char c) {
+        return isDigit(c) || isAlpha(c);
     }
-    static bool isIdentStart(char c) {
-		return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
-	}
 };

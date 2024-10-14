@@ -3,33 +3,23 @@
 
 static void Numbers()
 {
-	std::string s = "3 +3 +3.0 .3 -.3";
+	std::string s = "3 3.0 .3";
 	Tokenizer izer(s);
 
 	Token t = izer.get();
-	TEST(t.type == TokenType::number);
-	TEST(t.value == "3");
+	TEST(t.type == TokenType::NUMBER);
+	TEST(t.lexeme == "3");
 	TEST(t.dValue == 3.0);
 
 	t = izer.get();
-	TEST(t.type == TokenType::number);
-	TEST(t.value == "+3");
+	TEST(t.type == TokenType::NUMBER);
+	TEST(t.lexeme == "3.0");
 	TEST(t.dValue == 3.0);
 
 	t = izer.get();
-	TEST(t.type == TokenType::number);
-	TEST(t.value == "+3.0");
-	TEST(t.dValue == 3.0);
-
-	t = izer.get();
-	TEST(t.type == TokenType::number);
-	TEST(t.value == ".3");
+	TEST(t.type == TokenType::NUMBER);
+	TEST(t.lexeme == ".3");
 	TEST_FP(t.dValue, 0.3);
-
-	t = izer.get();
-	TEST(t.type == TokenType::number);
-	TEST(t.value == "-.3");
-	TEST_FP(t.dValue, -0.3);
 }
 
 static void Identifiers()
@@ -38,16 +28,16 @@ static void Identifiers()
 	Tokenizer izer(s);
 
 	Token t = izer.get();
-	TEST(t.type == TokenType::identifier);
-	TEST(t.value == "foo");
+	TEST(t.type == TokenType::IDENT);
+	TEST(t.lexeme == "foo");
 
 	t = izer.get();
-	TEST(t.type == TokenType::identifier);
-	TEST(t.value == "bar42");
+	TEST(t.type == TokenType::IDENT);
+	TEST(t.lexeme == "bar42");
 
 	t = izer.get();
-	TEST(t.type == TokenType::identifier);
-	TEST(t.value == "_hello");
+	TEST(t.type == TokenType::IDENT);
+	TEST(t.lexeme == "_hello");
 }
 
 static void Symbols()
@@ -56,28 +46,28 @@ static void Symbols()
 	Tokenizer izer(s);
 
 	Token t = izer.get();
-	TEST(t.type == TokenType::leftParen);
-	TEST(t.value == "(");
+	TEST(t.type == TokenType::LEFT_PAREN);
+	TEST(t.lexeme == "(");
 
 	t = izer.get();
-	TEST(t.type == TokenType::leftParen);
-	TEST(t.value == "(");
+	TEST(t.type == TokenType::LEFT_PAREN);
+	TEST(t.lexeme == "(");
 
 	t = izer.get();
-	TEST(t.type == TokenType::plus);
-	TEST(t.value == "+");
+	TEST(t.type == TokenType::PLUS);
+	TEST(t.lexeme == "+");
 
 	t = izer.get();
-	TEST(t.type == TokenType::plus);
-	TEST(t.value == "+");
+	TEST(t.type == TokenType::PLUS);
+	TEST(t.lexeme == "+");
 
 	t = izer.get();
-	TEST(t.type == TokenType::multiply);
-	TEST(t.value == "*");
+	TEST(t.type == TokenType::MULT);
+	TEST(t.lexeme == "*");
 
 	t = izer.get();
-	TEST(t.type == TokenType::rightParen);
-	TEST(t.value == ")");
+	TEST(t.type == TokenType::RIGHT_PAREN);
+	TEST(t.lexeme == ")");
 }
 
 static void SimLang()
@@ -92,38 +82,38 @@ static void SimLang()
 		Tokenizer izer(s[i]);
 
 		Token t = izer.get();
-		TEST(t.type == TokenType::identifier);
-		TEST(t.value == "dec");
+		TEST(t.type == TokenType::IDENT);
+		TEST(t.lexeme == "dec");
 
 		t = izer.get();
-		TEST(t.type == TokenType::identifier);
-		TEST(t.value == "x");
+		TEST(t.type == TokenType::IDENT);
+		TEST(t.lexeme == "x");
 
 		t = izer.get();
-		TEST(t.type == TokenType::assign);
+		TEST(t.type == TokenType::EQUAL);
 
 		t = izer.get();
-		TEST(t.type == TokenType::leftParen);
+		TEST(t.type == TokenType::LEFT_PAREN);
 
 		t = izer.get();
-		TEST(t.type == TokenType::number);
+		TEST(t.type == TokenType::NUMBER);
 		TEST(t.dValue == 7.0);
 
 		t = izer.get();
-		TEST(t.type == TokenType::plus);
+		TEST(t.type == TokenType::PLUS);
 
 		t = izer.get();
-		TEST(t.type == TokenType::identifier);
-		TEST(t.value == "y0");
+		TEST(t.type == TokenType::IDENT);
+		TEST(t.lexeme == "y0");
 
 		t = izer.get();
-		TEST(t.type == TokenType::rightParen);
+		TEST(t.type == TokenType::RIGHT_PAREN);
 
 		t = izer.get();
-		TEST(t.type == TokenType::divide);
+		TEST(t.type == TokenType::DIVIDE);
 
 		t = izer.get();
-		TEST(t.type == TokenType::number);
+		TEST(t.type == TokenType::NUMBER);
 		TEST_FP(t.dValue, 3.1);
 	}
 }
@@ -133,13 +123,13 @@ static void TwoNumbers()
 	std::string s = "1+2";
 	Tokenizer izer(s);
 	Token t = izer.get();
-	TEST(t.type == TokenType::number);
-	TEST(t.value == "1");
+	TEST(t.type == TokenType::NUMBER);
+	TEST(t.lexeme == "1");
 	t = izer.get();
-	TEST(t.type == TokenType::plus);
+	TEST(t.type == TokenType::PLUS);
 	t = izer.get();
-	TEST(t.type == TokenType::number);
-	TEST(t.value == "2");
+	TEST(t.type == TokenType::NUMBER);
+	TEST(t.lexeme == "2");
 }
 
 void Tokenizer::test()

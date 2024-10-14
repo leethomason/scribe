@@ -28,21 +28,16 @@ Token Tokenizer::get()
 		return Token(TokenType::eof);
 	}
 
-    char c0 = _input[_pos];
-    char c1 = (_pos + 1) < _input.size() ? _input[_pos + 1] : 0;
-    char c2 = (_pos + 2) < _input.size() ? _input[_pos + 2] : 0;
+    const char c = _input[_pos];
 
     // Number:
-    if (isNumberPart(c0)                                                // 0 .0
-        || (isNumberStart(c0) && isDigit(c1))                           // -0
-        || (isNumberStart(c0) && isNumberPart(c1) && isDigit(c2)))      // +.0
-    {
+    if (isDigitStart(c)) {
         const char* start = &_input[_pos];
         char* end = nullptr;
         double val = std::strtod(start, &end);
         if (end > start) {
             _pos += (end - start);
-            Token tok(TokenType::number, std::string(start, end - start));
+            Token tok(TokenType::NUMBER, std::string(start, end - start));
             tok.dValue = val;
             if (debug) fmt::print("{}\n", tok.dump());
             return tok;
@@ -50,38 +45,44 @@ Token Tokenizer::get()
     }
 
     // Identifier or Keyword
-    if (isIdentStart(c0)) {
+    if (isAlpha(c)) {
         std::string t;
-        t += c0;
+        t += c;
         _pos++;
-        while (_pos < _input.size() && isIdent(_input[_pos])) {
+        while (_pos < _input.size() && isAplhaNum(_input[_pos])) {
             t += _input[_pos];
             _pos++;
         }
 
-        if (t == "var") return Token(TokenType::var);
-        if (t == "return") return Token(TokenType::ret);
+        if (t == "var") return Token(TokenType::VAR);
+        if (t == "return") return Token(TokenType::RET);
 
-        Token token(TokenType::identifier, t);
+        Token token(TokenType::IDENT, t);
         if (debug) fmt::print("{}\n", token.dump());
         return token;
     }
 
     // Symbols
     std::string sym;
-    sym += c0;
+    sym += c;
     _pos++;
-
     Token token(TokenType::error);
 
-    switch (c0) {
-    case '=': token = Token(TokenType::assign, sym); break;
-    case '+': token = Token(TokenType::plus, sym); break;
-    case '-': token = Token(TokenType::minus, sym); break;
-    case '*': token = Token(TokenType::multiply, sym); break;
-    case '/': token = Token(TokenType::divide, sym); break;
-    case '(': token = Token(TokenType::leftParen, sym); break;
-    case ')': token = Token(TokenType::rightParen, sym); break;
+    switch (c) {
+    case '=': token = match('=') ? Token(TokenType::EQUAL_EQUAL, "==") : Token(TokenType::EQUAL, sym); break;
+
+    case '+': token = Token(TokenType::PLUS, sym); break;
+    case '-': token = Token(TokenType::MINUS, sym); break;
+    case '*': token = Token(TokenType::MULT, sym); break;
+    case '/': token = Token(TokenType::DIVIDE, sym); break;
+    case '(': token = Token(TokenType::LEFT_PAREN, sym); break;
+    case ')': token = Token(TokenType::RIGHT_PAREN, sym); break;
+    case '{': token = Token(TokenType::LEFT_BRACE, sym); break;
+    case '}': token = Token(TokenType::RIGHT_BRACE, sym); break;
+    case '!': token = match('=') ? Token(TokenType::BANG_EQUAL, "!=") : Token(TokenType::BANG, sym); break;
+    case '>': token = match('=') ? Token(TokenType::GREATER_EQUAL, ">=") : Token(TokenType::GREATER, sym); break;
+    case '<': token = match('=') ? Token(TokenType::LESS_EQUAL, "<=") : Token(TokenType::LESS, sym); break;
+
     default:
         break;
     }
@@ -91,20 +92,42 @@ Token Tokenizer::get()
 
 std::string Token::dump() const 
 {
-    switch (type) {
-    case TokenType::eof: return "EOF";
-    case TokenType::error: return "ERROR";
-    case TokenType::number: return "NUMBER: " + std::to_string(dValue);
-    case TokenType::identifier: return "IDENTIFIER: " + value;
-    case TokenType::var: return "VAR";
-    case TokenType::ret: return "RET";
-    case TokenType::assign: return "ASSIGN";
-    case TokenType::plus: return "PLUS";
-    case TokenType::minus: return "MINUS";
-    case TokenType::multiply: return "MULTIPLY";
-    case TokenType::divide: return "DIVIDE";
-    case TokenType::leftParen: return "LEFT PAREN";
-    case TokenType::rightParen: return "RIGHT PAREN";
-    default: return "UNKNOWN";
+    static const char* name[static_cast<int>(TokenType::count)] = {
+        "EOF",
+        "ERROR",
+        "NUMBER",
+        "IDENT",
+
+        "VAR",
+        "RET",
+
+        "PLUS",
+        "MINUS",
+        "MULT",
+        "DIVIDE",
+        "LEFT_PAREN",
+        "RIGHT_PAREN",
+        "LEFT_BRACE",
+        "RIGHT_BRACE",
+        "BANG",
+
+        "EQUAL",
+        "EQUAL_EQUAL",
+        "BANG_EQUAL",
+        "GREATER",
+        "GREATER_EQUAL",
+        "LESS",
+        "LESS_EQUAL",
+    };
+
+    std::string r = name[static_cast<int>(type)];
+    if (type == TokenType::NUMBER) {
+        r += ":";
+        r += std::to_string(dValue);
     }
+    else if (type == TokenType::IDENT) {
+        r += ":";
+        r += lexeme;
+    }
+    return r;
 }
