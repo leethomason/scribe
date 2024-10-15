@@ -3,34 +3,15 @@
 
 void ValueASTNode::evaluate(std::vector<Instruction>& bc, ConstPool& pool)
 {
-	REQUIRE(!left);
-	REQUIRE(!right);
-
 	uint32_t slot = pool.add(value);
 	bc.push_back(PackOpCode(OpCode::PUSH, slot));
 }
 
-void ValueASTNode::dump(int depth) const
-{
-	fmt::print("{: >{}}", "", depth * 2);
-	fmt::print("Value: {}\n", value.toString());
-}
-
-
 void IdentifierASTNode::evaluate(std::vector<Instruction>& bc, ConstPool& pool)
 {
-	REQUIRE(!left);
-	REQUIRE(!right);
-
 	uint32_t slot = pool.add(Value::String(name));
 	bc.push_back(PackOpCode(OpCode::PUSH, slot));
 	bc.push_back(PackOpCode(OpCode::LOAD));
-}
-
-void IdentifierASTNode::dump(int depth) const
-{
-	fmt::print("{: >{}}", "", depth * 2);
-	fmt::print("Identifier: {}\n", name);
 }
 
 void BinaryASTNode::evaluate(std::vector<Instruction>& bc, ConstPool& pool)
@@ -50,20 +31,3 @@ void BinaryASTNode::evaluate(std::vector<Instruction>& bc, ConstPool& pool)
 	}
 }
 
-void BinaryASTNode::dump(int depth) const
-{
-	left->dump(depth + 1);
-	right->dump(depth + 1);
-
-	std::string opName;
-	switch (type) {
-	case TokenType::PLUS: opName = "Add"; break;
-	case TokenType::MINUS: opName = "Sub"; break;
-	case TokenType::MULT: opName = "Mul"; break;
-	case TokenType::DIVIDE: opName = "Div"; break;
-	default: REQUIRE(false);
-	}
-
-	fmt::print("{: >{}}", "", depth * 2);
-	fmt::print("Binary: {}\n", opName);
-}

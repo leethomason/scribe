@@ -2,6 +2,8 @@
 #include "machine.h"
 #include "errorreporting.h"
 
+#include "astprinter.h"
+
 #include <fmt/core.h>
 #include <string>
 #include <iostream>
@@ -29,8 +31,10 @@ public:
 			}
             ErrorReporter::clear();
         }
-        else if (debugAST && root)
-            root->dump(0);
+        else if (debugAST && root) {
+            ASTPrinter printer;
+            printer.print(root);
+        }
 
         if (root) {
             std::vector<Instruction> instructions;
