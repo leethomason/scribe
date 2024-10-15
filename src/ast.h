@@ -28,8 +28,6 @@ class ASTNode {
 public:
     virtual ~ASTNode() = default;
     virtual void accept(ASTVisitor& visitor, int depth) const = 0;
-
-    virtual void evaluate(std::vector<Instruction>& bc, ConstPool& pool) = 0;
 };
 
 class ValueASTNode : public ASTNode
@@ -38,8 +36,6 @@ public:
     ValueASTNode(const Value& value) : value(value) {}
     virtual void accept(ASTVisitor& visitor, int depth) const override { visitor.visit(*this, depth);}
 
-    void evaluate(std::vector<Instruction>& bc, ConstPool& pool) override;
-  
     Value value;
 };
 
@@ -48,8 +44,6 @@ class IdentifierASTNode : public ASTNode
 public:
 	IdentifierASTNode(const std::string& name) : name(name) {}
     virtual void accept(ASTVisitor& visitor, int depth) const override { visitor.visit(*this, depth); }
-
-    void evaluate(std::vector<Instruction>& bc, ConstPool& pool) override;
 
     std::string name;
 };
@@ -66,8 +60,6 @@ public:
         right->accept(visitor, depth + 1);
         visitor.visit(*this, depth); 
     }
-
-    void evaluate(std::vector<Instruction>& bc, ConstPool& pool) override;
 
     TokenType type;
     ASTPtr left;

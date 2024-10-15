@@ -3,6 +3,7 @@
 #include "errorreporting.h"
 
 #include "astprinter.h"
+#include "bcgen.h"
 
 #include <fmt/core.h>
 #include <string>
@@ -38,7 +39,9 @@ public:
 
         if (root) {
             std::vector<Instruction> instructions;
-            root->evaluate(instructions, constPool);
+            BCGenerator bcgen(instructions, constPool);
+            bcgen.generate(*root);
+            
             if (debugBC)
                 machine.dump(instructions, constPool);
 
