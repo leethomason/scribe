@@ -2,6 +2,9 @@
 #include "machine.h"
 #include "errorreporting.h"
 
+#include "astprinter.h"
+#include "bcgen.h"
+
 #include <fmt/core.h>
 #include <string>
 #include <iostream>
@@ -13,15 +16,15 @@ class Interpreter {
 
 public:
     void interpret(std::string input) {
+        const bool debugTokens = true;
         const bool debugAST = true;
-        const bool debugBC = false;
-        const bool debugTokens = false;
+        const bool debugBC = true;
 
         Tokenizer tokenizer(input);
         tokenizer.debug = debugTokens;
-        Parser parser;
+        Parser parser(tokenizer);
 
-        ASTPtr root = parser.parse(tokenizer);
+        ASTPtr root = parser.parse();
 
         if (ErrorReporter::hasError()) {
             for(auto& report : ErrorReporter::reports()) {
@@ -29,12 +32,16 @@ public:
 			}
             ErrorReporter::clear();
         }
-        else if (debugAST && root)
-            root->dump(0);
+        else if (debugAST && root) {
+            ASTPrinter printer;
+            printer.print(root);
+        }
 
         if (root) {
             std::vector<Instruction> instructions;
-            root->evaluate(instructions, constPool);
+            BCGenerator bcgen(instructions, constPool);
+            bcgen.generate(*root);
+            
             if (debugBC)
                 machine.dump(instructions, constPool);
 
@@ -43,12 +50,14 @@ public:
                 fmt::print("Machine error: {}\n", machine.errorMessage());
             }
 
+#if true
             if (machine.stack.size()) {
                 fmt::print("Result = {}\n", machine.stack[0].toString());
             }
             else {
                 fmt::print("Stack empty.\n");
             }
+#endif
         }
         machine.stack.clear();
     }
@@ -63,7 +72,6 @@ public:
 int main() 
 {
 #if defined(_DEBUG) && defined(_WIN32)
-    // plog::init throws off memory tracking.
     _CrtMemState s1, s2, s3;
     _CrtMemCheckpoint(&s1);
 #endif

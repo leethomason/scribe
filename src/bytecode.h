@@ -27,6 +27,8 @@ enum class OpCode : uint16_t
 	PUSH_SCOPE,			// 0					0
 	POP_SCOPE,			// 0					0
 
+	PRINT,				// value				0
+
 	count,
 };
 

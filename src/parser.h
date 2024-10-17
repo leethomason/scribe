@@ -11,10 +11,20 @@
 class Parser
 {
 public:
-	ASTPtr parse(Tokenizer& tok) { return parseExpr(tok); }
+	Parser(Tokenizer& tok) : tok(tok) {}
+	ASTPtr parse() { return expression(); }
 
 private:
-	ASTPtr parsePrimaryExpr(Tokenizer& izer);
-	ASTPtr parseMulExpr(Tokenizer& izer);
-	ASTPtr parseExpr(Tokenizer& izer);
+	Tokenizer& tok;
+
+	bool check(TokenType type);
+	bool match(const std::vector<TokenType>& types, Token& matched);	
+
+	ASTPtr expression();
+	ASTPtr equality();
+	ASTPtr comparison();
+	ASTPtr term();
+	ASTPtr factor();
+	ASTPtr unary();
+	ASTPtr primary();
 };

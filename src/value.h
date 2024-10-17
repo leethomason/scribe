@@ -19,8 +19,8 @@ struct Value {
 
 	Value(const Value& rhs); // II. copy constructor
 	Value& operator=(const Value& other); // III. copy assignment
-	Value(Value&& other) noexcept; // IV. move constructor
-	Value& operator=(Value&& rhs) noexcept; // V. move assignment
+	//Value(Value&& other) noexcept; // IV. move constructor
+	//Value& operator=(Value&& rhs) noexcept; // V. move assignment
 	
 	bool operator==(const Value& rhs) const;
 	bool operator!=(const Value& rhs) const { return !(*this == rhs); }

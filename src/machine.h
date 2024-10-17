@@ -63,4 +63,5 @@ private:
 	void store();
 	void pushScope();
 	void popScope();
+	void print();
 };

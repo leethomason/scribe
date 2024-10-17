@@ -35,6 +35,7 @@ Value::~Value()
 	clear();
 }
 
+#if 0
 Value::Value(Value&& other) noexcept
 {
 	move(other);
@@ -77,6 +78,7 @@ void Value::move(Value& other)
 		break;
 	}
 }
+#endif
 
 void Value::clear()
 {
