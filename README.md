@@ -33,3 +33,33 @@ var d = a;                  // array d is a *copy* of a
 
 ### Modules
 
+var a: number[] = [1, 2, 3]
+var b: string[] = ["hello", "world"]
+
+I like the class idea - a lot:
+
+class Breakfast {
+  var eggs: number
+  var bacon: number
+  var toast: number
+  var juice: number
+
+  def total(): number {
+    return eggs + bacon + toast + juice
+  }
+}
+
+class Brunch extends Breakfast {
+  var coffee: number
+
+  def total(): number {
+    return super.total() + coffee
+  }
+}
+
+That's great! But then you need:
+
+var c: Breakfast[] = [Breakfast(), Brunch()]
+
+And that's great! But...it's not a value type. Or at 
+least a strict one.
