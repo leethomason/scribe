@@ -78,6 +78,7 @@ Token Tokenizer::get()
 
         if (t == "var") return Token(TokenType::VAR, _line);
         if (t == "return") return Token(TokenType::RET, _line);
+        if (t == "print") return Token(TokenType::PRINT, _line);
 
         Token token(TokenType::IDENT, _line, t);
         if (debug) fmt::print("{}\n", token.dump());
@@ -111,7 +112,8 @@ Token Tokenizer::get()
     return token;
 }
 
-std::string Token::dump() const 
+
+std::string Token::toString(TokenType type)
 {
     static const char* name[static_cast<int>(TokenType::count)] = {
         "EOF",
@@ -121,6 +123,7 @@ std::string Token::dump() const
 
         "VAR",
         "RET",
+        "PRINT",
 
         "PLUS",
         "MINUS",
@@ -140,8 +143,13 @@ std::string Token::dump() const
         "LESS",
         "LESS_EQUAL",
     };
+    return name[static_cast<int>(type)];
+}
 
-    std::string r = name[static_cast<int>(type)];
+std::string Token::dump() const 
+{
+    std::string r = toString(type);
+
     if (type == TokenType::NUMBER) {
         r += ":";
         r += std::to_string(dValue);

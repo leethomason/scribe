@@ -8,30 +8,31 @@ enum class TokenType {
 
     // Numbers & vars
     NUMBER,     // Number
-    IDENT, // Variable name
+    IDENT,      // Variable name
 
     // Keywords
     VAR,        // variable declaration
     RET,        // push to stack
+    PRINT,	    // print to console
 
     // Sybols & operations
     PLUS,       // '+'
     MINUS,      // '-'
-    MULT,   // '*'
+    MULT,       // '*'
     DIVIDE,     // '/'
     LEFT_PAREN,  // '('
     RIGHT_PAREN, // ')'
     LEFT_BRACE,  // '{'
     RIGHT_BRACE, // '}'
-    BANG,       // '!'
+    BANG,        // '!'
 
-    EQUAL,     // '='
-    EQUAL_EQUAL, // '=='
-    BANG_EQUAL,  // '!='
-    GREATER,     // '>'
-    GREATER_EQUAL, // '>='
-    LESS,        // '<'
-    LESS_EQUAL,  // '<='
+    EQUAL,          // '='
+    EQUAL_EQUAL,    // '=='
+    BANG_EQUAL,     // '!='
+    GREATER,        // '>'
+    GREATER_EQUAL,  // '>='
+    LESS,           // '<'
+    LESS_EQUAL,     // '<='
 
     count
 };
@@ -52,6 +53,7 @@ struct Token {
         return type >= TokenType::PLUS && type <= TokenType::DIVIDE;
     }
 
+    static std::string toString(TokenType type);
     std::string dump() const;
 };
 

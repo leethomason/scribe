@@ -222,6 +222,17 @@ void Machine::popScope()
 		localVars.end());
 }
 
+void Machine::print()
+{
+	size_t s = stack.size();
+	if (s < 1) {
+		setErrorMessage("PRINT: stack underflow");
+		return;
+	}
+	fmt::print("{}\n", stack.back().toString());
+	stack.pop_back();
+}
+
 void Machine::execute(const std::vector<Instruction>& instructions, const ConstPool& pool)
 {
 	execute(instructions.data(), static_cast<int>(instructions.size()), pool);
@@ -266,6 +277,7 @@ void Machine::execute(const Instruction* instructions, size_t n, const ConstPool
 		case OpCode::PUSH_SCOPE: pushScope(); break;
 		case OpCode::POP_SCOPE: popScope(); break;
 
+		case OpCode::PRINT: print(); break;
 
 		default:
 			setErrorMessage(fmt::format("Unknown opcode: {}", (int)opCode));

@@ -15,6 +15,16 @@ void BCGenerator::visit(const IdentifierASTNode& node, int depth)
 	bc.push_back(PackOpCode(OpCode::LOAD));
 }
 
+void BCGenerator::visit(const KeywordASTNode& node, int depth)
+{
+	(void)depth;
+	switch (node.token) {
+		case TokenType::PRINT: bc.push_back(PackOpCode(OpCode::PRINT)); break;
+	default: 
+		REQUIRE(false);
+	}
+}
+
 void BCGenerator::visit(const BinaryASTNode& node, int depth)
 {
 	(void)depth;
@@ -31,6 +41,22 @@ void BCGenerator::visit(const BinaryASTNode& node, int depth)
 	case TokenType::DIVIDE: bc.push_back(PackOpCode(OpCode::DIV)); break;
 	default: REQUIRE(false);
 	}
+}
+
+void BCGenerator::visit(const UnaryASTNode& node, int depth)
+{
+	(void)depth;
+
+	// These are alreaded 'visited' 
+	REQUIRE(node.right);
+
+	// So we just need to ad the operation.
+//	switch (node.type) {
+//	case TokenType::MINUS: bc.push_back(PackOpCode(OpCode::NEG)); break;
+//	case TokenType::BANG: bc.push_back(PackOpCode(OpCode::NOT)); break;
+//	default: REQUIRE(false);
+//	}
+	assert(false);
 }
 
 void BCGenerator::generate(const ASTNode& node)
