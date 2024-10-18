@@ -51,10 +51,10 @@ void Machine::binaryNumberOp(OpCode opCode)
 
 	switch (opCode)
 	{
-	case OpCode::ADD:	stack.push_back(Value::Number(lhs + rhs));	break;
-	case OpCode::SUB:	stack.push_back(Value::Number(lhs - rhs));	break;
-	case OpCode::MUL:	stack.push_back(Value::Number(lhs * rhs));	break;
-	case OpCode::DIV:	stack.push_back(Value::Number(lhs / rhs));	break;
+	case OpCode::ADD:	stack.push_back(Value(lhs + rhs));	break;
+	case OpCode::SUB:	stack.push_back(Value(lhs - rhs));	break;
+	case OpCode::MUL:	stack.push_back(Value(lhs * rhs));	break;
+	case OpCode::DIV:	stack.push_back(Value(lhs / rhs));	break;
 	default:
 		setErrorMessage(fmt::format("Unknown opcode when doing binary number operation: {}", (int)opCode));
 	}

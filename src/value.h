@@ -1,5 +1,7 @@
 #pragma once
 
+#include "error.h"
+
 #include <string>
 #include <vector>
 #include <map>
@@ -25,21 +27,16 @@ struct Value {
 	bool operator==(const Value& rhs) const;
 	bool operator!=(const Value& rhs) const { return !(*this == rhs); }
 
+	explicit Value(double v) : type(Type::tNumber), vNumber(v) {}
+	explicit Value(const std::string& v) : type(Type::tString) {
+		vString = new std::string(v);
+	}
+	// Why is boolean casting so weird?
+	explicit Value(Type t, bool v) : type(Type::tBoolean), vBoolean(v) {
+		REQUIRE(t == Type::tBoolean);
+	}
+
 	std::string toString() const;
-
-	static Value Number(double a) {
-		Value v;
-		v.type = Type::tNumber;
-		v.vNumber = a;
-		return v;
-	}
-
-	static Value String(const std::string& a) {
-		Value v;
-		v.type = Type::tString;
-		v.vString = new std::string(a);
-		return v;
-	}
 
 	Type type;
 	union {
@@ -53,5 +50,5 @@ struct Value {
 private:
 	void clear();
 	void copy(const Value& rhs);
-	void move(Value& other);
+	//void move(Value& other);
 };

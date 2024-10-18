@@ -21,8 +21,8 @@
 void OnePlusTwoIsThree()
 {
 	ConstPool pool;
-	const uint32_t one = pool.add(Value::Number(1.0));
-	const uint32_t two = pool.add(Value::Number(2.0));
+	const uint32_t one = pool.add(Value(1.0));
+	const uint32_t two = pool.add(Value(2.0));
 
 	Machine machine;
 	std::vector<Instruction> instructions = {
@@ -44,8 +44,8 @@ void OneMinusTwoIsNegativeOne()
 	ConstPool pool;
 	Machine machine;
 
-	const uint32_t one = pool.add(Value::Number(1.0));
-	const uint32_t two = pool.add(Value::Number(2.0));
+	const uint32_t one = pool.add(Value(1.0));
+	const uint32_t two = pool.add(Value(2.0));
 
 	std::vector<Instruction> instructions = {
 		PackOpCode(OpCode::PUSH, one ),		// lhs
@@ -66,9 +66,9 @@ void OnePlusTwoTimesThreeIsNine()
 	ConstPool pool;
 	Machine machine;
 
-	const uint32_t one = pool.add(Value::Number(1.0));
-	const uint32_t two = pool.add(Value::Number(2.0));
-	const uint32_t three = pool.add(Value::Number(3.0));
+	const uint32_t one = pool.add(Value(1.0));
+	const uint32_t two = pool.add(Value(2.0));
+	const uint32_t three = pool.add(Value(3.0));
 
 	std::vector<Instruction> instructions = {
 		PackOpCode(OpCode::PUSH, one),		// lhs
@@ -89,9 +89,9 @@ void OnePlusTwoTimesThreeIsNine()
 void OnePlusTwoDivThreeIsOne()
 {
 	ConstPool pool;
-	const uint32_t one = pool.add(Value::Number(1.0));
-	const uint32_t two = pool.add(Value::Number(2.0));
-	const uint32_t three = pool.add(Value::Number(3.0));
+	const uint32_t one = pool.add(Value(1.0));
+	const uint32_t two = pool.add(Value(2.0));
+	const uint32_t three = pool.add(Value(3.0));
 
 	Machine machine;
 	std::vector<Instruction> instructions = {
@@ -117,10 +117,10 @@ void XPlusYIsThree(OpCode def)
 	ConstPool pool;
 	Machine machine;
 
-	const uint32_t x = pool.add(Value::String("x"));
-	const uint32_t y = pool.add(Value::String("y"));
-	const uint32_t one = pool.add(Value::Number(1.0));
-	const uint32_t two = pool.add(Value::Number(2.0));
+	const uint32_t x = pool.add(Value("x"));
+	const uint32_t y = pool.add(Value("y"));
+	const uint32_t one = pool.add(Value(1.0));
+	const uint32_t two = pool.add(Value(2.0));
 
 	REQUIRE(def == OpCode::DEFINE_GLOBAL || def == OpCode::DEFINE_LOCAL);
 
@@ -152,19 +152,6 @@ void XPlusYIsThree(OpCode def)
 	TEST(machine.stack[0].type == Type::tNumber);
 	TEST_FP(machine.stack[0].vNumber, 3.0);
 }
-
-// a = "Hello";
-// a += " World";
-
-// a = true/false
-// x = 0
-// if (a) 
-//   x = 1
-// else
-//   x = 2
-
-// a = [1, 2, 3]
-// a[1]
 
 void Machine::test()
 {

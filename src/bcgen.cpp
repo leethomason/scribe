@@ -10,7 +10,7 @@ void BCGenerator::visit(const ValueASTNode& node, int depth)
 void BCGenerator::visit(const IdentifierASTNode& node, int depth)
 {
 	(void)depth;
-	uint32_t slot = pool.add(Value::String(node.name));
+	uint32_t slot = pool.add(Value(node.name));
 	bc.push_back(PackOpCode(OpCode::PUSH, slot));
 	bc.push_back(PackOpCode(OpCode::LOAD));
 }

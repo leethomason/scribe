@@ -1,4 +1,5 @@
 #include "token.h"
+#include "errorreporting.h"
 
 #include <fmt/core.h>
 
@@ -66,7 +67,34 @@ Token Tokenizer::get()
         }
     }
 
-    // Identifier or Keyword
+    // String
+    static const char SINGLE = '\'';
+    static const char DOUBLE = '"';
+
+    // FIXME: handle multi-line strings
+    if (c == SINGLE || c == DOUBLE) {
+		std::string t;
+		_pos++;
+		while (_pos < _input.size() && _input[_pos] != c) {
+            char ch = _input[_pos];
+            if (ch == '\r' || ch == '\n')
+                break;
+
+            t += ch;
+			_pos++;
+		}
+        if (_input[_pos] != c) {
+            ErrorReporter::report("fixme", _line, "Unterminated string");
+			return Token(TokenType::error, _line);
+        }
+
+		_pos++;
+		Token token(TokenType::STRING, _line, t);
+		if (debug) fmt::print("{}\n", token.dump());
+		return token;
+	}
+
+    // Identifier or Keyword or Boolean
     if (isAlpha(c)) {
         std::string t;
         t += c;
@@ -79,6 +107,8 @@ Token Tokenizer::get()
         if (t == "var") return Token(TokenType::VAR, _line);
         if (t == "return") return Token(TokenType::RET, _line);
         if (t == "print") return Token(TokenType::PRINT, _line);
+        if (t == "true") return Token(TokenType::TRUE, _line);
+        if (t == "false") return Token(TokenType::FALSE, _line);
 
         Token token(TokenType::IDENT, _line, t);
         if (debug) fmt::print("{}\n", token.dump());
@@ -106,7 +136,8 @@ Token Tokenizer::get()
     case '<': token = match('=') ? Token(TokenType::LESS_EQUAL, _line, "<=") : Token(TokenType::LESS, _line, sym); break;
 
     default:
-        break;
+        ErrorReporter::report("fixme", _line, fmt::format("Unexpected character: {}", c));
+        return Token();
     }
     if (debug) fmt::print("{}\n", token.dump());
     return token;
@@ -119,6 +150,9 @@ std::string Token::toString(TokenType type)
         "EOF",
         "ERROR",
         "NUMBER",
+        "STRING",
+        "TRUE",
+        "FALSE",
         "IDENT",
 
         "VAR",

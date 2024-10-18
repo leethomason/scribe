@@ -11,6 +11,10 @@ public:
         std::string message;
     };
 
+    static void reportSyntax(const std::string& file, int line, const std::string& message) {
+        report(file, line, message);
+	}
+
     static void report(const std::string& file, int line, const std::string& message) {
         m_reports.push_back({file, line, message});
     }

@@ -8,6 +8,9 @@ enum class TokenType {
 
     // Numbers & vars
     NUMBER,     // Number
+    STRING,
+    TRUE,
+    FALSE,
     IDENT,      // Variable name
 
     // Keywords

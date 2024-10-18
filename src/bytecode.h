@@ -19,6 +19,8 @@ enum class OpCode : uint16_t
 	MUL,
 	DIV,
 
+
+
 	// There isn't really a global, just a top-level scope. And that top-level scope is per file.
 	DEFINE_GLOBAL,		// key, init-value		0 (global)
 	DEFINE_LOCAL,		// key, init-value		0 (local to current scope depth)
@@ -52,7 +54,7 @@ struct ConstPool
 {
 	ConstPool() {
 		// Useful, and this way there is always a 0 index.
-		values.push_back(Value::Number(0.0));
+		values.push_back(Value(0.0));
 	}
 
 	std::vector<Value> values;

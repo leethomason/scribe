@@ -7,14 +7,6 @@
 #include <assert.h>
 #include <stdint.h>
 
-// Types:
-// - number
-// - string
-// - boolean
-// - array
-// - map
-
-
 // The virtual machine.
 // Given a stack of instructions, executes them.
 class Machine
