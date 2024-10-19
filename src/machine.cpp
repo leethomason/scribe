@@ -60,6 +60,11 @@ void Machine::binaryNumberOp(OpCode opCode)
 	}
 }
 
+void Machine::negate()
+{
+
+}
+
 void Machine::defineGlobal()
 {
 	size_t s = stack.size();
@@ -264,6 +269,11 @@ void Machine::execute(const Instruction* instructions, size_t n, const ConstPool
 			binaryNumberOp(opCode);
 			break;
 		}
+
+		case OpCode::NEGATE:
+		case OpCode::NOT:
+			unaryOp(opCode);
+			break;;
 
 		case OpCode::DEFINE_GLOBAL: defineGlobal(); break;
 		case OpCode::DEFINE_LOCAL: defineLocal(); break;

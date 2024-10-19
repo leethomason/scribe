@@ -51,11 +51,11 @@ void BCGenerator::visit(const UnaryASTNode& node, int depth)
 	REQUIRE(node.right);
 
 	// So we just need to ad the operation.
-//	switch (node.type) {
-//	case TokenType::MINUS: bc.push_back(PackOpCode(OpCode::NEG)); break;
-//	case TokenType::BANG: bc.push_back(PackOpCode(OpCode::NOT)); break;
-//	default: REQUIRE(false);
-//	}
+	switch (node.type) {
+	case TokenType::MINUS: bc.push_back(PackOpCode(OpCode::NEGATE)); break;
+	case TokenType::BANG: bc.push_back(PackOpCode(OpCode::NOT)); break;
+	default: REQUIRE(false);
+	}
 	assert(false);
 }
 

@@ -19,7 +19,8 @@ enum class OpCode : uint16_t
 	MUL,
 	DIV,
 
-
+	NEGATE,				// 1					result (-x)
+	NOT,				// 1					bool result (true or false)
 
 	// There isn't really a global, just a top-level scope. And that top-level scope is per file.
 	DEFINE_GLOBAL,		// key, init-value		0 (global)
