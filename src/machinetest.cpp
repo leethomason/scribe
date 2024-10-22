@@ -153,6 +153,27 @@ void XPlusYIsThree(OpCode def)
 	TEST_FP(machine.stack[0].vNumber, 3.0);
 }
 
+static void CatHelloWorld()
+{
+	ConstPool pool;
+	Machine machine;
+
+	const uint32_t hello = pool.add(Value::String("Hello"));
+	const uint32_t world = pool.add(Value::String(", World"));
+
+	std::vector<Instruction> instructions = {
+		PackOpCode(OpCode::PUSH, hello),
+		PackOpCode(OpCode::PUSH, world),
+		PackOpCode(OpCode::ADD),
+	};
+	machine.execute(instructions, pool);
+
+	TEST(machine.hasError() == false);
+	TEST(machine.stack.size() == 1);
+	TEST(machine.stack[0].type == Type::tString);
+	TEST(machine.stack[0].vString->compare("Hello, World") == 0);
+}
+
 void Machine::test()
 {
 	RUN_TEST(OnePlusTwoIsThree());
@@ -161,4 +182,5 @@ void Machine::test()
 	RUN_TEST(OnePlusTwoDivThreeIsOne());
 	RUN_TEST(XPlusYIsThree(OpCode::DEFINE_GLOBAL));
 	RUN_TEST(XPlusYIsThree(OpCode::DEFINE_LOCAL));
+	RUN_TEST(CatHelloWorld());
 }
