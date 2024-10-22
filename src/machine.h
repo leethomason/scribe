@@ -49,6 +49,8 @@ private:
 	//        The trick is how to handle the ConstPool - it's currently passed in to execute(),
 	//        but individual ops need it.
 	void binaryNumberOp(OpCode opCode);
+	void negate();
+	void negative();
 	void defineGlobal();
 	void defineLocal();
 	void load();
