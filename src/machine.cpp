@@ -23,46 +23,83 @@ Machine::Machine()
 {
 }
 
-bool Machine::verifyBinaryNumberOp(const char* op)
+bool Machine::verifyUnderflow(const std::string& ctx, int n)
 {
-	if (stack.size() < 2) {
-		setErrorMessage(fmt::format("{}: stack underflow", op));
-		return false;
-	}
-	if (stack.back().type != Type::tNumber) {
-		setErrorMessage(fmt::format("{}: expected 'number' at stack -1", op));
-		return false;
-	}
-	if (stack[stack.size() - 2].type != Type::tNumber) {
-		setErrorMessage(fmt::format("{}: expected 'number' at stack -2", op));
+	if (stack.size() < n) {
+		setErrorMessage(fmt::format("{}: stack underflow", ctx));
 		return false;
 	}
 	return true;
 }
 
-void Machine::binaryNumberOp(OpCode opCode)
+bool Machine::verifyTypes(const std::string& ctx, const std::vector<Type>& types)
 {
-	if (!verifyBinaryNumberOp(gOpCodeNames[(int)opCode])) return;
+	REQUIRE(types.size() > 0);
 
-	double rhs = stack.back().vNumber;
-	stack.pop_back();
-	double lhs = stack.back().vNumber;
-	stack.pop_back();
+	if (!verifyUnderflow(ctx, (int)types.size())) return false;
+	for (size_t i = 0; i < types.size(); i++) {
+		Type type = stack[stack.size() - i - 1].type;
+		if (type != types[i]) {
+			setErrorMessage(fmt::format("{}: expected '{}' at stack -{}", ctx, TypeName(type), i+1));
+			return false;
+		}
+	}
+	return true;
+}
 
-	switch (opCode)
-	{
-	case OpCode::ADD:	stack.push_back(Value(lhs + rhs));	break;
-	case OpCode::SUB:	stack.push_back(Value(lhs - rhs));	break;
-	case OpCode::MUL:	stack.push_back(Value(lhs * rhs));	break;
-	case OpCode::DIV:	stack.push_back(Value(lhs / rhs));	break;
-	default:
-		setErrorMessage(fmt::format("Unknown opcode when doing binary number operation: {}", (int)opCode));
+void Machine::popStack(int n)
+{
+	REQUIRE(n >= 0);
+	REQUIRE(stack.size() >= n);
+	stack.resize(stack.size() - n);
+}
+
+void Machine::binaryOp(OpCode opCode)
+{
+	bool stringAdd = stack.size() > 1 && stack.back().type == Type::tString;
+	if (stringAdd) {
+		if (!verifyTypes("ADD concat", {Type::tString, Type::tString})) return;
+
+		const std::string& lhs = *stack[stack.size() - 2].vString;
+		const std::string& rhs = *stack.back().vString;
+		std::string result = lhs + rhs;
+		popStack(2);
+		stack.push_back(Value::String(result));
+	}
+	else {
+		if (!verifyTypes(gOpCodeNames[(int)opCode], {Type::tNumber, Type::tNumber})) return;
+
+		double rhs = stack.back().vNumber;
+		popStack();
+		double lhs = stack.back().vNumber;
+		popStack();
+
+		switch (opCode)
+		{
+		case OpCode::ADD:	stack.push_back(Value::Number(lhs + rhs));	break;
+		case OpCode::SUB:	stack.push_back(Value::Number(lhs - rhs));	break;
+		case OpCode::MUL:	stack.push_back(Value::Number(lhs * rhs));	break;
+		case OpCode::DIV:	stack.push_back(Value::Number(lhs / rhs));	break;
+		default:
+			setErrorMessage(fmt::format("Unknown opcode when doing binary number operation: {}", (int)opCode));
+		}
 	}
 }
 
-void Machine::negate()
+void Machine::negative()
 {
+	if (!verifyTypes("NEGATE", {Type::tNumber})) return;
+	double x = stack.back().vNumber;
+	popStack(1);
+	stack.push_back(Value::Number(-x));
+}
 
+void Machine::notOp()
+{
+	if (!verifyUnderflow("NOT", 1)) return;
+	bool x = stack.back().isTruthy();
+	popStack(1);
+	stack.push_back(Value::Boolean(!x));
 }
 
 void Machine::defineGlobal()
@@ -84,8 +121,7 @@ void Machine::defineGlobal()
 
 	std::string key = std::move(*(stack[s - 2].vString));
 	Value v = std::move(stack[s - 1]);
-	stack.pop_back();
-	stack.pop_back();
+	popStack(2);
 
 	if (globalVars.find(key) != globalVars.end()) {
 		setErrorMessage(fmt::format("DEFINE_GLOBAL: key '{}' already exists", key));
@@ -113,8 +149,7 @@ void Machine::defineLocal()
 
 	std::string key = std::move(*(stack[s - 2].vString));
 	Value v = std::move(stack[s - 1]);
-	stack.pop_back();
-	stack.pop_back();
+	popStack(2);
 
 	const auto it = std::find_if(localVars.begin(), localVars.end(), [&](const LocalVar& lv) {
 		return lv.key == key; 
@@ -142,7 +177,7 @@ void Machine::load()
 		return;
 	}
 	std::string key = std::move(*(stack[s - 1].vString));
-	stack.pop_back();
+	popStack();
 
 	const auto localIt = std::find_if(localVars.begin(), localVars.end(), [&](const LocalVar& lv) {
 		return lv.key == key;
@@ -181,8 +216,7 @@ void Machine::store()
 	}
 	std::string key = std::move(*(stack[s - 2].vString));
 	Value v = std::move(stack[s - 1]);
-	stack.pop_back();
-	stack.pop_back();
+	popStack(2);
 
 	const auto localIt = std::find_if(localVars.begin(), localVars.end(), [&](const LocalVar& lv) {
 		return lv.key == key;
@@ -235,7 +269,7 @@ void Machine::print()
 		return;
 	}
 	fmt::print("{}\n", stack.back().toString());
-	stack.pop_back();
+	popStack();
 }
 
 void Machine::execute(const std::vector<Instruction>& instructions, const ConstPool& pool)
@@ -259,30 +293,23 @@ void Machine::execute(const Instruction* instructions, size_t n, const ConstPool
 			stack.push_back(pool.get(index));
 			break;
 		case OpCode::POP:
-			stack.pop_back();
+			popStack();
 			break;
 		case OpCode::ADD:
 		case OpCode::SUB:
 		case OpCode::MUL:
 		case OpCode::DIV:
 		{
-			binaryNumberOp(opCode);
+			binaryOp(opCode);
 			break;
 		}
 
-		case OpCode::NEGATE:
-		case OpCode::NOT:
-			unaryOp(opCode);
-			break;;
-
+		case OpCode::NEGATE: notOp(); break;
+		case OpCode::NOT: negative(); break;
 		case OpCode::DEFINE_GLOBAL: defineGlobal(); break;
 		case OpCode::DEFINE_LOCAL: defineLocal(); break;
-		case OpCode::LOAD: 
-			load(); 
-			break;
-		case OpCode::STORE: 
-			store(); 
-			break;
+		case OpCode::LOAD: load(); break;
+		case OpCode::STORE: store(); break;
 
 		case OpCode::PUSH_SCOPE: pushScope(); break;
 		case OpCode::POP_SCOPE: popScope(); break;

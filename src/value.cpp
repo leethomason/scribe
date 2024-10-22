@@ -3,6 +3,21 @@
 #include <fmt/core.h>
 #include <assert.h>
 
+const char* TypeName(Type t)
+{
+	REQUIRE((int)t >= 0 && (int)t < (int)Type::count);
+
+	static const char* names[] = {
+		"none",
+		"number",
+		"string",
+		"boolean",
+		"array",
+		"map",
+	};
+	return names[static_cast<int>(t)];
+}
+
 Value::Value(const Value& rhs) : type(Type::tNone)
 {
 	copy(rhs);
@@ -141,3 +156,22 @@ std::string Value::toString() const
 	return "";
 }
 
+bool Value::isTruthy() const
+{
+	switch (type) {
+	case Type::tNone:
+		return false;
+	case Type::tNumber:
+		return vNumber != 0;
+	case Type::tBoolean:
+		return vBoolean;
+	case Type::tString:
+		return !vString->empty();
+	case Type::tArray:
+		return !vArray->empty();
+	case Type::tMap:
+		return !vMap->empty();
+	}
+	REQUIRE(false);
+	return false;
+}

@@ -42,15 +42,18 @@ private:
 		error = message; 
 	}
 
-	bool verifyBinaryNumberOp(const char* op);
+	bool verifyUnderflow(const std::string& ctx, int n);
+	bool verifyTypes(const std::string& ctx, const std::vector<Type>& types);	// checks underflow as well
+
+	void popStack(int n = 1);
 
 	// Stack operations.
 	// FIXME: these should be public so the machine can be operated programmatically.
 	//        The trick is how to handle the ConstPool - it's currently passed in to execute(),
 	//        but individual ops need it.
-	void binaryNumberOp(OpCode opCode);
-	void negate();
+	void binaryOp(OpCode opCode);
 	void negative();
+	void notOp();
 	void defineGlobal();
 	void defineLocal();
 	void load();

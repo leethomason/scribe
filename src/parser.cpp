@@ -103,15 +103,15 @@ ASTPtr Parser::primary()
 	Token t = tok.get();
 	switch(t.type) {
 		case TokenType::NUMBER:
-			return std::make_shared<ValueASTNode>(Value(t.dValue));
+			return std::make_shared<ValueASTNode>(Value::Number(t.dValue));
 		case TokenType::STRING:
-			return std::make_shared<ValueASTNode>(Value(t.lexeme));
+			return std::make_shared<ValueASTNode>(Value::String(t.lexeme));
 		case TokenType::IDENT:
 			return std::make_shared<IdentifierASTNode>(t.lexeme);
 		case TokenType::TRUE:	
-			return std::make_shared<ValueASTNode>(Value(true));
+			return std::make_shared<ValueASTNode>(Value::Boolean(true));
 		case TokenType::FALSE:
-			return std::make_shared<ValueASTNode>(Value(false));
+			return std::make_shared<ValueASTNode>(Value::Boolean(false));
 
 		case TokenType::LEFT_PAREN:
 		{

@@ -13,7 +13,10 @@ enum class Type {
 	tBoolean,
 	tArray,
 	tMap,
+	count
 };
+
+const char* TypeName(Type t);
 
 struct Value {
 	Value() : type(Type::tNone), vNumber(0) {}
@@ -27,16 +30,24 @@ struct Value {
 	bool operator==(const Value& rhs) const;
 	bool operator!=(const Value& rhs) const { return !(*this == rhs); }
 
-	explicit Value(double v) : type(Type::tNumber), vNumber(v) {}
-	explicit Value(const std::string& v) : type(Type::tString) {
-		vString = new std::string(v);
+	// Fooling around with overloaded constructors (especially bool)
+	// is a mess. Use constructor functions.
+
+	static Value Number(double v) {
+		Value val; val.type = Type::tNumber; val.vNumber = v; return val;
 	}
-	// Why is boolean casting so weird?
-	explicit Value(Type t, bool v) : type(Type::tBoolean), vBoolean(v) {
-		REQUIRE(t == Type::tBoolean);
+	static Value String(const std::string& v) {
+		Value val; val.type = Type::tString; val.vString = new std::string(v); return val;
+	}
+	static Value Boolean(bool v) {
+		Value val; val.type = Type::tBoolean; val.vBoolean = v; return val;
 	}
 
 	std::string toString() const;
+
+	// Ooh boy. This is always up to debate.
+	bool isTruthy() const;
+	bool isFalsey() const { return !isTruthy(); }
 
 	Type type;
 	union {

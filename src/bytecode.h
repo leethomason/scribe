@@ -55,7 +55,7 @@ struct ConstPool
 {
 	ConstPool() {
 		// Useful, and this way there is always a 0 index.
-		values.push_back(Value(0.0));
+		values.push_back(Value::Number(0.0));
 	}
 
 	std::vector<Value> values;
