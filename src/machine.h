@@ -47,11 +47,21 @@ private:
 
 	void popStack(int n = 1);
 
+	// Warning: unchecked!
+	Value& getStack(int i) { 
+		assert(i > 0 && i <= stack.size());
+		return stack[stack.size() - i]; 
+	}
+
 	// Stack operations.
 	// FIXME: these should be public so the machine can be operated programmatically.
 	//        The trick is how to handle the ConstPool - it's currently passed in to execute(),
 	//        but individual ops need it.
 	void binaryOp(OpCode opCode);
+
+	void equal(OpCode op);			// any type
+	void compare(OpCode opCode);	// numbers only
+
 	void negative();
 	void notOp();
 	void defineGlobal();

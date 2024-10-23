@@ -38,7 +38,7 @@ bool Machine::verifyTypes(const std::string& ctx, const std::vector<Type>& types
 
 	if (!verifyUnderflow(ctx, (int)types.size())) return false;
 	for (size_t i = 0; i < types.size(); i++) {
-		Type type = stack[stack.size() - i - 1].type;
+		Type type = getStack(1).type;
 		if (type != types[i]) {
 			setErrorMessage(fmt::format("{}: expected '{}' at stack -{}", ctx, TypeName(type), i+1));
 			return false;
@@ -60,8 +60,8 @@ void Machine::binaryOp(OpCode opCode)
 	if (stringAdd) {
 		if (!verifyTypes("ADD concat", {Type::tString, Type::tString})) return;
 
-		const std::string& lhs = *stack[stack.size() - 2].vString;
-		const std::string& rhs = *stack.back().vString;
+		const std::string& lhs = *getStack(2).vString;
+		const std::string& rhs = *getStack(1).vString;
 		std::string result = lhs + rhs;
 		popStack(2);
 		stack.push_back(Value::String(result));
@@ -84,6 +84,47 @@ void Machine::binaryOp(OpCode opCode)
 			setErrorMessage(fmt::format("Unknown opcode when doing binary number operation: {}", (int)opCode));
 		}
 	}
+}
+
+void Machine::equal(OpCode op)
+{
+	REQUIRE(op == OpCode::EQUAL || op == OpCode::NOT_EQUAL);
+	const std::string& opName = op == OpCode::EQUAL ? "EQUAL" : "NOT_EQUAL";
+	if (!verifyUnderflow(opName, 2)) return;
+	const Value& rhs = getStack(1);
+	const Value& lhs = getStack(2);
+	if (rhs.type != lhs.type) {
+		setErrorMessage(fmt::format("{}: type mismatch: {} != {}", opName, TypeName(lhs.type), TypeName(rhs.type)));
+		return;
+	}
+	bool result = rhs == lhs;
+	if (op == OpCode::NOT_EQUAL) result = !result;
+
+	popStack(2);
+	stack.push_back(Value::Boolean(result));
+}
+
+void Machine::compare(OpCode opCode)
+{
+	REQUIRE(opCode == OpCode::LESS || opCode == OpCode::LESS_EQUAL || opCode == OpCode::GREATER || opCode == OpCode::GREATER_EQUAL);
+	const std::string& opName = gOpCodeNames[(int)opCode];
+	if (!verifyTypes(opName, { Type::tNumber, Type::tNumber })) return;
+
+	double rhs = getStack(1).vNumber;
+	double lhs = getStack(2).vNumber;
+	popStack(2);
+
+	bool result = false;
+	switch (opCode)
+	{
+	case OpCode::LESS:			result = lhs < rhs; break;
+	case OpCode::LESS_EQUAL:	result = lhs <= rhs; break;
+	case OpCode::GREATER:		result = lhs > rhs; break;
+	case OpCode::GREATER_EQUAL:	result = lhs >= rhs; break;
+	default:
+		setErrorMessage(fmt::format("Unknown opcode when doing comparison: {}", (int)opCode));
+	}
+	stack.push_back(Value::Boolean(result));
 }
 
 void Machine::negative()
@@ -110,17 +151,17 @@ void Machine::defineGlobal()
 		return;
 	}
 
-	if (stack[s - 2].type != Type::tString) {
+	if (getStack(2).type != Type::tString) {
 		setErrorMessage("DEFINE_GLOBAL: expected 'string' at stack -2");
 		return;
 	}
-	if (stack[s - 1].type == Type::tNone) {
+	if (getStack(1).type == Type::tNone) {
 		setErrorMessage("DEFINE_GLOBAL: expected value at stack -1");
 		return;
 	}
 
-	std::string key = std::move(*(stack[s - 2].vString));
-	Value v = std::move(stack[s - 1]);
+	std::string key = std::move(*(getStack(2).vString));
+	Value v = std::move(getStack(1));
 	popStack(2);
 
 	if (globalVars.find(key) != globalVars.end()) {
@@ -138,17 +179,17 @@ void Machine::defineLocal()
 		setErrorMessage("DEFINE_LOCAL: stack underflow");
 		return;
 	}
-	if (stack[s - 2].type != Type::tString) {
+	if (getStack(2).type != Type::tString) {
 		setErrorMessage("DEFINE_LOCAL: expected 'string' at stack -2");
 		return;
 	}
-	if (stack[s - 1].type == Type::tNone) {
+	if (getStack(1).type == Type::tNone) {
 		setErrorMessage("DEFINE_LOCAL: expected value at stack -1");
 		return;
 	}
 
-	std::string key = std::move(*(stack[s - 2].vString));
-	Value v = std::move(stack[s - 1]);
+	std::string key = std::move(*(getStack(2).vString));
+	Value v = getStack(1);
 	popStack(2);
 
 	const auto it = std::find_if(localVars.begin(), localVars.end(), [&](const LocalVar& lv) {
@@ -172,11 +213,11 @@ void Machine::load()
 		setErrorMessage("LOAD: stack underflow");
 		return;
 	}
-	if (stack[s - 1].type != Type::tString) {
+	if (getStack(1).type != Type::tString) {
 		setErrorMessage("LOAD: expected 'string' at stack -1");
 		return;
 	}
-	std::string key = std::move(*(stack[s - 1].vString));
+	std::string key = std::move(*(getStack(1).vString));
 	popStack();
 
 	const auto localIt = std::find_if(localVars.begin(), localVars.end(), [&](const LocalVar& lv) {
@@ -206,16 +247,16 @@ void Machine::store()
 		setErrorMessage("STORE: stack underflow");
 		return;
 	}
-	if (stack[s - 2].type != Type::tString) {
+	if (getStack(2).type != Type::tString) {
 		setErrorMessage("STORE: expected 'string' at stack -2");
 		return;
 	}
-	if (stack[s - 1].type == Type::tNone) {
+	if (getStack(1).type == Type::tNone) {
 		setErrorMessage("STORE: expected value at stack -1");
 		return;
 	}
-	std::string key = std::move(*(stack[s - 2].vString));
-	Value v = std::move(stack[s - 1]);
+	std::string key = std::move(*(getStack(2).vString));
+	Value v = std::move(getStack(1));
 	popStack(2);
 
 	const auto localIt = std::find_if(localVars.begin(), localVars.end(), [&](const LocalVar& lv) {
@@ -304,8 +345,8 @@ void Machine::execute(const Instruction* instructions, size_t n, const ConstPool
 			break;
 		}
 
-		case OpCode::NEGATE: notOp(); break;
-		case OpCode::NOT: negative(); break;
+		case OpCode::NOT: notOp(); break;
+		case OpCode::NEGATE: negative(); break;
 		case OpCode::DEFINE_GLOBAL: defineGlobal(); break;
 		case OpCode::DEFINE_LOCAL: defineLocal(); break;
 		case OpCode::LOAD: load(); break;

@@ -22,6 +22,13 @@ enum class OpCode : uint16_t
 	NEGATE,				// 1					result (-x)
 	NOT,				// 1					bool result (true or false)
 
+	EQUAL,
+	NOT_EQUAL,
+	LESS,
+	LESS_EQUAL,
+	GREATER,
+	GREATER_EQUAL,
+
 	// There isn't really a global, just a top-level scope. And that top-level scope is per file.
 	DEFINE_GLOBAL,		// key, init-value		0 (global)
 	DEFINE_LOCAL,		// key, init-value		0 (local to current scope depth)
@@ -71,6 +78,7 @@ struct ConstPool
 	}
 
 	const Value& get(uint32_t index) const {
+		// FIXME: should be runtime error
 		REQUIRE(index < values.size());
 		return values[index];
 	}

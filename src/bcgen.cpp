@@ -56,7 +56,6 @@ void BCGenerator::visit(const UnaryASTNode& node, int depth)
 	case TokenType::BANG: bc.push_back(PackOpCode(OpCode::NOT)); break;
 	default: REQUIRE(false);
 	}
-	assert(false);
 }
 
 void BCGenerator::generate(const ASTNode& node)
