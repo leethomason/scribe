@@ -5,7 +5,14 @@
 /*
 	Issues: 
 		* handling EOL (no semicolon)
+		* ternary! ternary is good.
+		
 
+	program -> statement*
+	statement ->   exprStmt 
+				 | printStmt
+	eprStmt -> expr
+	printStmt -> "print" expr
 	expr -> equality
 	equality -> comparison ( ( "==" | "!=" ) comparison )*
 	comparison -> term ( ( ">" | ">=" | "<" | "<=" ) term )*
@@ -15,6 +22,19 @@
 	primary -> NUMBER | STRING | identifier | "true" | "false" | "(" expr ")"
 */
 
+/*
+std::vector<ASTPtr>  Parser::parseStmts()
+{
+	std::vector<ASTPtr> stmts;
+	while (!tok.done()) {
+		ASTPtr stmt = statement();
+		if (stmt) {
+			stmts.push_back(stmt);
+		}
+	}
+	return stmts;
+}
+*/
 bool Parser::check(TokenType type) 
 {
 	if (tok.peek().type == type) {
@@ -37,68 +57,68 @@ bool Parser::match(const std::vector<TokenType>& types, Token& t)
 }
 
 
-ASTPtr Parser::expression()
+ASTExprPtr Parser::expression()
 {
 	return equality();
 }
 
-ASTPtr Parser::equality()
+ASTExprPtr Parser::equality()
 {
-	ASTPtr expr = comparison();
+	ASTExprPtr expr = comparison();
 	Token t;
 	while(match({TokenType::EQUAL_EQUAL, TokenType::BANG_EQUAL}, t)) {
-		ASTPtr right = comparison();
+		ASTExprPtr right = comparison();
 		expr = std::make_shared<BinaryASTNode>(t.type, expr, right);
 	}
 	return expr;
 }
 
-ASTPtr Parser::comparison()
+ASTExprPtr Parser::comparison()
 {
-	ASTPtr expr = term();
+	ASTExprPtr expr = term();
 	Token t;
 	while (match({TokenType::GREATER, TokenType::GREATER_EQUAL, TokenType::LESS, TokenType::LESS_EQUAL}, t)) {
-		ASTPtr right = term();
+		ASTExprPtr right = term();
 		expr = std::make_shared<BinaryASTNode>(t.type, expr, right);
 	}
 	return expr;
 }
 
-ASTPtr Parser::term()
+ASTExprPtr Parser::term()
 {
-	ASTPtr expr = factor();
+	ASTExprPtr expr = factor();
 	Token t;
 	while (match({TokenType::PLUS, TokenType::MINUS}, t)) {
-		ASTPtr right = factor();
+		ASTExprPtr right = factor();
 		expr = std::make_shared<BinaryASTNode>(t.type, expr, right);
 	}
 	return expr;
 }
 
-ASTPtr Parser::factor()
+ASTExprPtr Parser::factor()
 {
-	ASTPtr expr = unary();
+	ASTExprPtr expr = unary();
 	Token t;
 	while (match({TokenType::MULT, TokenType::DIVIDE}, t)) {
-		ASTPtr right = unary();
+		ASTExprPtr right = unary();
 		expr = std::make_shared<BinaryASTNode>(t.type, expr, right);
 	}
 	return expr;
 }
 
 // Everything above is Binary, so just keep in the mind the conceptual switch
-ASTPtr Parser::unary()
+ASTExprPtr Parser::unary()
 {
 	Token t;
 	if (match({TokenType::BANG, TokenType::MINUS}, t)) {
-		ASTPtr right = unary();
+		ASTExprPtr right = unary();
 		return std::make_shared<UnaryASTNode>(t.type, right);
 	}
 	return primary();
 }
 
 // NUMBER | STRING | identifier | "true" | "false" | "(" expr ")"
-ASTPtr Parser::primary()
+ASTExprPtr Parser::primary()
 {
 	Token t = tok.get();
 	switch(t.type) {
@@ -115,7 +135,7 @@ ASTPtr Parser::primary()
 
 		case TokenType::LEFT_PAREN:
 		{
-			ASTPtr expr = expression();
+			ASTExprPtr expr = expression();
 			if (!check(TokenType::RIGHT_PAREN)) {
 				ErrorReporter::report("fixme", t.line, "Expected ')'");
 				return nullptr;

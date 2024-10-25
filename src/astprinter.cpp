@@ -48,7 +48,7 @@ void ASTPrinter::visit(const UnaryASTNode& node, int depth)
 	fmt::print("Unary: {}\n", opName);
 }
 
-void ASTPrinter::print(const ASTPtr& ast)
+void ASTPrinter::print(const ASTExprPtr& ast)
 {
 	ast->accept(*this, 0);
 }

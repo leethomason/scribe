@@ -58,7 +58,7 @@ void BCGenerator::visit(const UnaryASTNode& node, int depth)
 	}
 }
 
-void BCGenerator::generate(const ASTNode& node)
+void BCGenerator::generate(const ASTExprNode& node)
 {
 	node.accept(*this, 0);
 }

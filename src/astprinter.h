@@ -2,7 +2,7 @@
 
 #include "ast.h"
 
-class ASTPrinter : public ASTVisitor {
+class ASTPrinter : public ASTExprVisitor {
 public:
 	void visit(const ValueASTNode& node, int depth) override;
 	void visit(const IdentifierASTNode& node, int depth) override;
@@ -10,5 +10,5 @@ public:
 	void visit(const BinaryASTNode& node, int depth) override;
 	void visit(const UnaryASTNode& node, int depth) override;
 
-	void print(const ASTPtr& ast);
+	void print(const ASTExprPtr& ast);
 };

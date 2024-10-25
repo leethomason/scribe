@@ -2,10 +2,10 @@
 
 #include "ast.h"
 
-class BCGenerator : public ASTVisitor {
+class BCGenerator : public ASTExprVisitor {
 public:
 	BCGenerator(std::vector<Instruction>& bc, ConstPool& pool) : bc(bc), pool(pool) {}
-	void generate(const ASTNode& node);
+	void generate(const ASTExprNode& node);
 
 	void visit(const ValueASTNode& node, int depth) override;
 	void visit(const IdentifierASTNode& node, int depth) override;

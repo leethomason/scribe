@@ -12,7 +12,9 @@ class Parser
 {
 public:
 	Parser(Tokenizer& tok) : tok(tok) {}
-	ASTPtr parse() { return expression(); }
+
+	ASTExprPtr parseExpr() { return expression(); }
+	//std::vector<ASTPtr> parseStmts();
 
 private:
 	Tokenizer& tok;
@@ -20,11 +22,13 @@ private:
 	bool check(TokenType type);
 	bool match(const std::vector<TokenType>& types, Token& matched);	
 
-	ASTPtr expression();
-	ASTPtr equality();
-	ASTPtr comparison();
-	ASTPtr term();
-	ASTPtr factor();
-	ASTPtr unary();
-	ASTPtr primary();
+	//ASTPtr statement();
+
+	ASTExprPtr expression();
+	ASTExprPtr equality();
+	ASTExprPtr comparison();
+	ASTExprPtr term();
+	ASTExprPtr factor();
+	ASTExprPtr unary();
+	ASTExprPtr primary();
 };

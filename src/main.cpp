@@ -24,7 +24,7 @@ public:
         tokenizer.debug = debugTokens;
         Parser parser(tokenizer);
 
-        ASTPtr root = parser.parse();
+        ASTExprPtr root = parser.parseExpr();
 
         if (ErrorReporter::hasError()) {
             for(auto& report : ErrorReporter::reports()) {

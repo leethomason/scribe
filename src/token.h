@@ -67,6 +67,8 @@ public:
     Token get();
     Token peek();
 
+    bool done() const { return _pos >= _input.size(); }
+
     static void test();
 
     bool debug = false;
