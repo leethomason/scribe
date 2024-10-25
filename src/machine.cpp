@@ -56,7 +56,7 @@ void Machine::popStack(int n)
 
 void Machine::binaryOp(OpCode opCode)
 {
-	bool stringAdd = stack.size() > 1 && stack.back().type == Type::tString;
+	bool stringAdd = stack.size() > 1 && getStack(1).type == Type::tString;
 	if (stringAdd) {
 		if (!verifyTypes("ADD concat", {Type::tString, Type::tString})) return;
 
@@ -69,10 +69,9 @@ void Machine::binaryOp(OpCode opCode)
 	else {
 		if (!verifyTypes(gOpCodeNames[(int)opCode], {Type::tNumber, Type::tNumber})) return;
 
-		double rhs = stack.back().vNumber;
-		popStack();
-		double lhs = stack.back().vNumber;
-		popStack();
+		double rhs = getStack(1).vNumber;
+		double lhs = getStack(2).vNumber;
+		popStack(2);
 
 		switch (opCode)
 		{
@@ -130,17 +129,19 @@ void Machine::compare(OpCode opCode)
 void Machine::negative()
 {
 	if (!verifyTypes("NEGATE", {Type::tNumber})) return;
-	double x = stack.back().vNumber;
-	popStack(1);
-	stack.push_back(Value::Number(-x));
+	double x = getStack(1).vNumber;
+	//popStack(1);
+	//stack.push_back(Value::Number(-x));
+	getStack(1) = Value::Number(-x);
 }
 
 void Machine::notOp()
 {
 	if (!verifyUnderflow("NOT", 1)) return;
-	bool x = stack.back().isTruthy();
-	popStack(1);
-	stack.push_back(Value::Boolean(!x));
+	bool x = getStack(1).isTruthy();
+	//popStack(1);
+	//stack.push_back(Value::Boolean(!x));
+	getStack(1) = Value::Boolean(!x);
 }
 
 void Machine::defineGlobal()
@@ -309,7 +310,7 @@ void Machine::print()
 		setErrorMessage("PRINT: stack underflow");
 		return;
 	}
-	fmt::print("{}\n", stack.back().toString());
+	fmt::print("{}\n", getStack(1).toString());
 	popStack();
 }
 
