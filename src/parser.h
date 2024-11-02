@@ -14,7 +14,7 @@ public:
 	Parser(Tokenizer& tok) : tok(tok) {}
 
 	ASTExprPtr parseExpr() { return expression(); }
-	//std::vector<ASTPtr> parseStmts();
+	std::vector<ASTStmtPtr> parseStmts();
 
 private:
 	Tokenizer& tok;
@@ -22,7 +22,9 @@ private:
 	bool check(TokenType type);
 	bool match(const std::vector<TokenType>& types, Token& matched);	
 
-	//ASTPtr statement();
+	ASTStmtPtr statement();
+	ASTStmtPtr printStatement();
+	ASTStmtPtr expressionStatement();
 
 	ASTExprPtr expression();
 	ASTExprPtr equality();

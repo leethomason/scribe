@@ -22,19 +22,6 @@
 	primary -> NUMBER | STRING | identifier | "true" | "false" | "(" expr ")"
 */
 
-/*
-std::vector<ASTPtr>  Parser::parseStmts()
-{
-	std::vector<ASTPtr> stmts;
-	while (!tok.done()) {
-		ASTPtr stmt = statement();
-		if (stmt) {
-			stmts.push_back(stmt);
-		}
-	}
-	return stmts;
-}
-*/
 bool Parser::check(TokenType type) 
 {
 	if (tok.peek().type == type) {
@@ -56,6 +43,37 @@ bool Parser::match(const std::vector<TokenType>& types, Token& t)
 	return false;
 }
 
+
+std::vector<ASTStmtPtr>  Parser::parseStmts()
+{
+	std::vector<ASTStmtPtr> stmts;
+	while (!tok.done()) {
+		ASTStmtPtr stmt = statement();
+		if (stmt) {
+			stmts.push_back(stmt);
+		}
+	}
+	return stmts;
+}
+
+ASTStmtPtr Parser::statement()
+{
+	if (check(TokenType::PRINT))
+		return printStatement();
+	return expressionStatement();
+}
+
+ASTStmtPtr Parser::printStatement()
+{
+	ASTExprPtr expr = expression();
+	return std::make_shared<ASTPrintStmtNode>(expr);
+}
+
+ASTStmtPtr Parser::expressionStatement()
+{
+	ASTExprPtr expr = expression();
+	return std::make_shared<ASTExprStmtNode>(expr);
+}
 
 ASTExprPtr Parser::expression()
 {
