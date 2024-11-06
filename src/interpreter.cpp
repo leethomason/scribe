@@ -5,51 +5,64 @@
 #include "errorreporting.h"
 #include "astprinter.h"
 #include "bcgen.h"
+#include "instinterp.h"
 
-void Interpreter::interpret(std::string input)
+Value Interpreter::interpret(std::string input)
 {
     const bool debugTokens = true;
-    const bool debugAST = true;
-    const bool debugBC = true;
+    //const bool debugAST = true;
+    //const bool debugBC = true;
 
     Tokenizer tokenizer(input);
     tokenizer.debug = debugTokens;
     Parser parser(tokenizer);
+    Value rc;
 
-    ASTExprPtr root = parser.parseExpr();
+    std::vector<ASTStmtPtr> stmts = parser.parseStmts();
 
     if (ErrorReporter::hasError()) {
         for (auto& report : ErrorReporter::reports()) {
             fmt::print("Error: {}:{} {}\n", report.file, report.line, report.message);
         }
         ErrorReporter::clear();
-    }
-    else if (debugAST && root) {
-        ASTPrinter printer;
-        printer.print(root);
+        return rc;
     }
 
-    if (root) {
-        std::vector<Instruction> instructions;
-        BCGenerator bcgen(instructions, constPool);
-        bcgen.generate(*root);
+#if 0
+    // FIXME: switch back to byte code
+    // Using an interpreter for dev.
+    std::vector<Instruction> instructions;
+    BCStmtGenerator bcgen(instructions, constPool);
+#else
+    StmtInterpreter iMachine;
+#endif
 
-        if (debugBC)
-            machine.dump(instructions, constPool);
+    for (const auto& stmt : stmts) {
+        // FIXME
+        //if (debugAST) {
+        //	ASTPrinter printer;
+        //	printer.print(stmt);
+        //}
 
-        machine.execute(instructions, constPool);
-        if (machine.hasError()) {
-            fmt::print("Machine error: {}\n", machine.errorMessage());
-        }
-
-#if true
-        if (machine.stack.size()) {
-            fmt::print("Result = {}\n", machine.stack[0].toString());
-        }
-        else {
-            fmt::print("Stack empty.\n");
-        }
+#if 0
+        bcgen.generate(*stmt);
+#else
+        iMachine.interpret(*stmt);
 #endif
     }
+#if 0
+    if (debugBC)
+        machine.dump(instructions, constPool);
+    machine.execute(instructions, constPool);
+
+    if (machine.hasError()) {
+        fmt::print("Machine error: {}\n", machine.errorMessage());
+    }
+    if (machine.stack.size()) {
+        rc = machine.stack[0];
+    }
     machine.stack.clear();
+#endif
+
+    return rc;
 }

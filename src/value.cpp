@@ -3,9 +3,9 @@
 #include <fmt/core.h>
 #include <assert.h>
 
-const char* TypeName(Type t)
+const char* TypeName(ValueType t)
 {
-	REQUIRE((int)t >= 0 && (int)t < (int)Type::count);
+	REQUIRE((int)t >= 0 && (int)t < (int)ValueType::count);
 
 	static const char* names[] = {
 		"none",
@@ -18,7 +18,7 @@ const char* TypeName(Type t)
 	return names[static_cast<int>(t)];
 }
 
-Value::Value(const Value& rhs) : type(Type::tNone)
+Value::Value(const Value& rhs) : type(ValueType::tNone)
 {
 	copy(rhs);
 }
@@ -35,12 +35,12 @@ bool Value::operator==(const Value& rhs) const
 	if (type != rhs.type) return false;
 
 	switch (type) {
-	case Type::tNone: return true;
-	case Type::tNumber: return vNumber == rhs.vNumber;
-	case Type::tBoolean: return vBoolean == rhs.vBoolean;
-	case Type::tString: return *vString == *rhs.vString;
-	case Type::tArray: return *vArray == *rhs.vArray;
-	case Type::tMap: return *vMap == *rhs.vMap;
+	case ValueType::tNone: return true;
+	case ValueType::tNumber: return vNumber == rhs.vNumber;
+	case ValueType::tBoolean: return vBoolean == rhs.vBoolean;
+	case ValueType::tString: return *vString == *rhs.vString;
+	case ValueType::tArray: return *vArray == *rhs.vArray;
+	case ValueType::tMap: return *vMap == *rhs.vMap;
 	}
 	return false;
 }
@@ -98,15 +98,15 @@ void Value::move(Value& other)
 void Value::clear()
 {
 	switch (type) {
-	case Type::tNone:
-	case Type::tNumber:
-	case Type::tBoolean:
+	case ValueType::tNone:
+	case ValueType::tNumber:
+	case ValueType::tBoolean:
 		break;
-	case Type::tString: delete vString; break;
-	case Type::tArray: delete vArray; break;
-	case Type::tMap: delete vMap; break;
+	case ValueType::tString: delete vString; break;
+	case ValueType::tArray: delete vArray; break;
+	case ValueType::tMap: delete vMap; break;
 	}
-	type = Type::tNone;
+	type = ValueType::tNone;
 	vNumber = 0;
 }
 
@@ -115,22 +115,22 @@ void Value::copy(const Value& rhs)
 	clear();
 	type = rhs.type;
 	switch (type) {
-	case Type::tNone:
+	case ValueType::tNone:
 		vNumber = 0;
 		break;
-	case Type::tNumber:
+	case ValueType::tNumber:
 		vNumber = rhs.vNumber;
 		break;
-	case Type::tBoolean:
+	case ValueType::tBoolean:
 		vBoolean = rhs.vBoolean;
 		break;
-	case Type::tString: 
+	case ValueType::tString: 
 		vString = new std::string(*rhs.vString); 
 		break;
-	case Type::tArray: 
+	case ValueType::tArray: 
 		vArray = new std::vector<Value>(*rhs.vArray); 
 		break;
-	case Type::tMap: 
+	case ValueType::tMap: 
 		vMap = new std::map<std::string, Value>(*rhs.vMap); 
 		break;
 	}
@@ -139,17 +139,17 @@ void Value::copy(const Value& rhs)
 std::string Value::toString() const
 {
 	switch (type) {
-	case Type::tNone:
+	case ValueType::tNone:
 		return "none";
-	case Type::tNumber:
+	case ValueType::tNumber:
 		return fmt::format("{}", vNumber);
-	case Type::tBoolean:
+	case ValueType::tBoolean:
 		return vBoolean ? "true" : "false";
-	case Type::tString:
+	case ValueType::tString:
 		return *vString;
-	case Type::tArray:
+	case ValueType::tArray:
 		return "[]";
-	case Type::tMap:
+	case ValueType::tMap:
 		return "{}";
 	}
 	assert(false);
@@ -159,17 +159,17 @@ std::string Value::toString() const
 bool Value::isTruthy() const
 {
 	switch (type) {
-	case Type::tNone:
+	case ValueType::tNone:
 		return false;
-	case Type::tNumber:
+	case ValueType::tNumber:
 		return vNumber != 0;
-	case Type::tBoolean:
+	case ValueType::tBoolean:
 		return vBoolean;
-	case Type::tString:
+	case ValueType::tString:
 		return !vString->empty();
-	case Type::tArray:
+	case ValueType::tArray:
 		return !vArray->empty();
-	case Type::tMap:
+	case ValueType::tMap:
 		return !vMap->empty();
 	}
 	REQUIRE(false);

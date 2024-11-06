@@ -6,7 +6,7 @@
 #include <vector>
 #include <map>
 
-enum class Type {
+enum class ValueType {
 	tNone,
 	tNumber,
 	tString,
@@ -16,10 +16,10 @@ enum class Type {
 	count
 };
 
-const char* TypeName(Type t);
+const char* TypeName(ValueType t);
 
 struct Value {
-	Value() : type(Type::tNone), vNumber(0) {}
+	Value() : type(ValueType::tNone), vNumber(0) {}
 	~Value(); // I. destructor
 
 	Value(const Value& rhs); // II. copy constructor
@@ -34,13 +34,13 @@ struct Value {
 	// is a mess. Use constructor functions.
 
 	static Value Number(double v) {
-		Value val; val.type = Type::tNumber; val.vNumber = v; return val;
+		Value val; val.type = ValueType::tNumber; val.vNumber = v; return val;
 	}
 	static Value String(const std::string& v) {
-		Value val; val.type = Type::tString; val.vString = new std::string(v); return val;
+		Value val; val.type = ValueType::tString; val.vString = new std::string(v); return val;
 	}
 	static Value Boolean(bool v) {
-		Value val; val.type = Type::tBoolean; val.vBoolean = v; return val;
+		Value val; val.type = ValueType::tBoolean; val.vBoolean = v; return val;
 	}
 
 	std::string toString() const;
@@ -49,7 +49,7 @@ struct Value {
 	bool isTruthy() const;
 	bool isFalsey() const { return !isTruthy(); }
 
-	Type type;
+	ValueType type;
 	union {
 		double vNumber;
 		std::string* vString;

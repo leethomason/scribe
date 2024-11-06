@@ -34,7 +34,7 @@ void OnePlusTwoIsThree()
 
 	TEST(machine.hasError() == false);
 	TEST(machine.stack.size() == 1);
-	TEST(machine.stack[0].type == Type::tNumber);
+	TEST(machine.stack[0].type == ValueType::tNumber);
 	TEST_FP(machine.stack[0].vNumber, 3.0);
 }
 
@@ -56,7 +56,7 @@ void OneMinusTwoIsNegativeOne()
 
 	TEST(machine.hasError() == false);
 	TEST(machine.stack.size() == 1);
-	TEST(machine.stack[0].type == Type::tNumber);
+	TEST(machine.stack[0].type == ValueType::tNumber);
 	TEST_FP(machine.stack[0].vNumber, -1.0);
 }
 
@@ -81,7 +81,7 @@ void OnePlusTwoTimesThreeIsNine()
 
 	TEST(machine.hasError() == false);
 	TEST(machine.stack.size() == 1);
-	TEST(machine.stack[0].type == Type::tNumber);
+	TEST(machine.stack[0].type == ValueType::tNumber);
 	TEST_FP(machine.stack[0].vNumber, 9.0);
 }
 
@@ -105,7 +105,7 @@ void OnePlusTwoDivThreeIsOne()
 
 	TEST(machine.hasError() == false);
 	TEST(machine.stack.size() == 1);
-	TEST(machine.stack[0].type == Type::tNumber);
+	TEST(machine.stack[0].type == ValueType::tNumber);
 	TEST_FP(machine.stack[0].vNumber, 1.0);
 }
 
@@ -149,7 +149,7 @@ void XPlusYIsThree(OpCode def)
 	machine.execute(instructions.data() + 6, instructions.size() - 6, pool);
 	TEST(machine.hasError() == false);
 	TEST(machine.stack.size() == 1);
-	TEST(machine.stack[0].type == Type::tNumber);
+	TEST(machine.stack[0].type == ValueType::tNumber);
 	TEST_FP(machine.stack[0].vNumber, 3.0);
 }
 
@@ -170,7 +170,7 @@ static void CatHelloWorld()
 
 	TEST(machine.hasError() == false);
 	TEST(machine.stack.size() == 1);
-	TEST(machine.stack[0].type == Type::tString);
+	TEST(machine.stack[0].type == ValueType::tString);
 	TEST(machine.stack[0].vString->compare("Hello, World") == 0);
 }
 

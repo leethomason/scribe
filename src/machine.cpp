@@ -32,13 +32,13 @@ bool Machine::verifyUnderflow(const std::string& ctx, int n)
 	return true;
 }
 
-bool Machine::verifyTypes(const std::string& ctx, const std::vector<Type>& types)
+bool Machine::verifyTypes(const std::string& ctx, const std::vector<ValueType>& types)
 {
 	REQUIRE(types.size() > 0);
 
 	if (!verifyUnderflow(ctx, (int)types.size())) return false;
 	for (size_t i = 0; i < types.size(); i++) {
-		Type type = getStack(1).type;
+		ValueType type = getStack(1).type;
 		if (type != types[i]) {
 			setErrorMessage(fmt::format("{}: expected '{}' at stack -{}", ctx, TypeName(type), i+1));
 			return false;
@@ -56,9 +56,9 @@ void Machine::popStack(int n)
 
 void Machine::binaryOp(OpCode opCode)
 {
-	bool stringAdd = stack.size() > 1 && getStack(1).type == Type::tString;
+	bool stringAdd = stack.size() > 1 && getStack(1).type == ValueType::tString;
 	if (stringAdd) {
-		if (!verifyTypes("ADD concat", {Type::tString, Type::tString})) return;
+		if (!verifyTypes("ADD concat", {ValueType::tString, ValueType::tString})) return;
 
 		const std::string& lhs = *getStack(2).vString;
 		const std::string& rhs = *getStack(1).vString;
@@ -67,7 +67,7 @@ void Machine::binaryOp(OpCode opCode)
 		stack.push_back(Value::String(result));
 	}
 	else {
-		if (!verifyTypes(gOpCodeNames[(int)opCode], {Type::tNumber, Type::tNumber})) return;
+		if (!verifyTypes(gOpCodeNames[(int)opCode], {ValueType::tNumber, ValueType::tNumber})) return;
 
 		double rhs = getStack(1).vNumber;
 		double lhs = getStack(2).vNumber;
@@ -107,7 +107,7 @@ void Machine::compare(OpCode opCode)
 {
 	REQUIRE(opCode == OpCode::LESS || opCode == OpCode::LESS_EQUAL || opCode == OpCode::GREATER || opCode == OpCode::GREATER_EQUAL);
 	const std::string& opName = gOpCodeNames[(int)opCode];
-	if (!verifyTypes(opName, { Type::tNumber, Type::tNumber })) return;
+	if (!verifyTypes(opName, { ValueType::tNumber, ValueType::tNumber })) return;
 
 	double rhs = getStack(1).vNumber;
 	double lhs = getStack(2).vNumber;
@@ -128,7 +128,7 @@ void Machine::compare(OpCode opCode)
 
 void Machine::negative()
 {
-	if (!verifyTypes("NEGATE", {Type::tNumber})) return;
+	if (!verifyTypes("NEGATE", {ValueType::tNumber})) return;
 	double x = getStack(1).vNumber;
 	//popStack(1);
 	//stack.push_back(Value::Number(-x));
@@ -152,11 +152,11 @@ void Machine::defineGlobal()
 		return;
 	}
 
-	if (getStack(2).type != Type::tString) {
+	if (getStack(2).type != ValueType::tString) {
 		setErrorMessage("DEFINE_GLOBAL: expected 'string' at stack -2");
 		return;
 	}
-	if (getStack(1).type == Type::tNone) {
+	if (getStack(1).type == ValueType::tNone) {
 		setErrorMessage("DEFINE_GLOBAL: expected value at stack -1");
 		return;
 	}
@@ -180,11 +180,11 @@ void Machine::defineLocal()
 		setErrorMessage("DEFINE_LOCAL: stack underflow");
 		return;
 	}
-	if (getStack(2).type != Type::tString) {
+	if (getStack(2).type != ValueType::tString) {
 		setErrorMessage("DEFINE_LOCAL: expected 'string' at stack -2");
 		return;
 	}
-	if (getStack(1).type == Type::tNone) {
+	if (getStack(1).type == ValueType::tNone) {
 		setErrorMessage("DEFINE_LOCAL: expected value at stack -1");
 		return;
 	}
@@ -214,7 +214,7 @@ void Machine::load()
 		setErrorMessage("LOAD: stack underflow");
 		return;
 	}
-	if (getStack(1).type != Type::tString) {
+	if (getStack(1).type != ValueType::tString) {
 		setErrorMessage("LOAD: expected 'string' at stack -1");
 		return;
 	}
@@ -248,11 +248,11 @@ void Machine::store()
 		setErrorMessage("STORE: stack underflow");
 		return;
 	}
-	if (getStack(2).type != Type::tString) {
+	if (getStack(2).type != ValueType::tString) {
 		setErrorMessage("STORE: expected 'string' at stack -2");
 		return;
 	}
-	if (getStack(1).type == Type::tNone) {
+	if (getStack(1).type == ValueType::tNone) {
 		setErrorMessage("STORE: expected value at stack -1");
 		return;
 	}

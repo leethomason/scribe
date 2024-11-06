@@ -1,13 +1,13 @@
 #include "bcgen.h"
 
-void BCGenerator::visit(const ValueASTNode& node, int depth)
+void BCExprGenerator::visit(const ValueASTNode& node, int depth)
 {
 	(void)depth;
 	uint32_t slot = pool.add(node.value);
 	bc.push_back(PackOpCode(OpCode::PUSH, slot));
 }
 
-void BCGenerator::visit(const IdentifierASTNode& node, int depth)
+void BCExprGenerator::visit(const IdentifierASTNode& node, int depth)
 {
 	(void)depth;
 	uint32_t slot = pool.add(Value::String(node.name));
@@ -15,7 +15,7 @@ void BCGenerator::visit(const IdentifierASTNode& node, int depth)
 	bc.push_back(PackOpCode(OpCode::LOAD));
 }
 
-void BCGenerator::visit(const KeywordASTNode& node, int depth)
+void BCExprGenerator::visit(const KeywordASTNode& node, int depth)
 {
 	(void)depth;
 	switch (node.token) {
@@ -25,7 +25,7 @@ void BCGenerator::visit(const KeywordASTNode& node, int depth)
 	}
 }
 
-void BCGenerator::visit(const BinaryASTNode& node, int depth)
+void BCExprGenerator::visit(const BinaryASTNode& node, int depth)
 {
 	(void)depth;
 
@@ -43,7 +43,7 @@ void BCGenerator::visit(const BinaryASTNode& node, int depth)
 	}
 }
 
-void BCGenerator::visit(const UnaryASTNode& node, int depth)
+void BCExprGenerator::visit(const UnaryASTNode& node, int depth)
 {
 	(void)depth;
 
@@ -58,7 +58,7 @@ void BCGenerator::visit(const UnaryASTNode& node, int depth)
 	}
 }
 
-void BCGenerator::generate(const ASTExprNode& node)
+void BCExprGenerator::generate(const ASTExprNode& node)
 {
 	node.accept(*this, 0);
 }

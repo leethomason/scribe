@@ -1,6 +1,7 @@
 #include "errorreporting.h"
 #include "interpreter.h"
 #include "token.h"
+#include "langtest.h"
 
 #include <fmt/core.h>
 #include <string>
@@ -23,6 +24,7 @@ int main()
     
     Machine::test();
     Tokenizer::test();
+    LangTest();
 
     {
         Interpreter interpreter;
@@ -32,7 +34,10 @@ int main()
             fmt::print(">> ");
             std::getline(std::cin, line);
             if (line == "exit") break;
-            interpreter.interpret(line);
+            Value rc = interpreter.interpret(line);
+            if (rc.type != ValueType::tNone) {
+				fmt::print("Result: {}\n", rc.toString());
+			}
         }
     }
 

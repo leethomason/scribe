@@ -7,5 +7,6 @@ class Interpreter {
     Machine machine;
 
 public:
-    void interpret(std::string input);
+    Value interpret(std::string input);
 };
+
