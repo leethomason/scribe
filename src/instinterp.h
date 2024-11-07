@@ -13,6 +13,8 @@ public:
 	void visit(const BinaryASTNode& node, int depth) override;
 	void visit(const UnaryASTNode& node, int depth) override;
 
+	std::vector<Value> stack;
+
 private:
 };
 
