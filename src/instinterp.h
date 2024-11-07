@@ -13,7 +13,16 @@ public:
 	void visit(const BinaryASTNode& node, int depth) override;
 	void visit(const UnaryASTNode& node, int depth) override;
 
+	bool hasError() const { return !errorMsg.empty(); }
+
+	std::vector<Value> stack;
+
 private:
+	void setErrorMessage(const std::string& msg) { errorMsg = msg; }
+	bool verifyUnderflow(const std::string& ctx, int n);
+	bool verifyTypes(const std::string& ctx, const std::vector<ValueType>& types);	// checks underflow as well
+
+	std::string errorMsg;
 };
 
 class StmtInterpreter : public ASTStmtVisitor {

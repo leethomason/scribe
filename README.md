@@ -23,6 +23,71 @@ var c = {}
 
 var d = a;                  // array d is a *copy* of a  
 
+Bite the bullet. Keep it simple. Use references.
+
+var a: num[] = [1, 3];
+var b: string[] = ["hello", "world"];
+vac c: Breakfast[] = [Breakfast(), Brunch()]; // no slicing!
+var d: num{} = { "x": 1, "y": 2}
+var e: Breakfast{} = { "early": Breakfast(), "late": Brunch()}
+var f = Breakfast()
+
+e = {}   // empty, not null
+// ERROR: only classes can be null.
+//        e = null
+f = null // okay, because this points to a class
+         // removing this would be super great. But...then return values
+         // need optional support, which isn't so great.
+
+Explore this.
+Kotlin uses the nullable operator. ?. That's interesting. If that's the case,
+should all values be nullable? Feels a little deep for a scripting language.
+
+Primitive:
+
+* num
+* bool
+* string
+
+Unsure:
+
+* list
+* map
+
+Reference:
+
+* classes
+
+list
+
+* push
+* pop
+* insert
+* remove
+* clear
+* size
+* slice
+* find
+* empty
+* []
+
+map
+
+* set
+* get
+* has
+* remove
+* clear
+* size
+* empty
+* [] -- add or access only?
+
+builtin
+
+* print
+* type() - returns the class name (even if null!) or the more primitive type
+* baseType() - "class", "list", "map", "num", etc.
+
 ### Expressions
 
 ### Statements
