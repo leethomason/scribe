@@ -28,21 +28,21 @@ using ASTExprPtr = std::shared_ptr<ASTExprNode>;
 class ASTStmtVisitor
 {
 public:
-	virtual void visit(const ASTExprStmtNode&, int depth) = 0;
-	virtual void visit(const ASTPrintStmtNode&, int depth) = 0;
+	virtual void visit(const ASTExprStmtNode&) = 0;
+	virtual void visit(const ASTPrintStmtNode&) = 0;
 };
 
 class ASTStmtNode {
     public:
 	virtual ~ASTStmtNode() = default;
-	virtual void accept(ASTStmtVisitor& visitor, int depth) const = 0;
+	virtual void accept(ASTStmtVisitor& visitor) const = 0;
 };
 
 class ASTExprStmtNode : public ASTStmtNode
 {
 public:
 	ASTExprStmtNode(ASTExprPtr expr) : expr(expr) {}
-    virtual void accept(ASTStmtVisitor& visitor, int depth) const override;
+    virtual void accept(ASTStmtVisitor& visitor) const override;
 
 	ASTExprPtr expr;
 };
@@ -51,7 +51,7 @@ class ASTPrintStmtNode : public ASTStmtNode
 {
 public:
 	ASTPrintStmtNode(ASTExprPtr expr) : expr(expr) {}
-    virtual void accept(ASTStmtVisitor& visitor, int depth) const override;
+    virtual void accept(ASTStmtVisitor& visitor) const override;
 
 	ASTExprPtr expr;
 };

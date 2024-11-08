@@ -19,6 +19,8 @@ public:
         m_reports.push_back({file, line, message});
     }
 
+    static void printReports();
+
     static const std::vector<Report>& reports() {
         return m_reports;
     }

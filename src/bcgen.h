@@ -23,8 +23,8 @@ public:
 	BCStmtGenerator(std::vector<Instruction>& bc, ConstPool& pool) : bc(bc), pool(pool) {}
 	void generate(const ASTStmtNode& node);
 
-	void visit(const ASTExprStmtNode& node, int depth) override;
-	void visit(const ASTPrintStmtNode& node, int depth) override;
+	void visit(const ASTExprStmtNode& node) override;
+	void visit(const ASTPrintStmtNode& node) override;
 
 private:
 	std::vector<Instruction>& bc;

@@ -39,14 +39,16 @@ private:
 	std::string errorMsg;
 };
 
+/*
 class StmtInterpreter : public ASTStmtVisitor {
 public:
 	StmtInterpreter() {}
 	void interpret(const ASTStmtNode& node);
 
-	void visit(const ASTExprStmtNode& node, int depth) override;
-	void visit(const ASTPrintStmtNode& node, int depth) override;
+	void visit(const ASTExprStmtNode& node) override;
+	void visit(const ASTPrintStmtNode& node) override;
 
 private:
 	std::vector<Value> stack;
 };
+*/

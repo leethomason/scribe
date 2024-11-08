@@ -1,12 +1,13 @@
 #pragma once
 
-#include "machine.h"
+#include "ast.h"
 
-class Interpreter {
-    ConstPool constPool;
-    Machine machine;
-
+class Interpreter : public ASTStmtVisitor 
+{
 public:
     Value interpret(std::string input);
+
+    virtual void visit(const ASTExprStmtNode&) override;
+    virtual void visit(const ASTPrintStmtNode&) override;
 };
 
