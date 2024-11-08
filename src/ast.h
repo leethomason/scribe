@@ -51,7 +51,7 @@ class ASTPrintStmtNode : public ASTStmtNode
 {
 public:
 	ASTPrintStmtNode(ASTExprPtr expr) : expr(expr) {}
-	virtual void accept(ASTStmtVisitor& visitor, int depth) const override;
+    virtual void accept(ASTStmtVisitor& visitor, int depth) const override;
 
 	ASTExprPtr expr;
 };
