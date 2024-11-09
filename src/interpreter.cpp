@@ -5,9 +5,9 @@
 #include "errorreporting.h"
 #include "astprinter.h"
 #include "bcgen.h"
-#include "instinterp.h"
 
-Value Interpreter::interpret(std::string input)
+
+Value Interpreter::interpret(const std::string& input)
 {
     Tokenizer tokenizer(input);
     tokenizer.debug = false;

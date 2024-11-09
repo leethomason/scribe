@@ -5,7 +5,7 @@
 class Interpreter : public ASTStmtVisitor, public ASTExprVisitor
 {
 public:
-    Value interpret(std::string input);
+    Value interpret(const std::string& input);
 
 	// ASTStmtVisitor
     virtual void visit(const ASTExprStmtNode&) override;

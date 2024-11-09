@@ -39,9 +39,20 @@ static void OnePlusTwo()
 	TEST(r.vNumber == 3);
 }
 
+static void OneMinusTwo()
+{
+	const std::string s =
+		"return 1 - 2";
+
+	Interpreter ip;
+	Value r = ip.interpret(s);
+	TEST(r.type == ValueType::tNumber);
+	TEST(r.vNumber == -1);
+}
 void LangTest()
 {
 	RUN_TEST(SimplePrint());
 	RUN_TEST(SimpleReturn());
 	RUN_TEST(OnePlusTwo());
+	RUN_TEST(OneMinusTwo());
 }
