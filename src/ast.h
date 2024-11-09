@@ -42,7 +42,9 @@ class ASTExprStmtNode : public ASTStmtNode
 {
 public:
 	ASTExprStmtNode(ASTExprPtr expr) : expr(expr) {}
-    virtual void accept(ASTStmtVisitor& visitor) const override;
+    virtual void accept(ASTStmtVisitor& visitor) const override {
+        visitor.visit(*this); 
+    }
 
 	ASTExprPtr expr;
 };
@@ -51,7 +53,9 @@ class ASTPrintStmtNode : public ASTStmtNode
 {
 public:
 	ASTPrintStmtNode(ASTExprPtr expr) : expr(expr) {}
-    virtual void accept(ASTStmtVisitor& visitor) const override;
+    virtual void accept(ASTStmtVisitor& visitor) const override {
+        visitor.visit(*this);
+    }
 
 	ASTExprPtr expr;
 };
@@ -88,7 +92,9 @@ class IdentifierASTNode : public ASTExprNode
 { 
 public:
 	IdentifierASTNode(const std::string& name) : name(name) {}
-    virtual void accept(ASTExprVisitor& visitor, int depth) const override { visitor.visit(*this, depth); }
+    virtual void accept(ASTExprVisitor& visitor, int depth) const override { 
+        visitor.visit(*this, depth); 
+    }
 
     std::string name;
 };

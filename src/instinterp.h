@@ -2,6 +2,8 @@
 
 #include "ast.h"
 
+#if 0
+
 class ExprInterpreter : public ASTExprVisitor {
 public:
 	ExprInterpreter() {}
@@ -38,6 +40,8 @@ private:
 
 	std::string errorMsg;
 };
+
+#endif
 
 /*
 class StmtInterpreter : public ASTStmtVisitor {

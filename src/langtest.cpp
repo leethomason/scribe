@@ -7,7 +7,7 @@
 static void SimpleReturn()
 {
 	const std::string s =
-		"return 13";
+		"print 13";
 	
 	Interpreter itpr;
 	Value r = itpr.interpret(s);

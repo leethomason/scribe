@@ -2,6 +2,8 @@
 
 #include <fmt/core.h>
 
+#if 0
+
 bool ExprInterpreter::verifyUnderflow(const std::string& ctx, int n)
 {
 	if (stack.size() < n) {
@@ -132,6 +134,4 @@ void StmtInterpreter::visit(const ASTPrintStmtNode& node, int depth)
 	assert(exprInterp.stack.size() == 1);
 	fmt::print("print: {}\n", exprInterp.stack[0].toString());
 }
-
-
-
+#endif

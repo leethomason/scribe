@@ -2,6 +2,7 @@
 #include "interpreter.h"
 #include "token.h"
 #include "langtest.h"
+#include "machine.h"
 
 #include <fmt/core.h>
 #include <string>
