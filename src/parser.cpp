@@ -11,8 +11,10 @@
 	program -> statement*
 	statement ->   exprStmt 
 				 | printStmt
+				 | returnStmt
 	eprStmt -> expr
 	printStmt -> "print" expr
+	returnStmt -> "return" expr
 	expr -> equality
 	equality -> comparison ( ( "==" | "!=" ) comparison )*
 	comparison -> term ( ( ">" | ">=" | "<" | "<=" ) term )*
@@ -60,6 +62,8 @@ ASTStmtPtr Parser::statement()
 {
 	if (check(TokenType::PRINT))
 		return printStatement();
+	if (check(TokenType::RETURN))
+		return returnStatement();
 	return expressionStatement();
 }
 
@@ -67,6 +71,12 @@ ASTStmtPtr Parser::printStatement()
 {
 	ASTExprPtr expr = expression();
 	return std::make_shared<ASTPrintStmtNode>(expr);
+}
+
+ASTStmtPtr Parser::returnStatement()
+{
+	ASTExprPtr expr = expression();
+	return std::make_shared<ASTReturnStmtNode>(expr);
 }
 
 ASTStmtPtr Parser::expressionStatement()

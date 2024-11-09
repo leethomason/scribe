@@ -11,6 +11,7 @@
 class ASTStmtNode;
 class ASTExprStmtNode;
 class ASTPrintStmtNode;
+class ASTReturnStmtNode;
 
 using ASTStmtPtr = std::shared_ptr<ASTStmtNode>;
 
@@ -30,6 +31,7 @@ class ASTStmtVisitor
 public:
 	virtual void visit(const ASTExprStmtNode&) = 0;
 	virtual void visit(const ASTPrintStmtNode&) = 0;
+    virtual void visit(const ASTReturnStmtNode&) = 0;
 };
 
 class ASTStmtNode {
@@ -58,6 +60,17 @@ public:
     }
 
 	ASTExprPtr expr;
+};
+
+class ASTReturnStmtNode : public ASTStmtNode
+{
+public:
+    ASTReturnStmtNode(ASTExprPtr expr) : expr(expr) {}
+    virtual void accept(ASTStmtVisitor& visitor) const override {
+        visitor.visit(*this);
+    }
+
+    ASTExprPtr expr;
 };
 
 // -------- Expressions ----------

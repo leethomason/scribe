@@ -105,7 +105,7 @@ Token Tokenizer::get()
         }
 
         if (t == "var") return Token(TokenType::VAR, _line);
-        if (t == "return") return Token(TokenType::RET, _line);
+        if (t == "return") return Token(TokenType::RETURN, _line);
         if (t == "print") return Token(TokenType::PRINT, _line);
         if (t == "true") return Token(TokenType::TRUE, _line);
         if (t == "false") return Token(TokenType::FALSE, _line);

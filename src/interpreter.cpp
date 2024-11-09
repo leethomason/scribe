@@ -25,6 +25,18 @@ Value Interpreter::interpret(std::string input)
     for (const auto& stmt : stmts) {
         stmt->accept(*this);
     }
+	if (ErrorReporter::hasError()) {
+		ErrorReporter::printReports();
+		ErrorReporter::clear();
+		return rc;
+	}
+
+	if (stack.size() == 1) {
+		rc = stack[0];
+	}
+	else if (stack.size() > 1) {
+		assert(false);
+	}
     return rc;
 }
 
@@ -38,7 +50,15 @@ void Interpreter::visit(const ASTPrintStmtNode& node)
 {
 	node.expr->accept(*this, 0);
     assert(stack.size() == 1);
-    fmt::print("print: {}\n", stack[0].toString());
+	std::string s = fmt::format("{}\n", stack[0].toString());
+	if (output) *output += s;
+	fmt::print(s);
+}
+
+void Interpreter::visit(const ASTReturnStmtNode& node)
+{
+	node.expr->accept(*this, 0);
+	assert(stack.size() == 1);
 }
 
 bool Interpreter::verifyUnderflow(const std::string& ctx, int n)

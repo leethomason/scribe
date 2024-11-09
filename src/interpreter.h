@@ -7,9 +7,12 @@ class Interpreter : public ASTStmtVisitor, public ASTExprVisitor
 public:
     Value interpret(std::string input);
 
+	// ASTStmtVisitor
     virtual void visit(const ASTExprStmtNode&) override;
     virtual void visit(const ASTPrintStmtNode&) override;
+	virtual void visit(const ASTReturnStmtNode&) override;
 
+	// ASTExprVisitor
 	void visit(const ValueASTNode& node, int depth) override;
 	void visit(const IdentifierASTNode& node, int depth) override;
 	void visit(const KeywordASTNode& node, int depth) override;
@@ -17,6 +20,7 @@ public:
 	void visit(const UnaryASTNode& node, int depth) override;
 
 	bool hasError() const { return !errorMsg.empty(); }
+	void setOutput(std::string& out) { output = &out; }
 
 	std::vector<Value> stack;
 
@@ -40,5 +44,6 @@ private:
 	static constexpr int RHS = 1;
 
 	std::string errorMsg;
+	std::string* output = nullptr;
 };
 

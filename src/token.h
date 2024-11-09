@@ -15,7 +15,7 @@ enum class TokenType {
 
     // Keywords
     VAR,        // variable declaration
-    RET,        // push to stack
+    RETURN,        // push to stack
     PRINT,	    // print to console
 
     // Sybols & operations

@@ -25,6 +25,7 @@ private:
 	ASTStmtPtr statement();
 	ASTStmtPtr printStatement();
 	ASTStmtPtr expressionStatement();
+	ASTStmtPtr returnStatement();
 
 	ASTExprPtr expression();
 	ASTExprPtr equality();
