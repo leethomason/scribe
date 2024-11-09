@@ -23,6 +23,10 @@ Value Interpreter::interpret(std::string input)
     }
 
     for (const auto& stmt : stmts) {
+		assert(stack.size() == 0);
+		ASTPrinter printer;
+		stmt->accept(printer);
+
         stmt->accept(*this);
     }
 	if (ErrorReporter::hasError()) {
@@ -33,6 +37,7 @@ Value Interpreter::interpret(std::string input)
 
 	if (stack.size() == 1) {
 		rc = stack[0];
+		stack.clear();
 	}
 	else if (stack.size() > 1) {
 		assert(false);
@@ -53,6 +58,7 @@ void Interpreter::visit(const ASTPrintStmtNode& node)
 	std::string s = fmt::format("{}\n", stack[0].toString());
 	if (output) *output += s;
 	fmt::print(s);
+	popStack();
 }
 
 void Interpreter::visit(const ASTReturnStmtNode& node)
@@ -111,22 +117,23 @@ void Interpreter::visit(const BinaryASTNode& node, int depth)
 	if (hasError()) return;
 	if (!verifyUnderflow("BinaryOp", 2)) return;
 
-	Value rightV = getStack(RHS);
-	Value leftV = getStack(LHS);
-	popStack(2);
+	Value rhs = getStack(RHS);
+	Value lhs = getStack(LHS);
 
-	if (getStack(LHS).type == ValueType::tString) {
+	if (lhs.type == ValueType::tString) {
 		// String concat
 		if (!verifyTypes("BinaryOp::String Concat", { ValueType::tString, ValueType::tString })) return;
+		popStack(2);
 
-		Value r = Value::String(*rightV.vString + *leftV.vString);
+		Value r = Value::String(*rhs.vString + *lhs.vString);
 		stack.push_back(r);
 	}
 	else {
 		if (!verifyTypes("BinaryOp", { ValueType::tNumber, ValueType::tNumber })) return;
+		popStack(2);
 
-		double right = rightV.vNumber;
-		double left = leftV.vNumber;
+		double right = rhs.vNumber;
+		double left = lhs.vNumber;
 		double r = 0.0;
 
 		switch (node.type) {

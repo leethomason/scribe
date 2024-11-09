@@ -2,6 +2,23 @@
 
 #include <fmt/core.h>
 
+void ASTPrinter::visit(const ASTExprStmtNode&)
+{
+	assert(false);
+}
+
+void ASTPrinter::visit(const ASTPrintStmtNode& node)
+{
+	fmt::print("STMT print\n");
+	node.expr->accept(*this, 1);
+}
+
+void ASTPrinter::visit(const ASTReturnStmtNode& node)
+{
+	fmt::print("STMT return\n");
+	node.expr->accept(*this, 1);
+}
+
 void ASTPrinter::visit(const ValueASTNode& node, int depth)
 {
 	fmt::print("{: >{}}", "", depth * 2);
