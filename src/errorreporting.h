@@ -19,6 +19,10 @@ public:
         m_reports.push_back({file, line, message});
     }
 
+    static void reportRuntime(const std::string& message) {
+		report("", 0, message);
+	}
+
     static void printReports();
 
     static const std::vector<Report>& reports() {

@@ -6,7 +6,6 @@
 	Issues: 
 		* handling EOL (no semicolon)
 		* ternary! ternary is good.
-		
 
 	program -> statement*
 	statement ->   exprStmt 
@@ -15,6 +14,7 @@
 	eprStmt -> expr
 	printStmt -> "print" expr
 	returnStmt -> "return" expr
+
 	expr -> equality
 	equality -> comparison ( ( "==" | "!=" ) comparison )*
 	comparison -> term ( ( ">" | ">=" | "<" | "<=" ) term )*

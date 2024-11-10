@@ -17,8 +17,6 @@ Value Interpreter::interpret(const std::string& input)
     std::vector<ASTStmtPtr> stmts = parser.parseStmts();
 
     if (ErrorReporter::hasError()) {
-        ErrorReporter::printReports();
-        ErrorReporter::clear();
         return rc;
     }
 
@@ -30,8 +28,6 @@ Value Interpreter::interpret(const std::string& input)
         stmt->accept(*this);
     }
 	if (ErrorReporter::hasError()) {
-		ErrorReporter::printReports();
-		ErrorReporter::clear();
 		return rc;
 	}
 
@@ -70,7 +66,7 @@ void Interpreter::visit(const ASTReturnStmtNode& node)
 bool Interpreter::verifyUnderflow(const std::string& ctx, int n)
 {
 	if (stack.size() < n) {
-		setErrorMessage(fmt::format("{}: stack underflow", ctx));
+		ErrorReporter::reportRuntime(fmt::format("{}: stack underflow", ctx));
 		return false;
 	}
 	return true;
@@ -84,7 +80,7 @@ bool Interpreter::verifyTypes(const std::string& ctx, const std::vector<ValueTyp
 	for (size_t i = 0; i < types.size(); i++) {
 		ValueType type = stack[stack.size() - i - 1].type;
 		if (type != types[i]) {
-			setErrorMessage(fmt::format("{}: expected '{}' at stack -{}", ctx, TypeName(type), i + 1));
+			ErrorReporter::reportRuntime(fmt::format("{}: expected '{}' at stack -{}", ctx, TypeName(type), i + 1));
 			return false;
 		}
 	}
@@ -114,7 +110,7 @@ void Interpreter::visit(const KeywordASTNode& node, int depth)
 void Interpreter::visit(const BinaryASTNode& node, int depth)
 {
 	(void)depth;
-	if (hasError()) return;
+	if (ErrorReporter::hasError()) return;
 	if (!verifyUnderflow("BinaryOp", 2)) return;
 
 	Value rhs = getStack(RHS);
@@ -142,7 +138,7 @@ void Interpreter::visit(const BinaryASTNode& node, int depth)
 		case TokenType::MULT: r = left * right; break;
 		case TokenType::DIVIDE: r = left / right; break;
 		default:
-			setErrorMessage("Unexpected Binary Op");
+			ErrorReporter::reportRuntime("Unexpected Binary Op");
 			assert(false);
 		}
 
@@ -154,7 +150,7 @@ void Interpreter::visit(const UnaryASTNode& node, int depth)
 {
 	(void)depth;
 	REQUIRE(node.type == TokenType::MINUS || node.type == TokenType::BANG);
-	if (hasError()) return;
+	if (ErrorReporter::hasError()) return;
 
 	if (!verifyUnderflow("Unary", 1)) return;
 

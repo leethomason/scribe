@@ -1,8 +1,24 @@
 #include "langtest.h"
 #include "interpreter.h"
 #include "test.h"
+#include "errorreporting.h"
 
 #include <string>
+
+static void Run(const std::string& s, Value expectedResult = Value(), bool expectedError = false)
+{
+	Interpreter ip;
+	Value r = ip.interpret(s);
+	
+	if (expectedError) {
+		TEST(ErrorReporter::hasError());
+	}
+	else {
+		TEST(!ErrorReporter::hasError());
+		TEST(r == expectedResult);
+	}
+	ErrorReporter::clear();
+}
 
 static void SimplePrint()
 {
@@ -22,21 +38,23 @@ static void SimpleReturn()
 	const std::string s =
 		"return 13";
 	
-	Interpreter ip;
-	Value r = ip.interpret(s);
-	TEST(r.type == ValueType::tNumber);
-	TEST(r.vNumber == 13);
+	Run(s, Value::Number(13));
+}
+
+static void SimpleError()
+{
+	const std::string s =
+		"return 13;";
+
+	Run(s, Value(), true);
 }
 
 static void OnePlusTwo()
 {
 	const std::string s = 
-			"return 1 + 2";
+		"return 1 + 2";
 
-	Interpreter ip;
-	Value r = ip.interpret(s);
-	TEST(r.type == ValueType::tNumber);
-	TEST(r.vNumber == 3);
+    Run(s, Value::Number(3));
 }
 
 static void OneMinusTwo()
@@ -44,25 +62,22 @@ static void OneMinusTwo()
 	const std::string s =
 		"return 1 - 2";
 
-	Interpreter ip;
-	Value r = ip.interpret(s);
-	TEST(r.type == ValueType::tNumber);
-	TEST(r.vNumber == -1);
+	Run(s, Value::Number(-1));
 }
 
 static void TestParen()
 {
-	const std::string s = "return (1-2)*3";
-	Interpreter ip;
-	Value r = ip.interpret(s);
-	TEST(r.type == ValueType::tNumber);
-	TEST(r.vNumber == -3.0);
+	const std::string s = 
+		"return (1-2)*3";
+
+	Run(s, Value::Number(-3));
 }
 
 void LangTest()
 {
 	RUN_TEST(SimplePrint());
 	RUN_TEST(SimpleReturn());
+	RUN_TEST(SimpleError());
 	RUN_TEST(OnePlusTwo());
 	RUN_TEST(OneMinusTwo());
 	RUN_TEST(TestParen());

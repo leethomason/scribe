@@ -19,13 +19,11 @@ public:
 	void visit(const BinaryASTNode& node, int depth) override;
 	void visit(const UnaryASTNode& node, int depth) override;
 
-	bool hasError() const { return !errorMsg.empty(); }
 	void setOutput(std::string& out) { output = &out; }
 
 	std::vector<Value> stack;
 
 private:
-	void setErrorMessage(const std::string& msg) { errorMsg = msg; }
 	bool verifyUnderflow(const std::string& ctx, int n);
 	bool verifyTypes(const std::string& ctx, const std::vector<ValueType>& types);	// checks underflow as well
 
@@ -43,7 +41,6 @@ private:
 	static constexpr int LHS = 2;
 	static constexpr int RHS = 1;
 
-	std::string errorMsg;
 	std::string* output = nullptr;
 };
 

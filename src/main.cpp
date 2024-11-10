@@ -36,6 +36,12 @@ int main()
             std::getline(std::cin, line);
             if (line == "exit") break;
             Value rc = interpreter.interpret(line);
+
+            if (ErrorReporter::hasError()) {
+                ErrorReporter::printReports();
+                ErrorReporter::clear();
+            }
+
             if (rc.type != ValueType::tNone) {
 				fmt::print("Result: {}\n", rc.toString());
 			}
