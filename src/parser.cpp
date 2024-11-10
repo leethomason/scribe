@@ -7,11 +7,17 @@
 		* handling EOL (no semicolon)
 		* ternary! ternary is good.
 
-	program -> statement*
+	program -> declartion* EOF
+
+	declaration ->   varDecl 
+	               | statement
+
+	varDecl -> "var" IDENTIFIER ( "=" expression )?
+
 	statement ->   exprStmt 
 				 | printStmt
 				 | returnStmt
-	eprStmt -> expr
+	exprStmt -> expr
 	printStmt -> "print" expr
 	returnStmt -> "return" expr
 
@@ -21,7 +27,7 @@
 	term -> factor ( ( "+" | "-" ) factor )*
 	factor -> unary ( ( "*" | "/" ) unary )*
 	unary -> ( "!" | "-" ) unary | primary
-	primary -> NUMBER | STRING | identifier | "true" | "false" | "(" expr ")"
+	primary -> NUMBER | STRING | "true" | "false" | "(" expr ")" | IDENTIFIER
 */
 
 bool Parser::check(TokenType type) 

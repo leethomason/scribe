@@ -30,6 +30,7 @@ public:
     }
     static void clear() {
         m_reports.clear();
+        m_reports = std::vector<Report>();  // this is needed to prevent memory leaks in the static m_reports
     }
     static bool hasError() {
         return m_reports.size() > 0;

@@ -47,6 +47,7 @@ int main()
 			}
         }
     }
+    ErrorReporter::clear();
 
 #if defined(_DEBUG) && defined(_WIN32)
     int knownNumLeak = 0;

@@ -73,6 +73,32 @@ static void TestParen()
 	Run(s, Value::Number(-3));
 }
 
+static void TestVarDuck()
+{
+	const std::string s =
+		"var x = 8\n"
+		"return x";
+
+	Run(s, Value::Number(8));
+}
+
+static void TestVarDec()
+{
+	const std::string s =
+		"var x: num = 9\n"
+		"return x";
+
+	Run(s, Value::Number(9));
+}
+
+static void TestDuckFail()
+{
+	const std::string s = 
+		"var x = 4 + 5\n"
+		"return x";
+	Run(s, Value(), true);
+}
+
 void LangTest()
 {
 	RUN_TEST(SimplePrint());
