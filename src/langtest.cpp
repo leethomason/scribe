@@ -49,10 +49,21 @@ static void OneMinusTwo()
 	TEST(r.type == ValueType::tNumber);
 	TEST(r.vNumber == -1);
 }
+
+static void TestParen()
+{
+	const std::string s = "return (1-2)*3";
+	Interpreter ip;
+	Value r = ip.interpret(s);
+	TEST(r.type == ValueType::tNumber);
+	TEST(r.vNumber == -3.0);
+}
+
 void LangTest()
 {
 	RUN_TEST(SimplePrint());
 	RUN_TEST(SimpleReturn());
 	RUN_TEST(OnePlusTwo());
 	RUN_TEST(OneMinusTwo());
+	RUN_TEST(TestParen());
 }
