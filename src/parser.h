@@ -23,6 +23,8 @@ private:
 	bool match(const std::vector<TokenType>& types, Token& matched);	
 
 	ASTStmtPtr statement();
+	ASTStmtPtr declaration();
+	ASTStmtPtr varDecl();
 	ASTStmtPtr printStatement();
 	ASTStmtPtr expressionStatement();
 	ASTStmtPtr returnStatement();

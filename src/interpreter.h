@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ast.h"
+#include "environment.h"
 
 class Interpreter : public ASTStmtVisitor, public ASTExprVisitor
 {
@@ -11,6 +12,7 @@ public:
     virtual void visit(const ASTExprStmtNode&) override;
     virtual void visit(const ASTPrintStmtNode&) override;
 	virtual void visit(const ASTReturnStmtNode&) override;
+	virtual void visit(const ASTVarDeclStmtNode&) override;
 
 	// ASTExprVisitor
 	void visit(const ValueASTNode& node, int depth) override;
@@ -42,5 +44,7 @@ private:
 	static constexpr int RHS = 1;
 
 	std::string* output = nullptr;
+
+	Environment env;
 };
 

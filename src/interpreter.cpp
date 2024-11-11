@@ -63,6 +63,35 @@ void Interpreter::visit(const ASTReturnStmtNode& node)
 	assert(stack.size() == 1);
 }
 
+void Interpreter::visit(const ASTVarDeclStmtNode& node)
+{
+	REQUIRE(stack.empty());
+
+	Value value;
+
+	// This assigns default values for types.
+	switch (node.valueType) {
+	case ValueType::tNumber: value = Value::Number(0.0); break;
+	case ValueType::tString: value = Value::String(""); break;
+	case ValueType::tBoolean: value = Value::Boolean(false); break;
+	default:
+		assert(false); // unimplemented? internal error.
+	}
+
+	if (node.expr) {
+		node.expr->accept(*this, 0);
+		REQUIRE(stack.size() == 1);
+		REQUIRE(stack[0].type == value.type);	// Should have been established by parser
+		value = stack[0];
+		stack.clear();
+	}
+
+	if (!env.define(node.name, value)) {
+		ErrorReporter::reportRuntime(fmt::format("Env variable {} already defined", node.name));
+		return;
+	}
+}
+
 bool Interpreter::verifyUnderflow(const std::string& ctx, int n)
 {
 	if (stack.size() < n) {
@@ -95,9 +124,16 @@ void Interpreter::visit(const ValueASTNode& node, int depth)
 
 void Interpreter::visit(const IdentifierASTNode& node, int depth)
 {
-	(void)node;
 	(void)depth;
-	assert(false);
+	if (ErrorReporter::hasError()) return;
+
+	Value value = env.get(node.name);
+
+	if (value.type == ValueType::tNone) {
+		ErrorReporter::reportRuntime(fmt::format("Could not find var: {}", node.name));
+		return;
+	}
+	stack.push_back(value);
 }
 
 void Interpreter::visit(const KeywordASTNode& node, int depth)

@@ -7,12 +7,13 @@
 		* handling EOL (no semicolon)
 		* ternary! ternary is good.
 
-	program -> declartion* EOF
+	program -> declaration* EOF
 
 	declaration ->   varDecl 
 	               | statement
 
-	varDecl -> "var" IDENTIFIER ( "=" expression )?
+	varDecl ->   "var" IDENTIFIER ( "=" expression )?
+	           | "var" ":" IDENTIFIER ( "=" expression )?
 
 	statement ->   exprStmt 
 				 | printStmt
@@ -56,12 +57,67 @@ std::vector<ASTStmtPtr>  Parser::parseStmts()
 {
 	std::vector<ASTStmtPtr> stmts;
 	while (!tok.done()) {
-		ASTStmtPtr stmt = statement();
+		ASTStmtPtr stmt = declaration();
 		if (stmt) {
 			stmts.push_back(stmt);
 		}
 	}
 	return stmts;
+}
+
+ASTStmtPtr Parser::declaration()
+{
+	if (check(TokenType::VAR))
+		return varDecl();
+	return statement();
+}
+
+ASTStmtPtr Parser::varDecl()
+{
+	Token t = tok.get();
+	if (t.type != TokenType::IDENT) {
+		ErrorReporter::report("fixme", t.line, "Expected identifier");
+		return nullptr;
+	}
+
+	if (check(TokenType::COLON)) {
+		// "var" ":" IDENTIFIER ( "=" expression )?
+
+		Token type = tok.get();
+		if (type.type != TokenType::IDENT) {
+			ErrorReporter::report("fixme", t.line, "Expected type");
+			return nullptr;
+		}
+		ValueType valueType = IdentToTypeName(type.lexeme);
+		if (valueType == ValueType::tNone) {
+			ErrorReporter::report("fixme", t.line, "Unrecognized type");
+			return nullptr;
+		}
+
+		ASTExprPtr expr = nullptr;
+		if (check(TokenType::EQUAL)) {
+			expr = expression();
+		}
+
+		return std::make_shared<ASTVarDeclStmtNode>(t.lexeme, valueType, expr);
+	}
+	else {
+		// "var" IDENTIFIER ( "=" expression )?
+
+		ASTExprPtr expr = nullptr;
+		if (check(TokenType::EQUAL)) {
+			expr = expression();
+		}
+
+		// Very simple duck typing rules!
+		ValueType valueType = expr->duckType();
+		if (valueType == ValueType::tNone) {
+			ErrorReporter::report("fixme", t.line, "Could not duck type");
+			return nullptr;
+		}
+
+		return std::make_shared<ASTVarDeclStmtNode>(t.lexeme, valueType, expr);
+	}
 }
 
 ASTStmtPtr Parser::statement()

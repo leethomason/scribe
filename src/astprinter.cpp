@@ -19,6 +19,13 @@ void ASTPrinter::visit(const ASTReturnStmtNode& node)
 	node.expr->accept(*this, 1);
 }
 
+void ASTPrinter::visit(const ASTVarDeclStmtNode& node)
+{
+	fmt::print("STMT var decl: {}: {}\n", node.name, TypeName(node.valueType));
+	if (node.expr)
+		node.expr->accept(*this, 1);
+}
+
 void ASTPrinter::visit(const ValueASTNode& node, int depth)
 {
 	fmt::print("{: >{}}", "", depth * 2);

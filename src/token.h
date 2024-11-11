@@ -19,15 +19,16 @@ enum class TokenType {
     PRINT,	    // print to console
 
     // Sybols & operations
-    PLUS,       // '+'
-    MINUS,      // '-'
-    MULT,       // '*'
-    DIVIDE,     // '/'
-    LEFT_PAREN,  // '('
-    RIGHT_PAREN, // ')'
-    LEFT_BRACE,  // '{'
-    RIGHT_BRACE, // '}'
-    BANG,        // '!'
+    PLUS,           // '+'
+    MINUS,          // '-'
+    MULT,           // '*'
+    DIVIDE,         // '/'
+    LEFT_PAREN,     // '('
+    RIGHT_PAREN,    // ')'
+    LEFT_BRACE,     // '{'
+    RIGHT_BRACE,    // '}'
+    BANG,           // '!'
+    COLON,	        // ':'
 
     EQUAL,          // '='
     EQUAL_EQUAL,    // '=='

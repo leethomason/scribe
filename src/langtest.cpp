@@ -82,10 +82,10 @@ static void TestVarDuck()
 	Run(s, Value::Number(8));
 }
 
-static void TestVarDec()
+static void TestVarDecl()
 {
 	const std::string s =
-		"var x: num = 9\n"
+		"var x: number = 9\n"
 		"return x";
 
 	Run(s, Value::Number(9));
@@ -107,4 +107,7 @@ void LangTest()
 	RUN_TEST(OnePlusTwo());
 	RUN_TEST(OneMinusTwo());
 	RUN_TEST(TestParen());
+	RUN_TEST(TestVarDuck());
+	RUN_TEST(TestVarDecl());
+	RUN_TEST(TestDuckFail());
 }

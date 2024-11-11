@@ -11,12 +11,22 @@ const char* TypeName(ValueType t)
 		"none",
 		"number",
 		"string",
-		"boolean",
+		"bool",
 		"array",
 		"map",
 	};
 	return names[static_cast<int>(t)];
 }
+
+ValueType IdentToTypeName(const std::string& s)
+{
+	if (s == "number") return ValueType::tNumber;
+	if (s == "string") return ValueType::tString;
+	if (s == "bool") return ValueType::tBoolean;
+
+	return ValueType::tNone;
+}
+
 
 Value::Value(const Value& rhs) : type(ValueType::tNone)
 {

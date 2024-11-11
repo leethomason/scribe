@@ -134,6 +134,7 @@ Token Tokenizer::get()
     case '!': token = match('=') ? Token(TokenType::BANG_EQUAL, _line, "!=") : Token(TokenType::BANG, _line, sym); break;
     case '>': token = match('=') ? Token(TokenType::GREATER_EQUAL, _line, ">=") : Token(TokenType::GREATER, _line, sym); break;
     case '<': token = match('=') ? Token(TokenType::LESS_EQUAL, _line, "<=") : Token(TokenType::LESS, _line, sym); break;
+    case ':': token = Token(TokenType::COLON, _line, sym); break;
 
     default:
         ErrorReporter::report("fixme", _line, fmt::format("Unexpected character: {}", c));

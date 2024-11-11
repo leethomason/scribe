@@ -18,6 +18,10 @@ enum class ValueType {
 
 const char* TypeName(ValueType t);
 
+// Currently: tNumber, tString, tBoolean
+// tNone for error
+ValueType IdentToTypeName(const std::string&);
+
 struct Value {
 	Value() : type(ValueType::tNone), vNumber(0) {}
 	~Value(); // I. destructor

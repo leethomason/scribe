@@ -13,6 +13,7 @@ public:
 	void visit(const ASTExprStmtNode&) override;
 	void visit(const ASTPrintStmtNode&) override;
 	void visit(const ASTReturnStmtNode&) override;
+	void visit(const ASTVarDeclStmtNode&) override;
 
 	void print(const ASTExprPtr& ast);
 };

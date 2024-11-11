@@ -12,6 +12,7 @@ class ASTStmtNode;
 class ASTExprStmtNode;
 class ASTPrintStmtNode;
 class ASTReturnStmtNode;
+class ASTVarDeclStmtNode;
 
 using ASTStmtPtr = std::shared_ptr<ASTStmtNode>;
 
@@ -32,6 +33,7 @@ public:
 	virtual void visit(const ASTExprStmtNode&) = 0;
 	virtual void visit(const ASTPrintStmtNode&) = 0;
     virtual void visit(const ASTReturnStmtNode&) = 0;
+    virtual void visit(const ASTVarDeclStmtNode&) = 0;
 };
 
 class ASTStmtNode {
@@ -73,6 +75,19 @@ public:
     ASTExprPtr expr;
 };
 
+class ASTVarDeclStmtNode : public ASTStmtNode
+{
+public:
+    ASTVarDeclStmtNode(const std::string& name, ValueType valueType, ASTExprPtr expr) : name(name), valueType(valueType), expr(expr) {}
+    virtual void accept(ASTStmtVisitor& visitor) const override {
+        visitor.visit(*this);
+    }
+
+    std::string name;
+    ValueType valueType = ValueType::tNone;
+    ASTExprPtr expr;
+};
+
 // -------- Expressions ----------
 
 class ASTExprVisitor
@@ -90,13 +105,23 @@ class ASTExprNode {
 public:
     virtual ~ASTExprNode() = default;
     virtual void accept(ASTExprVisitor& visitor, int depth) const = 0;
+
+    // Needed for duck typing.
+    virtual ValueType duckType() const {
+        return ValueType::tNone;
+    }
 };
 
 class ValueASTNode : public ASTExprNode
 {
 public:
     ValueASTNode(const Value& value) : value(value) {}
-    virtual void accept(ASTExprVisitor& visitor, int depth) const override { visitor.visit(*this, depth);}
+    virtual void accept(ASTExprVisitor& visitor, int depth) const override { 
+        visitor.visit(*this, depth);
+    }
+    virtual ValueType duckType() const override {
+        return value.type;
+    }
 
     Value value;
 };
