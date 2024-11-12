@@ -157,7 +157,7 @@ void Interpreter::visit(const BinaryASTNode& node, int depth)
 		if (!verifyTypes("BinaryOp::String Concat", { ValueType::tString, ValueType::tString })) return;
 		popStack(2);
 
-		Value r = Value::String(*rhs.vString + *lhs.vString);
+		Value r = Value::String(*lhs.vString + *rhs.vString);
 		stack.push_back(r);
 	}
 	else {

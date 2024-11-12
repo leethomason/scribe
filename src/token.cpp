@@ -174,6 +174,7 @@ std::string Token::toString(TokenType type)
         "LEFT_BRACE",
         "RIGHT_BRACE",
         "BANG",
+        "COLON",
 
         "EQUAL",
         "EQUAL_EQUAL",

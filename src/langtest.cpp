@@ -105,6 +105,14 @@ static void TestDuckFail()
 	Run(s, Value(), true, 1);
 }
 
+static void TestHelloWorldVar()
+{
+	const std::string s =
+		"var x = 'Hello'\n"
+		"return x + ', World!'";
+	Run(s, Value::String("Hello, World!"));
+}
+
 void LangTest()
 {
 	RUN_TEST(SimplePrint());
@@ -116,4 +124,5 @@ void LangTest()
 	RUN_TEST(TestVarDuck());
 	RUN_TEST(TestVarDecl());
 	RUN_TEST(TestDuckFail());
+	RUN_TEST(TestHelloWorldVar());
 }
