@@ -76,7 +76,7 @@ ASTStmtPtr Parser::varDecl()
 {
 	Token t = tok.get();
 	if (t.type != TokenType::IDENT) {
-		ErrorReporter::report("fixme", t.line, "Expected identifier");
+		ErrorReporter::report(ctxName, t.line, "Expected identifier");
 		return nullptr;
 	}
 
@@ -85,12 +85,12 @@ ASTStmtPtr Parser::varDecl()
 
 		Token type = tok.get();
 		if (type.type != TokenType::IDENT) {
-			ErrorReporter::report("fixme", t.line, "Expected type");
+			ErrorReporter::report(ctxName, t.line, "Expected type");
 			return nullptr;
 		}
 		ValueType valueType = IdentToTypeName(type.lexeme);
 		if (valueType == ValueType::tNone) {
-			ErrorReporter::report("fixme", t.line, "Unrecognized type");
+			ErrorReporter::report(ctxName, t.line, "Unrecognized type");
 			return nullptr;
 		}
 
@@ -112,7 +112,7 @@ ASTStmtPtr Parser::varDecl()
 		// Very simple duck typing rules!
 		ValueType valueType = expr->duckType();
 		if (valueType == ValueType::tNone) {
-			ErrorReporter::report("fixme", t.line, "Could not duck type");
+			ErrorReporter::report(ctxName, t.line, "Could not duck type");
 			return nullptr;
 		}
 
@@ -227,13 +227,13 @@ ASTExprPtr Parser::primary()
 		{
 			ASTExprPtr expr = expression();
 			if (!check(TokenType::RIGHT_PAREN)) {
-				ErrorReporter::report("fixme", t.line, "Expected ')'");
+				ErrorReporter::report(ctxName, t.line, "Expected ')'");
 				return nullptr;
 			}
 			return expr;
 		}
 		default:
-			ErrorReporter::report("fixme", t.line, "Unexpected token");
+			ErrorReporter::report(ctxName, t.line, "Unexpected token");
 	}
 	return nullptr;
 }

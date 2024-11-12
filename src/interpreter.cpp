@@ -7,11 +7,11 @@
 #include "bcgen.h"
 
 
-Value Interpreter::interpret(const std::string& input)
+Value Interpreter::interpret(const std::string& input, const std::string& ctxName)
 {
     Tokenizer tokenizer(input);
     tokenizer.debug = false;
-    Parser parser(tokenizer);
+    Parser parser(tokenizer, ctxName);
     Value rc;
 
     std::vector<ASTStmtPtr> stmts = parser.parseStmts();

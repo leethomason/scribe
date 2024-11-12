@@ -5,13 +5,18 @@
 
 #include <string>
 
-static void Run(const std::string& s, Value expectedResult = Value(), bool expectedError = false)
+static void Run(const std::string& s, Value expectedResult = Value(), bool expectedError = false, int errorLine = -1)
 {
 	Interpreter ip;
-	Value r = ip.interpret(s);
+	Value r = ip.interpret(s, "langtest");
 	
 	if (expectedError) {
 		TEST(ErrorReporter::hasError());
+
+		const ErrorReporter::Report& report = ErrorReporter::reports().front();
+		if (errorLine >= 0) {
+			TEST(errorLine == report.line);
+		}
 	}
 	else {
 		TEST(!ErrorReporter::hasError());
@@ -29,7 +34,7 @@ static void SimplePrint()
 	std::string out;
 	ip.setOutput(out);
 
-	ip.interpret(s);
+	ip.interpret(s, "langtest");
 	TEST(out == "13\n");
 }
 
@@ -46,7 +51,7 @@ static void SimpleError()
 	const std::string s =
 		"return 13;";
 
-	Run(s, Value(), true);
+	Run(s, Value(), true, 0);
 }
 
 static void OnePlusTwo()
@@ -94,9 +99,10 @@ static void TestVarDecl()
 static void TestDuckFail()
 {
 	const std::string s = 
+		"// comment\n"
 		"var x = 4 + 5\n"
 		"return x";
-	Run(s, Value(), true);
+	Run(s, Value(), true, 1);
 }
 
 void LangTest()

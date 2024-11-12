@@ -11,13 +11,14 @@
 class Parser
 {
 public:
-	Parser(Tokenizer& tok) : tok(tok) {}
+	Parser(Tokenizer& tok, const std::string& ctxName) : tok(tok), ctxName(ctxName) {}
 
 	ASTExprPtr parseExpr() { return expression(); }
 	std::vector<ASTStmtPtr> parseStmts();
 
 private:
 	Tokenizer& tok;
+	std::string ctxName;
 
 	bool check(TokenType type);
 	bool match(const std::vector<TokenType>& types, Token& matched);	

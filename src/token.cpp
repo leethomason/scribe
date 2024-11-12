@@ -2,6 +2,7 @@
 #include "errorreporting.h"
 
 #include <fmt/core.h>
+#include <assert.h>
 
 Token Tokenizer::peek()
 {
@@ -30,7 +31,6 @@ void Tokenizer::skipWhitespace()
 			while (_pos < _input.size() && _input[_pos] != '\n') {
 				_pos++;
 			}
-            _line++;
 		}
 		else {
 			break;
@@ -42,7 +42,8 @@ Token Tokenizer::get()
 {
     if (_hasPeek) {
         _hasPeek = false;
-        if (debug) fmt::print("{}\n", _peek.dump());
+        if (debug)
+            _peek.print();
         return _peek;
     }
 
@@ -62,7 +63,8 @@ Token Tokenizer::get()
             _pos += (end - start);
             Token tok(TokenType::NUMBER, _line, std::string(start, end - start));
             tok.dValue = val;
-            if (debug) fmt::print("{}\n", tok.dump());
+            if (debug)
+                tok.print();
             return tok;
         }
     }
@@ -90,7 +92,8 @@ Token Tokenizer::get()
 
 		_pos++;
 		Token token(TokenType::STRING, _line, t);
-		if (debug) fmt::print("{}\n", token.dump());
+        if (debug)
+            token.print();
 		return token;
 	}
 
@@ -111,7 +114,8 @@ Token Tokenizer::get()
         if (t == "false") return Token(TokenType::FALSE, _line);
 
         Token token(TokenType::IDENT, _line, t);
-        if (debug) fmt::print("{}\n", token.dump());
+        if (debug)
+            token.print();
         return token;
     }
 
@@ -140,7 +144,8 @@ Token Tokenizer::get()
         ErrorReporter::report("fixme", _line, fmt::format("Unexpected character: {}", c));
         return Token();
     }
-    if (debug) fmt::print("{}\n", token.dump());
+    if (debug)
+        token.print();
     return token;
 }
 
@@ -181,7 +186,7 @@ std::string Token::toString(TokenType type)
     return name[static_cast<int>(type)];
 }
 
-std::string Token::dump() const 
+std::string Token::toString() const 
 {
     std::string r = toString(type);
 
@@ -194,4 +199,9 @@ std::string Token::dump() const
         r += lexeme;
     }
     return r;
+}
+
+void Token::print() const
+{
+    fmt::print("[{:3}] {}\n", line, toString());
 }

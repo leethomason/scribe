@@ -35,7 +35,7 @@ int main()
             fmt::print(">> ");
             std::getline(std::cin, line);
             if (line == "exit") break;
-            Value rc = interpreter.interpret(line);
+            Value rc = interpreter.interpret(line, "cmd");
 
             if (ErrorReporter::hasError()) {
                 ErrorReporter::printReports();

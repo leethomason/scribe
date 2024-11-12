@@ -58,7 +58,9 @@ struct Token {
     }
 
     static std::string toString(TokenType type);
-    std::string dump() const;
+    
+    std::string toString() const;
+    void print() const;
 };
 
 // Tokenizer (scanner or lexar) to break input into tokens
