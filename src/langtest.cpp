@@ -113,6 +113,25 @@ static void TestHelloWorldVar()
 	Run(s, Value::String("Hello, World!"));
 }
 
+// Need 'if' to turn on...
+static void BadVarSyntax()
+{
+	const std::string s =
+		"// comment 0\n"
+		"// comment 1\n"
+		"if (true) var x = 1\n";
+	Run(s, Value(), true, 2);
+}
+
+static void AssignVar()
+{
+	const std::string s =
+		"var x = 1\n"
+		"x = 2\n"
+		"return x";
+	Run(s, Value::Number(2));
+}
+
 void LangTest()
 {
 	RUN_TEST(SimplePrint());
@@ -125,4 +144,5 @@ void LangTest()
 	RUN_TEST(TestVarDecl());
 	RUN_TEST(TestDuckFail());
 	RUN_TEST(TestHelloWorldVar());
+	RUN_TEST(AssignVar());
 }

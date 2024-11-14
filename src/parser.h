@@ -25,6 +25,7 @@ private:
 
 	ASTStmtPtr statement();
 	ASTStmtPtr declaration();
+	ASTStmtPtr assignment();
 	ASTStmtPtr varDecl();
 	ASTStmtPtr printStatement();
 	ASTStmtPtr expressionStatement();

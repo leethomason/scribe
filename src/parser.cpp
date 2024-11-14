@@ -11,10 +11,8 @@
 
 	declaration ->   varDecl 
 	               | statement
-
 	varDecl ->   "var" IDENTIFIER ( "=" expression )?
 	           | "var" ":" IDENTIFIER ( "=" expression )?
-
 	statement ->   exprStmt 
 				 | printStmt
 				 | returnStmt
@@ -22,7 +20,9 @@
 	printStmt -> "print" expr
 	returnStmt -> "return" expr
 
-	expr -> equality
+	expr -> assignment
+	assignment ->   IDENTIFIER "=" assignment														// FIXME: assigment should be a statement
+	              | equality
 	equality -> comparison ( ( "==" | "!=" ) comparison )*
 	comparison -> term ( ( ">" | ">=" | "<" | "<=" ) term )*
 	term -> factor ( ( "+" | "-" ) factor )*
