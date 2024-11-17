@@ -46,9 +46,7 @@ class ASTExprStmtNode : public ASTStmtNode
 {
 public:
 	ASTExprStmtNode(ASTExprPtr expr) : expr(expr) {}
-    virtual void accept(ASTStmtVisitor& visitor) const override {
-        visitor.visit(*this); 
-    }
+    virtual void accept(ASTStmtVisitor& visitor) const override { visitor.visit(*this);  }
 
 	ASTExprPtr expr;
 };
@@ -57,9 +55,7 @@ class ASTPrintStmtNode : public ASTStmtNode
 {
 public:
 	ASTPrintStmtNode(ASTExprPtr expr) : expr(expr) {}
-    virtual void accept(ASTStmtVisitor& visitor) const override {
-        visitor.visit(*this);
-    }
+    virtual void accept(ASTStmtVisitor& visitor) const override { visitor.visit(*this); }
 
 	ASTExprPtr expr;
 };
@@ -68,9 +64,7 @@ class ASTReturnStmtNode : public ASTStmtNode
 {
 public:
     ASTReturnStmtNode(ASTExprPtr expr) : expr(expr) {}
-    virtual void accept(ASTStmtVisitor& visitor) const override {
-        visitor.visit(*this);
-    }
+    virtual void accept(ASTStmtVisitor& visitor) const override { visitor.visit(*this); }
 
     ASTExprPtr expr;
 };
@@ -79,9 +73,7 @@ class ASTVarDeclStmtNode : public ASTStmtNode
 {
 public:
     ASTVarDeclStmtNode(const std::string& name, ValueType valueType, ASTExprPtr expr) : name(name), valueType(valueType), expr(expr) {}
-    virtual void accept(ASTStmtVisitor& visitor) const override {
-        visitor.visit(*this);
-    }
+    virtual void accept(ASTStmtVisitor& visitor) const override { visitor.visit(*this); }
 
     std::string name;
     ValueType valueType = ValueType::tNone;
@@ -116,9 +108,9 @@ class ValueASTNode : public ASTExprNode
 {
 public:
     ValueASTNode(const Value& value) : value(value) {}
-    virtual void accept(ASTExprVisitor& visitor, int depth) const override { 
-        visitor.visit(*this, depth);
-    }
+
+    virtual void accept(ASTExprVisitor& visitor, int depth) const override { visitor.visit(*this, depth); }
+
     virtual ValueType duckType() const override {
         return value.type;
     }
@@ -130,10 +122,8 @@ class AssignmentASTNode : public ASTExprNode
 {
 public:
 	AssignmentASTNode(const std::string& name, ASTExprPtr right) : name(name), right(right) {}
-	virtual void accept(ASTExprVisitor& visitor, int depth) const override { 
-		right->accept(visitor, depth + 1);
-		visitor.visit(*this, depth); 
-	}
+
+    virtual void accept(ASTExprVisitor& visitor, int depth) const override { visitor.visit(*this, depth); }
 
 	std::string name;
 	ASTExprPtr right;
@@ -143,10 +133,8 @@ class IdentifierASTNode : public ASTExprNode
 { 
 public:
 	IdentifierASTNode(const std::string& name) : name(name) {}
-    virtual void accept(ASTExprVisitor& visitor, int depth) const override { 
-        visitor.visit(*this, depth); 
-    }
-	virtual const IdentifierASTNode* asIdentifier() override { return this; }
+    virtual void accept(ASTExprVisitor& visitor, int depth) const override { visitor.visit(*this, depth); }
+    virtual const IdentifierASTNode* asIdentifier() override { return this; }
 
     std::string name;
 };
@@ -158,11 +146,7 @@ public:
         this->left = left;
         this->right = right;
     }
-    virtual void accept(ASTExprVisitor& visitor, int depth) const override { 
-        left->accept(visitor, depth + 1);
-        right->accept(visitor, depth + 1);
-        visitor.visit(*this, depth); 
-    }
+    virtual void accept(ASTExprVisitor& visitor, int depth) const override { visitor.visit(*this, depth); }
 
     TokenType type;
     ASTExprPtr left;
@@ -175,10 +159,7 @@ public:
     UnaryASTNode(TokenType type,ASTExprPtr right) : type(type) {
         this->right = right;
     }
-    virtual void accept(ASTExprVisitor& visitor, int depth) const override { 
-        right->accept(visitor, depth + 1);
-        visitor.visit(*this, depth); 
-    }
+    virtual void accept(ASTExprVisitor& visitor, int depth) const override { visitor.visit(*this, depth); }
 
     TokenType type;
     ASTExprPtr right;

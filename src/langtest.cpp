@@ -5,6 +5,10 @@
 
 #include <string>
 
+// The problem is that runtime errors don't have line numbers. 
+// But should! Until then, flag runtime errors.
+static constexpr int RUNTIME = 0;	
+
 static void Run(const std::string& s, Value expectedResult = Value(), bool expectedError = false, int errorLine = -1)
 {
 	Interpreter ip;
@@ -147,7 +151,7 @@ static void NoRedeclare()
 		"var x = 1\n"
 		"var x = 2\n"
 		"return x";
-	Run(s, Value(), true, 1);
+	Run(s, Value(), true, RUNTIME);
 }
 
 void LangTest()

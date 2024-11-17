@@ -43,6 +43,7 @@ void ASTPrinter::visit(const AssignmentASTNode& node, int depth)
 {
 	fmt::print("{: >{}}", "", depth * 2);
 	fmt::print("Assignment: {}\n", node.name);
+
 	node.right->accept(*this, depth + 1);
 }
 
@@ -59,6 +60,9 @@ void ASTPrinter::visit(const BinaryASTNode& node, int depth)
 
 	fmt::print("{: >{}}", "", depth * 2);
 	fmt::print("Binary: {}\n", opName);
+
+	node.left->accept(*this, depth + 1);
+	node.right->accept(*this, depth + 1);
 }
 
 void ASTPrinter::visit(const UnaryASTNode& node, int depth)
@@ -72,6 +76,8 @@ void ASTPrinter::visit(const UnaryASTNode& node, int depth)
 
 	fmt::print("{: >{}}", "", depth * 2);
 	fmt::print("Unary: {}\n", opName);
+
+	node.right->accept(*this, depth + 1);
 }
 
 void ASTPrinter::print(const ASTExprPtr& ast)

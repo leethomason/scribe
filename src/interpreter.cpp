@@ -6,7 +6,7 @@
 #include "astprinter.h"
 #include "bcgen.h"
 
-#define DEBUG_INTERPRETER() 0
+#define DEBUG_INTERPRETER() 1
 
 Value Interpreter::interpret(const std::string& input, const std::string& ctxName)
 {
@@ -63,8 +63,11 @@ void Interpreter::visit(const ASTPrintStmtNode& node)
 {
 	if (!interpreterOkay)
 		return;
+
+	REQUIRE(stack.empty());
 	node.expr->accept(*this, 0);
-    assert(stack.size() == 1);
+	REQUIRE(stack.size() == 1);
+
 	std::string s = fmt::format("{}\n", stack[0].toString());
 	if (output) *output += s;
 	fmt::print(s);
@@ -75,11 +78,12 @@ void Interpreter::visit(const ASTReturnStmtNode& node)
 {
 	if (!interpreterOkay) 
 		return;
+
 	node.expr->accept(*this, 0);
 
 	if (!interpreterOkay)
 		return;
-	assert(stack.size() == 1);
+	REQUIRE(stack.size() == 1);
 }
 
 void Interpreter::visit(const ASTVarDeclStmtNode& node)
@@ -151,9 +155,10 @@ bool Interpreter::verifyTypes(const std::string& ctx, const std::vector<ValueTyp
 
 void Interpreter::visit(const ValueASTNode& node, int depth)
 {
+	(void)depth;
+
 	if (!interpreterOkay)
 		return;
-	(void)depth;
 	stack.push_back(node.value);
 }
 
@@ -175,12 +180,14 @@ void Interpreter::visit(const IdentifierASTNode& node, int depth)
 void Interpreter::visit(const AssignmentASTNode& node, int depth)
 {
 	(void)depth;
+
 	node.right->accept(*this, 0);
-	if (interpreterOkay) 
+	if (!interpreterOkay) 
 		return;
 
+	REQUIRE(stack.size() == 1);
 	Value value = stack.back();
-	stack.pop_back();
+	//stack.pop_back();				// FIXME: popping and expressions and oh my
 
 	if (!env.set(node.name, value)) {
 		runtimeError(fmt::format("Could not find var: {}", node.name));
@@ -193,6 +200,9 @@ void Interpreter::visit(const BinaryASTNode& node, int depth)
 	(void)depth;
 	if (!interpreterOkay) 
 		return;
+
+	node.left->accept(*this, 0);
+	node.right->accept(*this, 0);
 	if (!verifyUnderflow("BinaryOp", 2)) 
 		return;
 
@@ -236,6 +246,7 @@ void Interpreter::visit(const UnaryASTNode& node, int depth)
 		return;
 	REQUIRE(node.type == TokenType::MINUS || node.type == TokenType::BANG);
 
+	node.right->accept(*this, 0);
 	if (!verifyUnderflow("Unary", 1)) 
 		return;
 
