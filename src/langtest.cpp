@@ -132,6 +132,24 @@ static void AssignVar()
 	Run(s, Value::Number(2));
 }
 
+static void AssignVarPlusOne()
+{
+	const std::string s =
+		"var x = 1\n"
+		"x = 2\n"
+		"return x + 1";
+	Run(s, Value::Number(3));
+}
+
+static void NoRedeclare()
+{
+	const std::string s =
+		"var x = 1\n"
+		"var x = 2\n"
+		"return x";
+	Run(s, Value(), true, 1);
+}
+
 void LangTest()
 {
 	RUN_TEST(SimplePrint());
@@ -145,4 +163,6 @@ void LangTest()
 	RUN_TEST(TestDuckFail());
 	RUN_TEST(TestHelloWorldVar());
 	RUN_TEST(AssignVar());
+	RUN_TEST(AssignVarPlusOne());
+	RUN_TEST(NoRedeclare());
 }

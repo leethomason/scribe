@@ -6,30 +6,32 @@
 #include "astprinter.h"
 #include "bcgen.h"
 
+#define DEBUG_INTERPRETER() 0
 
 Value Interpreter::interpret(const std::string& input, const std::string& ctxName)
 {
     Tokenizer tokenizer(input);
-    tokenizer.debug = false;
+#if DEBUG_INTERPRETER()
+    tokenizer.debug = true;
+#endif	
     Parser parser(tokenizer, ctxName);
     Value rc;
 
     std::vector<ASTStmtPtr> stmts = parser.parseStmts();
 
-    if (ErrorReporter::hasError()) {
+    if (!interpreterOkay)
         return rc;
-    }
 
     for (const auto& stmt : stmts) {
 		assert(stack.size() == 0);
+#if DEBUG_INTERPRETER()
 		ASTPrinter printer;
 		stmt->accept(printer);
-
+#endif
         stmt->accept(*this);
     }
-	if (ErrorReporter::hasError()) {
+	if (!interpreterOkay)
 		return rc;
-	}
 
 	if (stack.size() == 1) {
 		rc = stack[0];
@@ -42,13 +44,25 @@ Value Interpreter::interpret(const std::string& input, const std::string& ctxNam
 }
 
 
-void Interpreter::visit(const ASTExprStmtNode&)
+void Interpreter::visit(const ASTExprStmtNode& node)
 {
-    assert(false); // need to implement
+	if (!interpreterOkay) 
+		return;
+    node.expr->accept(*this, 0);
+	if (!interpreterOkay)
+		return;
+
+	assert(stack.size() == 1);
+	// FIXME
+	// Should not pop - may be used in the next expression.
+	// But should be popped when the statement is done.
+	popStack();
 }
 
 void Interpreter::visit(const ASTPrintStmtNode& node)
 {
+	if (!interpreterOkay)
+		return;
 	node.expr->accept(*this, 0);
     assert(stack.size() == 1);
 	std::string s = fmt::format("{}\n", stack[0].toString());
@@ -59,12 +73,19 @@ void Interpreter::visit(const ASTPrintStmtNode& node)
 
 void Interpreter::visit(const ASTReturnStmtNode& node)
 {
+	if (!interpreterOkay) 
+		return;
 	node.expr->accept(*this, 0);
+
+	if (!interpreterOkay)
+		return;
 	assert(stack.size() == 1);
 }
 
 void Interpreter::visit(const ASTVarDeclStmtNode& node)
 {
+	if (!interpreterOkay)
+		return;
 	REQUIRE(stack.empty());
 
 	Value value;
@@ -87,15 +108,27 @@ void Interpreter::visit(const ASTVarDeclStmtNode& node)
 	}
 
 	if (!env.define(node.name, value)) {
-		ErrorReporter::reportRuntime(fmt::format("Env variable {} already defined", node.name));
+		runtimeError(fmt::format("Env variable {} already defined", node.name));
 		return;
 	}
+}
+
+void Interpreter::runtimeError(const std::string& msg)
+{
+	ErrorReporter::reportRuntime(msg);
+	interpreterOkay = false;
+}
+
+void Interpreter::internalError(const std::string& msg)
+{
+	ErrorReporter::reportRuntime(msg);
+	interpreterOkay = false;
 }
 
 bool Interpreter::verifyUnderflow(const std::string& ctx, int n)
 {
 	if (stack.size() < n) {
-		ErrorReporter::reportRuntime(fmt::format("{}: stack underflow", ctx));
+		internalError(fmt::format("{}: stack underflow", ctx));
 		return false;
 	}
 	return true;
@@ -109,7 +142,7 @@ bool Interpreter::verifyTypes(const std::string& ctx, const std::vector<ValueTyp
 	for (size_t i = 0; i < types.size(); i++) {
 		ValueType type = stack[stack.size() - i - 1].type;
 		if (type != types[i]) {
-			ErrorReporter::reportRuntime(fmt::format("{}: expected '{}' at stack -{}", ctx, TypeName(type), i + 1));
+			runtimeError(fmt::format("{}: expected '{}' at stack -{}", ctx, TypeName(type), i + 1));
 			return false;
 		}
 	}
@@ -118,6 +151,8 @@ bool Interpreter::verifyTypes(const std::string& ctx, const std::vector<ValueTyp
 
 void Interpreter::visit(const ValueASTNode& node, int depth)
 {
+	if (!interpreterOkay)
+		return;
 	(void)depth;
 	stack.push_back(node.value);
 }
@@ -125,29 +160,41 @@ void Interpreter::visit(const ValueASTNode& node, int depth)
 void Interpreter::visit(const IdentifierASTNode& node, int depth)
 {
 	(void)depth;
-	if (ErrorReporter::hasError()) return;
+	if (!interpreterOkay) 
+		return;
 
 	Value value = env.get(node.name);
 
 	if (value.type == ValueType::tNone) {
-		ErrorReporter::reportRuntime(fmt::format("Could not find var: {}", node.name));
+		runtimeError(fmt::format("Could not find var: {}", node.name));
 		return;
 	}
 	stack.push_back(value);
 }
 
-void Interpreter::visit(const KeywordASTNode& node, int depth)
+void Interpreter::visit(const AssignmentASTNode& node, int depth)
 {
-	(void)node;
 	(void)depth;
-	assert(false);
+	node.right->accept(*this, 0);
+	if (interpreterOkay) 
+		return;
+
+	Value value = stack.back();
+	stack.pop_back();
+
+	if (!env.set(node.name, value)) {
+		runtimeError(fmt::format("Could not find var: {}", node.name));
+		return;
+	}
 }
 
 void Interpreter::visit(const BinaryASTNode& node, int depth)
 {
 	(void)depth;
-	if (ErrorReporter::hasError()) return;
-	if (!verifyUnderflow("BinaryOp", 2)) return;
+	if (!interpreterOkay) 
+		return;
+	if (!verifyUnderflow("BinaryOp", 2)) 
+		return;
 
 	Value rhs = getStack(RHS);
 	Value lhs = getStack(LHS);
@@ -174,7 +221,7 @@ void Interpreter::visit(const BinaryASTNode& node, int depth)
 		case TokenType::MULT: r = left * right; break;
 		case TokenType::DIVIDE: r = left / right; break;
 		default:
-			ErrorReporter::reportRuntime("Unexpected Binary Op");
+			internalError("Unexpected Binary Op");
 			assert(false);
 		}
 
@@ -185,10 +232,12 @@ void Interpreter::visit(const BinaryASTNode& node, int depth)
 void Interpreter::visit(const UnaryASTNode& node, int depth)
 {
 	(void)depth;
+	if (!interpreterOkay)
+		return;
 	REQUIRE(node.type == TokenType::MINUS || node.type == TokenType::BANG);
-	if (ErrorReporter::hasError()) return;
 
-	if (!verifyUnderflow("Unary", 1)) return;
+	if (!verifyUnderflow("Unary", 1)) 
+		return;
 
 	Value val = getStack(1);
 	popStack();

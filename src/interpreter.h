@@ -17,7 +17,7 @@ public:
 	// ASTExprVisitor
 	void visit(const ValueASTNode& node, int depth) override;
 	void visit(const IdentifierASTNode& node, int depth) override;
-	void visit(const KeywordASTNode& node, int depth) override;
+	void visit(const AssignmentASTNode& node, int depth) override;
 	void visit(const BinaryASTNode& node, int depth) override;
 	void visit(const UnaryASTNode& node, int depth) override;
 
@@ -26,6 +26,9 @@ public:
 	std::vector<Value> stack;
 
 private:
+	void runtimeError(const std::string& msg);
+	void internalError(const std::string& msg);
+
 	bool verifyUnderflow(const std::string& ctx, int n);
 	bool verifyTypes(const std::string& ctx, const std::vector<ValueType>& types);	// checks underflow as well
 
@@ -43,6 +46,7 @@ private:
 	static constexpr int LHS = 2;
 	static constexpr int RHS = 1;
 
+	bool interpreterOkay = true;
 	std::string* output = nullptr;
 
 	Environment env;

@@ -50,7 +50,7 @@ struct Token {
     double dValue = 0;      // if number
 
     Token() : type(TokenType::error) {}
-    Token(TokenType type, int line, std::string lexeme = "") : type(type), line(line), lexeme(lexeme) {}
+    Token(TokenType type, int line, std::string lexeme) : type(type), line(line), lexeme(lexeme) {}
     Token(double d, int line) : type(TokenType::NUMBER), line(line), dValue(d) {}
 
     bool isBinOp() const {
@@ -77,6 +77,8 @@ public:
     bool debug = false;
 
 private:
+    Token innerGet();
+
     const std::string& _input;
     size_t _pos = 0;
     Token _peek;

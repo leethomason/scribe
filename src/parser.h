@@ -21,17 +21,20 @@ private:
 	std::string ctxName;
 
 	bool check(TokenType type);
+	bool check(TokenType type, Token& matched);	// returns the token, with the line #, etc.
+
 	bool match(const std::vector<TokenType>& types, Token& matched);	
 
 	ASTStmtPtr statement();
 	ASTStmtPtr declaration();
-	ASTStmtPtr assignment();
+	//ASTStmtPtr assignment();
 	ASTStmtPtr varDecl();
 	ASTStmtPtr printStatement();
 	ASTStmtPtr expressionStatement();
 	ASTStmtPtr returnStatement();
 
 	ASTExprPtr expression();
+	ASTExprPtr assignment();
 	ASTExprPtr equality();
 	ASTExprPtr comparison();
 	ASTExprPtr term();

@@ -15,16 +15,6 @@ void BCExprGenerator::visit(const IdentifierASTNode& node, int depth)
 	bc.push_back(PackOpCode(OpCode::LOAD));
 }
 
-void BCExprGenerator::visit(const KeywordASTNode& node, int depth)
-{
-	(void)depth;
-	switch (node.token) {
-		case TokenType::PRINT: bc.push_back(PackOpCode(OpCode::PRINT)); break;
-	default: 
-		REQUIRE(false);
-	}
-}
-
 void BCExprGenerator::visit(const BinaryASTNode& node, int depth)
 {
 	(void)depth;

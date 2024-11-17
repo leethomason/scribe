@@ -10,9 +10,10 @@
 	program -> declaration* EOF
 
 	declaration ->   varDecl 
-	               | statement
+				   | statement
 	varDecl ->   "var" IDENTIFIER ( "=" expression )?
 	           | "var" ":" IDENTIFIER ( "=" expression )?
+	assignment -> IDENTIFIER "=" expression
 	statement ->   exprStmt 
 				 | printStmt
 				 | returnStmt
@@ -21,8 +22,8 @@
 	returnStmt -> "return" expr
 
 	expr -> assignment
-	assignment ->   IDENTIFIER "=" assignment														// FIXME: assigment should be a statement
-	              | equality
+	assignment ->   IDENTIFIER "=" assignment
+				  | equality
 	equality -> comparison ( ( "==" | "!=" ) comparison )*
 	comparison -> term ( ( ">" | ">=" | "<" | "<=" ) term )*
 	term -> factor ( ( "+" | "-" ) factor )*
@@ -35,6 +36,15 @@ bool Parser::check(TokenType type)
 {
 	if (tok.peek().type == type) {
 		tok.get();
+		return true;
+	}
+	return false;
+}
+
+bool Parser::check(TokenType type, Token& t)
+{
+	if (tok.peek().type == type) {
+		t = tok.get();
 		return true;
 	}
 	return false;
@@ -143,13 +153,32 @@ ASTStmtPtr Parser::returnStatement()
 
 ASTStmtPtr Parser::expressionStatement()
 {
+	// x = 3 + 1 + y (expression -> assignment)
 	ASTExprPtr expr = expression();
 	return std::make_shared<ASTExprStmtNode>(expr);
 }
 
 ASTExprPtr Parser::expression()
 {
-	return equality();
+	return assignment();
+}
+
+ASTExprPtr Parser::assignment()
+{
+	ASTExprPtr expr = equality();
+	Token t;
+	if (check(TokenType::EQUAL, t)) {
+		// The expression should be an l-value
+		ASTExprPtr rValue = assignment();
+		const IdentifierASTNode* ident = expr->asIdentifier();
+
+		if (!ident) {
+			ErrorReporter::report(ctxName, t.line, "Invalid assignment target, not an l-value");
+			return nullptr;
+		}
+		return std::make_shared<AssignmentASTNode>(ident->name, rValue);
+	}
+	return expr;
 }
 
 ASTExprPtr Parser::equality()

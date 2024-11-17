@@ -18,8 +18,8 @@ using ASTStmtPtr = std::shared_ptr<ASTStmtNode>;
 
 class ASTExprNode;
 class ValueASTNode;
+class AssignmentASTNode;
 class IdentifierASTNode;
-class KeywordASTNode;
 class BinaryASTNode;
 class UnaryASTNode;
 
@@ -93,9 +93,9 @@ public:
 class ASTExprVisitor
 {
 public:
-    virtual void visit(const ValueASTNode&, int depth) = 0;   
+    virtual void visit(const AssignmentASTNode&, int depth) = 0;
+    virtual void visit(const ValueASTNode&, int depth) = 0;
     virtual void visit(const IdentifierASTNode&, int depth) = 0;
-    virtual void visit(const KeywordASTNode&, int depth) = 0;
     virtual void visit(const BinaryASTNode&, int depth) = 0;
     virtual void visit(const UnaryASTNode&, int depth) = 0;
 };
@@ -106,10 +106,10 @@ public:
     virtual ~ASTExprNode() = default;
     virtual void accept(ASTExprVisitor& visitor, int depth) const = 0;
 
-    // Needed for duck typing.
     virtual ValueType duckType() const {
         return ValueType::tNone;
     }
+    virtual const IdentifierASTNode* asIdentifier() { return nullptr; }
 };
 
 class ValueASTNode : public ASTExprNode
@@ -126,6 +126,19 @@ public:
     Value value;
 };
 
+class AssignmentASTNode : public ASTExprNode
+{
+public:
+	AssignmentASTNode(const std::string& name, ASTExprPtr right) : name(name), right(right) {}
+	virtual void accept(ASTExprVisitor& visitor, int depth) const override { 
+		right->accept(visitor, depth + 1);
+		visitor.visit(*this, depth); 
+	}
+
+	std::string name;
+	ASTExprPtr right;
+};
+
 class IdentifierASTNode : public ASTExprNode
 { 
 public:
@@ -133,17 +146,9 @@ public:
     virtual void accept(ASTExprVisitor& visitor, int depth) const override { 
         visitor.visit(*this, depth); 
     }
+	virtual const IdentifierASTNode* asIdentifier() override { return this; }
 
     std::string name;
-};
-
-class KeywordASTNode : public ASTExprNode
-{
-public:
-    KeywordASTNode(TokenType token) : token(token) {}
-    virtual void accept(ASTExprVisitor& visitor, int depth) const override { visitor.visit(*this, depth); }
-
-    TokenType token = TokenType::error;
 };
 
 class BinaryASTNode : public ASTExprNode

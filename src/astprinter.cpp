@@ -2,9 +2,10 @@
 
 #include <fmt/core.h>
 
-void ASTPrinter::visit(const ASTExprStmtNode&)
+void ASTPrinter::visit(const ASTExprStmtNode& node)
 {
-	assert(false);
+	fmt::print("STMT expr\n");
+	node.expr->accept(*this, 1);
 }
 
 void ASTPrinter::visit(const ASTPrintStmtNode& node)
@@ -38,10 +39,11 @@ void ASTPrinter::visit(const IdentifierASTNode& node, int depth)
 	fmt::print("Identifier: {}\n", node.name);
 }
 
-void ASTPrinter::visit(const KeywordASTNode& node, int depth)
+void ASTPrinter::visit(const AssignmentASTNode& node, int depth)
 {
 	fmt::print("{: >{}}", "", depth * 2);
-	fmt::print("Keyword: {}\n", Token::toString(node.token));
+	fmt::print("Assignment: {}\n", node.name);
+	node.right->accept(*this, depth + 1);
 }
 
 void ASTPrinter::visit(const BinaryASTNode& node, int depth)

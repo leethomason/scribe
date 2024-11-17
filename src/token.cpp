@@ -7,10 +7,7 @@
 Token Tokenizer::peek()
 {
     if (!_hasPeek) {
-        bool savedDebug = debug;
-        debug = false;
-        _peek = get();
-        debug = savedDebug;
+        _peek = innerGet();
         _hasPeek = true;
     }
     return _peek;
@@ -40,16 +37,23 @@ void Tokenizer::skipWhitespace()
 
 Token Tokenizer::get()
 {
+    Token t = innerGet();
+    if (debug)
+        t.print();
+    return t;
+}
+
+
+Token Tokenizer::innerGet()
+{
     if (_hasPeek) {
         _hasPeek = false;
-        if (debug)
-            _peek.print();
         return _peek;
     }
 
     skipWhitespace();
     if (_pos == _input.size()) {
-		return Token(TokenType::eof, _line);
+		return Token(TokenType::eof, _line, "");
 	}
 
     const char c = _input[_pos];
@@ -63,8 +67,6 @@ Token Tokenizer::get()
             _pos += (end - start);
             Token tok(TokenType::NUMBER, _line, std::string(start, end - start));
             tok.dValue = val;
-            if (debug)
-                tok.print();
             return tok;
         }
     }
@@ -87,13 +89,11 @@ Token Tokenizer::get()
 		}
         if (_input[_pos] != c) {
             ErrorReporter::report("fixme", _line, "Unterminated string");
-			return Token(TokenType::error, _line);
+			return Token(TokenType::error, _line, "");
         }
 
 		_pos++;
 		Token token(TokenType::STRING, _line, t);
-        if (debug)
-            token.print();
 		return token;
 	}
 
@@ -107,15 +107,18 @@ Token Tokenizer::get()
             _pos++;
         }
 
-        if (t == "var") return Token(TokenType::VAR, _line);
-        if (t == "return") return Token(TokenType::RETURN, _line);
-        if (t == "print") return Token(TokenType::PRINT, _line);
-        if (t == "true") return Token(TokenType::TRUE, _line);
-        if (t == "false") return Token(TokenType::FALSE, _line);
+        if (t == "var") 
+            return Token(TokenType::VAR, _line, t);
+        if (t == "return") 
+            return Token(TokenType::RETURN, _line, t);
+        if (t == "print") 
+            return Token(TokenType::PRINT, _line, t);
+        if (t == "true") 
+            return Token(TokenType::TRUE, _line, t);
+        if (t == "false") 
+            return Token(TokenType::FALSE, _line, t);
 
         Token token(TokenType::IDENT, _line, t);
-        if (debug)
-            token.print();
         return token;
     }
 
@@ -123,7 +126,7 @@ Token Tokenizer::get()
     std::string sym;
     sym += c;
     _pos++;
-    Token token(TokenType::error, -1);
+    Token token(TokenType::error, -1, "");
 
     switch (c) {
     case '=': token = match('=') ? Token(TokenType::EQUAL_EQUAL, _line, "==") : Token(TokenType::EQUAL, _line, sym); break;
@@ -144,8 +147,6 @@ Token Tokenizer::get()
         ErrorReporter::report("fixme", _line, fmt::format("Unexpected character: {}", c));
         return Token();
     }
-    if (debug)
-        token.print();
     return token;
 }
 
