@@ -15,10 +15,12 @@
 	           | "var" ":" IDENTIFIER ( "=" expression )?
 	assignment -> IDENTIFIER "=" expression
 	statement ->   exprStmt 
+				 | ifStmt
 				 | printStmt
 				 | returnStmt
 				 | block
 	exprStmt -> expr
+	ifStmt -> "if" expression "{" statement ( "else" "{" statement )?	// Note that the "{" is not consumed by the ifStmt, but by the block
 	printStmt -> "print" expr
 	returnStmt -> "return" expr
 	block -> "{" declaration* "}"
@@ -137,12 +139,14 @@ ASTStmtPtr Parser::varDecl()
 
 ASTStmtPtr Parser::statement()
 {
-	if (check(TokenType::PRINT))
-		return printStatement();
-	if (check(TokenType::RETURN))
-		return returnStatement();
 	if (check(TokenType::LEFT_BRACE))
 		return block();
+	if (check(TokenType::RETURN))
+		return returnStatement();
+	if (check(TokenType::PRINT))
+		return printStatement();
+	if (check(TokenType::IF))
+		return ifStatement();
 	return expressionStatement();
 }
 
@@ -156,6 +160,31 @@ ASTStmtPtr Parser::returnStatement()
 {
 	ASTExprPtr expr = expression();
 	return std::make_shared<ASTReturnStmtNode>(expr);
+}
+
+ASTStmtPtr Parser::ifStatement()
+{
+	ASTExprPtr condition = expression();
+	Token t = tok.peek();	// Only peek - don't match - we need to read the block!
+
+	if (t.type != TokenType::LEFT_BRACE) {
+		ErrorReporter::report(ctxName, tok.peek().line, "Expected '{'");
+		return nullptr;
+	}
+
+	ASTStmtPtr thenBranch = block();
+	ASTStmtPtr elseBranch = nullptr;
+
+	if (check(TokenType::ELSE)) {
+		t = tok.peek();
+		if (t.type != TokenType::LEFT_BRACE) {
+			ErrorReporter::report(ctxName, tok.peek().line, "Expected '{'");
+			return nullptr;
+		}
+		elseBranch = block();
+	}
+
+	return std::make_shared<ASTIfStmtNode>(condition, thenBranch, elseBranch);
 }
 
 ASTStmtPtr Parser::block()

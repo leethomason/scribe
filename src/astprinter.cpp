@@ -28,6 +28,17 @@ void ASTPrinter::visit(const ASTBlockStmtNode& node)
 	fmt::print("}}\n");
 }
 
+void ASTPrinter::visit(const ASTIfStmtNode& node)
+{
+	fmt::print("STMT if\n");
+	node.condition->accept(*this, 1);
+	node.thenBranch->accept(*this);
+	if (node.elseBranch) {
+		fmt::print("     else\n");
+		node.elseBranch->accept(*this);
+	}
+}
+
 void ASTPrinter::visit(const ASTVarDeclStmtNode& node)
 {
 	fmt::print("STMT var decl: {}: {}\n", node.name, TypeName(node.valueType));

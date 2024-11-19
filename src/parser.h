@@ -27,11 +27,11 @@ private:
 
 	ASTStmtPtr statement();
 	ASTStmtPtr declaration();
-	//ASTStmtPtr assignment();
 	ASTStmtPtr varDecl();
 	ASTStmtPtr printStatement();
 	ASTStmtPtr expressionStatement();
 	ASTStmtPtr returnStatement();
+	ASTStmtPtr ifStatement();
 	ASTStmtPtr block();
 
 	ASTExprPtr expression();

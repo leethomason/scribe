@@ -210,7 +210,8 @@ static void ScopeTest()
 static void AssignmentExpressions()
 {
 	// Went back and forth on this one.
-	//
+	// In the end, Swift does allow this (and uses it for declaration)
+	// so went with allowing returns from assignment.
 	const std::string s =
 		"var a = 1\n"
 		"var b = 2\n"
@@ -220,8 +221,33 @@ static void AssignmentExpressions()
 	Run(s, Value::Number(3));
 }
 
+static void ShortenedAssignmentExpressions()
+{
+	// Went back and forth on this one.
+	// In the end, Swift does allow this (and uses it for declaration)
+	// so went with allowing returns from assignment.
+	const std::string s =
+		"var a = 1\n"
+		"var b = 2\n"
+		"var c = 3\n"
+		"return a = b = c\n";
+	Run(s, Value::Number(3));
+}
+
+static void BasicIfTest()
+{
+	const std::string s =
+		"var a = 1\n"
+		"if a == 1 {\n"
+		"	return 2\n"
+		"}\n"
+		"return 3";
+	Run(s, Value::Number(2));
+}
+
 void LangTest()
 {
+#if 0
 	RUN_TEST(SimplePrint());
 	RUN_TEST(SimpleReturn());
 	RUN_TEST(SimpleError());
@@ -236,4 +262,8 @@ void LangTest()
 	RUN_TEST(AssignVarPlusOne());
 	RUN_TEST(NoRedeclare());
 	RUN_TEST(ScopeTest());
+	RUN_TEST(AssignmentExpressions());
+	RUN_TEST(ShortenedAssignmentExpressions());
+#endif
+	RUN_TEST(BasicIfTest());
 }

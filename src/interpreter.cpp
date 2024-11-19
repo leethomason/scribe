@@ -6,7 +6,7 @@
 #include "astprinter.h"
 #include "bcgen.h"
 
-#define DEBUG_INTERPRETER() 0
+#define DEBUG_INTERPRETER() 1
 
 Value Interpreter::interpret(const std::string& input, const std::string& ctxName)
 {
@@ -83,6 +83,27 @@ void Interpreter::visit(const ASTReturnStmtNode& node)
 	if (!interpreterOkay)
 		return;
 	REQUIRE(stack.size() == 1);
+}
+
+void Interpreter::visit(const ASTIfStmtNode& node)
+{
+	if (!interpreterOkay)
+		return;
+
+	node.condition->accept(*this, 0);
+	if (!interpreterOkay)
+		return;
+	REQUIRE(stack.size() == 1);
+
+	Value cond = stack.back();
+	popStack();
+	if (cond.isTruthy()) {
+		node.thenBranch->accept(*this);
+	}
+	else if (node.elseBranch) {
+		node.elseBranch->accept(*this);
+	}
+	REQUIRE(stack.empty());
 }
 
 void Interpreter::visit(const ASTBlockStmtNode& node)

@@ -14,9 +14,11 @@ enum class TokenType {
     IDENT,      // Variable name
 
     // Keywords
-    VAR,        // variable declaration
-    RETURN,        // push to stack
-    PRINT,	    // print to console
+    VAR,            // variable declaration
+    RETURN,         // push to stack
+    PRINT,	        // print to console
+	IF,			    // if statement
+	ELSE,           // else statement
 
     // Sybols & operations
     PLUS,           // '+'

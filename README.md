@@ -4,8 +4,6 @@ Experimental / toy script language for games
 
 ## Basics
 
-### Types
-
 Question:
 
 * Is is possible to remove the ';' at the end of a statement?
@@ -43,11 +41,34 @@ var e: Breakfast{} = { "early": Breakfast(), "late": Brunch()}
 var f = Breakfast()
 
 e = {}   // empty, not null
+
+### 'if' clauses
+
+if true {
+    // okay, this is all dangerously WGSL. But it is pretty clean.
+    // the left bracket is used at the condition terminator
+}
+
+var t = a > 0 ? b : c
+// in this case, the ? is used as the condition terminator. Then we can read two expressions.
+
+### Option 1: Classes can be null
+
 // ERROR: only classes can be null.
 //        e = null
 f = null // okay, because this points to a class
          // removing this would be super great. But...then return values
          // need optional support, which isn't so great.
+
+### Option 2: Removing Null
+
+if var b = getMeal() {
+    print(b.total())
+}
+
+if var b = getMeal(2) && var c = getMeal(b.index()) {
+    print(b.total() + c.total())
+}
 
 Primitive:
 

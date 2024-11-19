@@ -14,6 +14,7 @@ class ASTPrintStmtNode;
 class ASTReturnStmtNode;
 class ASTBlockStmtNode;
 class ASTVarDeclStmtNode;
+class ASTIfStmtNode;
 
 using ASTStmtPtr = std::shared_ptr<ASTStmtNode>;
 
@@ -36,6 +37,7 @@ public:
     virtual void visit(const ASTReturnStmtNode&) = 0;
 	virtual void visit(const ASTBlockStmtNode&) = 0;
     virtual void visit(const ASTVarDeclStmtNode&) = 0;
+	virtual void visit(const ASTIfStmtNode&) = 0;
 };
 
 class ASTStmtNode {
@@ -78,6 +80,17 @@ public:
 	virtual void accept(ASTStmtVisitor& visitor) const override { visitor.visit(*this); }
 	
     std::vector<ASTStmtPtr> stmts;
+};
+
+class ASTIfStmtNode : public ASTStmtNode
+{
+public:
+	ASTIfStmtNode(ASTExprPtr condition, ASTStmtPtr thenBranch, ASTStmtPtr elseBranch) : condition(condition), thenBranch(thenBranch), elseBranch(elseBranch) {}
+	virtual void accept(ASTStmtVisitor& visitor) const override { visitor.visit(*this); }
+
+	ASTExprPtr condition;
+	ASTStmtPtr thenBranch;
+	ASTStmtPtr elseBranch;
 };
 
 class ASTVarDeclStmtNode : public ASTStmtNode
