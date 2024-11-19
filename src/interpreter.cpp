@@ -86,6 +86,20 @@ void Interpreter::visit(const ASTReturnStmtNode& node)
 	REQUIRE(stack.size() == 1);
 }
 
+void Interpreter::visit(const ASTBlockStmtNode& node)
+{
+	if (!interpreterOkay)
+		return;
+
+	env.push();
+	for (const auto& stmt : node.stmts) {
+		stmt->accept(*this);
+		if (!interpreterOkay)
+			break;
+	}
+	env.pop();
+}
+
 void Interpreter::visit(const ASTVarDeclStmtNode& node)
 {
 	if (!interpreterOkay)
@@ -187,7 +201,6 @@ void Interpreter::visit(const AssignmentASTNode& node, int depth)
 
 	REQUIRE(stack.size() == 1);
 	Value value = stack.back();
-	//stack.pop_back();				// FIXME: popping and expressions and oh my
 
 	if (!env.set(node.name, value)) {
 		runtimeError(fmt::format("Could not find var: {}", node.name));

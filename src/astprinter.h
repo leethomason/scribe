@@ -14,6 +14,7 @@ public:
 	void visit(const ASTPrintStmtNode&) override;
 	void visit(const ASTReturnStmtNode&) override;
 	void visit(const ASTVarDeclStmtNode&) override;
+	void visit(const ASTBlockStmtNode&) override;
 
 	void print(const ASTExprPtr& ast);
 };

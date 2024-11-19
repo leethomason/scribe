@@ -20,6 +20,14 @@ void ASTPrinter::visit(const ASTReturnStmtNode& node)
 	node.expr->accept(*this, 1);
 }
 
+void ASTPrinter::visit(const ASTBlockStmtNode& node)
+{
+	fmt::print("STMT block {{\n");
+	for (const auto& stmt : node.stmts)
+		stmt->accept(*this);
+	fmt::print("}}\n");
+}
+
 void ASTPrinter::visit(const ASTVarDeclStmtNode& node)
 {
 	fmt::print("STMT var decl: {}: {}\n", node.name, TypeName(node.valueType));

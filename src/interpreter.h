@@ -13,6 +13,7 @@ public:
     virtual void visit(const ASTPrintStmtNode&) override;
 	virtual void visit(const ASTReturnStmtNode&) override;
 	virtual void visit(const ASTVarDeclStmtNode&) override;
+	virtual void visit(const ASTBlockStmtNode&) override;
 
 	// ASTExprVisitor
 	void visit(const ValueASTNode& node, int depth) override;
@@ -49,6 +50,6 @@ private:
 	bool interpreterOkay = true;
 	std::string* output = nullptr;
 
-	Environment env;
+	EnvironmentStack env;
 };
 

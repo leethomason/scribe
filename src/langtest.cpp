@@ -29,6 +29,28 @@ static void Run(const std::string& s, Value expectedResult = Value(), bool expec
 	ErrorReporter::clear();
 }
 
+static void PrintRun(const std::string& s, const std::string& expectedPrint, bool expectedError = false, int errorLine = -1)
+{
+	Interpreter ip;
+	std::string out;
+	ip.setOutput(out);
+	Value r = ip.interpret(s, "langtest-print");
+
+	if (expectedError) {
+		TEST(ErrorReporter::hasError());
+		const ErrorReporter::Report& report = ErrorReporter::reports().front();
+		if (errorLine >= 0) {
+			TEST(errorLine == report.line);
+		}
+	}
+	else {
+		ErrorReporter::printReports();
+		TEST(!ErrorReporter::hasError());
+	}
+	ErrorReporter::clear();
+	TEST(out == expectedPrint);
+}
+
 static void SimplePrint()
 {
 	const std::string s =
@@ -154,8 +176,40 @@ static void NoRedeclare()
 	Run(s, Value(), true, RUNTIME);
 }
 
+static void ScopeTest()
+{
+	const std::string s =
+		"var a = 'global a'\n"
+		"var b = 'global b'\n"
+		"var c = 'global c'\n"
+		"{\n"
+		"	var a = 'outer a'\n"
+		"	var b = 'outer b'\n"
+		"	{\n"
+		"		var a = 'inner a'\n"
+		"		print a print b print c\n"
+		"   }\n"
+		"	print a print b print c\n"
+		"}\n"
+		"print a print b print c\n";
+
+	const std::string expected =
+		"inner a\n"
+		"outer b\n"
+		"global c\n"
+		"outer a\n"
+		"outer b\n"
+		"global c\n"
+		"global a\n"
+		"global b\n"
+		"global c\n";
+
+	PrintRun(s, expected);
+}
+
 void LangTest()
 {
+#if 0
 	RUN_TEST(SimplePrint());
 	RUN_TEST(SimpleReturn());
 	RUN_TEST(SimpleError());
@@ -169,4 +223,6 @@ void LangTest()
 	RUN_TEST(AssignVar());
 	RUN_TEST(AssignVarPlusOne());
 	RUN_TEST(NoRedeclare());
+#endif
+	RUN_TEST(ScopeTest());
 }

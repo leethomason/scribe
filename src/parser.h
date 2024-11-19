@@ -32,6 +32,7 @@ private:
 	ASTStmtPtr printStatement();
 	ASTStmtPtr expressionStatement();
 	ASTStmtPtr returnStatement();
+	ASTStmtPtr block();
 
 	ASTExprPtr expression();
 	ASTExprPtr assignment();

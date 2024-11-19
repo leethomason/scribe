@@ -17,9 +17,11 @@
 	statement ->   exprStmt 
 				 | printStmt
 				 | returnStmt
+				 | block
 	exprStmt -> expr
 	printStmt -> "print" expr
 	returnStmt -> "return" expr
+	block -> "{" declaration* "}"
 
 	expr -> assignment
 	assignment ->   IDENTIFIER "=" assignment
@@ -67,6 +69,9 @@ std::vector<ASTStmtPtr>  Parser::parseStmts()
 {
 	std::vector<ASTStmtPtr> stmts;
 	while (!tok.done()) {
+		if (tok.peek().type == TokenType::RIGHT_BRACE)	// Hmm - end of block. Not totally sure why this is needed - possibly lack of ; in scribe?
+			break;
+
 		ASTStmtPtr stmt = declaration();
 		if (stmt) {
 			stmts.push_back(stmt);
@@ -136,6 +141,8 @@ ASTStmtPtr Parser::statement()
 		return printStatement();
 	if (check(TokenType::RETURN))
 		return returnStatement();
+	if (check(TokenType::LEFT_BRACE))
+		return block();
 	return expressionStatement();
 }
 
@@ -149,6 +156,16 @@ ASTStmtPtr Parser::returnStatement()
 {
 	ASTExprPtr expr = expression();
 	return std::make_shared<ASTReturnStmtNode>(expr);
+}
+
+ASTStmtPtr Parser::block()
+{
+	std::vector<ASTStmtPtr> stmts = parseStmts();
+	if (!check(TokenType::RIGHT_BRACE)) {
+		ErrorReporter::report(ctxName, tok.peek().line, "Expected '}'");
+		return nullptr;
+	}
+	return std::make_shared<ASTBlockStmtNode>(stmts);
 }
 
 ASTStmtPtr Parser::expressionStatement()
