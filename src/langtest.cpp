@@ -207,9 +207,21 @@ static void ScopeTest()
 	PrintRun(s, expected);
 }
 
+static void AssignmentExpressions()
+{
+	// Went back and forth on this one.
+	//
+	const std::string s =
+		"var a = 1\n"
+		"var b = 2\n"
+		"var c = 3\n"
+		"a = b = c\n"
+		"return a";
+	Run(s, Value::Number(3));
+}
+
 void LangTest()
 {
-#if 0
 	RUN_TEST(SimplePrint());
 	RUN_TEST(SimpleReturn());
 	RUN_TEST(SimpleError());
@@ -223,6 +235,5 @@ void LangTest()
 	RUN_TEST(AssignVar());
 	RUN_TEST(AssignVarPlusOne());
 	RUN_TEST(NoRedeclare());
-#endif
 	RUN_TEST(ScopeTest());
 }

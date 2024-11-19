@@ -6,7 +6,7 @@
 #include "astprinter.h"
 #include "bcgen.h"
 
-#define DEBUG_INTERPRETER() 1
+#define DEBUG_INTERPRETER() 0
 
 Value Interpreter::interpret(const std::string& input, const std::string& ctxName)
 {
@@ -23,7 +23,10 @@ Value Interpreter::interpret(const std::string& input, const std::string& ctxNam
         return rc;
 
     for (const auto& stmt : stmts) {
-		assert(stack.size() == 0);
+		// Clear the stack at the beginning of the loop so
+		// that an expression statement can "return" a result.
+		stack.clear();
+
 #if DEBUG_INTERPRETER()
 		ASTPrinter printer;
 		stmt->accept(printer);
@@ -53,10 +56,6 @@ void Interpreter::visit(const ASTExprStmtNode& node)
 		return;
 
 	assert(stack.size() == 1);
-	// FIXME
-	// Should not pop - may be used in the next expression.
-	// But should be popped when the statement is done.
-	popStack();
 }
 
 void Interpreter::visit(const ASTPrintStmtNode& node)
