@@ -6,6 +6,7 @@
 	Issues: 
 		* handling EOL (no semicolon)
 		* ternary! ternary is good.
+		* note that peeking '{' or '}' terminates bunches of things - need to correctly get that in the grammar 
 
 	program -> declaration* EOF
 
@@ -71,9 +72,6 @@ std::vector<ASTStmtPtr>  Parser::parseStmts()
 {
 	std::vector<ASTStmtPtr> stmts;
 	while (!tok.done()) {
-		if (tok.peek().type == TokenType::RIGHT_BRACE)	// Hmm - end of block. Not totally sure why this is needed - possibly lack of ; in scribe?
-			break;
-
 		ASTStmtPtr stmt = declaration();
 		if (stmt) {
 			stmts.push_back(stmt);
@@ -165,19 +163,17 @@ ASTStmtPtr Parser::returnStatement()
 ASTStmtPtr Parser::ifStatement()
 {
 	ASTExprPtr condition = expression();
-	Token t = tok.peek();	// Only peek - don't match - we need to read the block!
 
-	if (t.type != TokenType::LEFT_BRACE) {
+	if (!check(TokenType::LEFT_BRACE)) {
 		ErrorReporter::report(ctxName, tok.peek().line, "Expected '{'");
 		return nullptr;
 	}
-
 	ASTStmtPtr thenBranch = block();
+	REQUIRE(thenBranch);
 	ASTStmtPtr elseBranch = nullptr;
 
 	if (check(TokenType::ELSE)) {
-		t = tok.peek();
-		if (t.type != TokenType::LEFT_BRACE) {
+		if (!check(TokenType::LEFT_BRACE)) {
 			ErrorReporter::report(ctxName, tok.peek().line, "Expected '{'");
 			return nullptr;
 		}
@@ -189,7 +185,11 @@ ASTStmtPtr Parser::ifStatement()
 
 ASTStmtPtr Parser::block()
 {
-	std::vector<ASTStmtPtr> stmts = parseStmts();
+	std::vector<ASTStmtPtr> stmts;
+
+	while(!tok.done() && tok.peek().type != TokenType::RIGHT_BRACE) {
+		stmts.push_back(declaration());
+	}
 	if (!check(TokenType::RIGHT_BRACE)) {
 		ErrorReporter::report(ctxName, tok.peek().line, "Expected '}'");
 		return nullptr;
@@ -199,7 +199,6 @@ ASTStmtPtr Parser::block()
 
 ASTStmtPtr Parser::expressionStatement()
 {
-	// x = 3 + 1 + y (expression -> assignment)
 	ASTExprPtr expr = expression();
 	return std::make_shared<ASTExprStmtNode>(expr);
 }
@@ -312,5 +311,3 @@ ASTExprPtr Parser::primary()
 	}
 	return nullptr;
 }
-
-

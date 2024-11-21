@@ -40,6 +40,19 @@ private:
 		stack.resize(stack.size() - n);
 	}
 
+	// This comes about because assignment can push to the stack, which
+	// leaves something "extra". I wish there was a more elegant solution.
+	struct RestoreStack {
+		RestoreStack(std::vector<Value>& stack) : stack(stack), size(stack.size()) {}
+		~RestoreStack() { stack.resize(size); }
+		std::vector<Value>& stack;
+		size_t size;
+	};
+
+	Value numberBinaryOp(TokenType op, const Value& lhs, const Value& rhs);
+	Value stringBinaryOp(TokenType op, const Value& lhs, const Value& rhs);
+	Value boolBinaryOp(TokenType op, const Value& lhs, const Value& rhs);
+
 	// Warning: unchecked!
 	Value& getStack(int i) {
 		assert(i > 0 && i <= stack.size());

@@ -234,20 +234,43 @@ static void ShortenedAssignmentExpressions()
 	Run(s, Value::Number(3));
 }
 
+static void BlockTest()
+{
+	const std::string s =
+		"var a = 1\n"
+		"{ a = 17 }\n"
+		"return a";
+	Run(s, Value::Number(17));
+}
+
+static void SimpleParenTest()
+{
+	const std::string s =
+		"return (1 + 16)";
+	Run(s, Value::Number(17));
+}
+
+static void ParenTest()
+{
+	const std::string s =
+		"var a = 1\n"
+		"return (a + 16)";
+	Run(s, Value::Number(17));
+}
+
 static void BasicIfTest()
 {
 	const std::string s =
 		"var a = 1\n"
 		"if a == 1 {\n"
-		"	return 2\n"
+		"	a = 2\n"
 		"}\n"
-		"return 3";
+		"return a";
 	Run(s, Value::Number(2));
 }
 
 void LangTest()
 {
-#if 0
 	RUN_TEST(SimplePrint());
 	RUN_TEST(SimpleReturn());
 	RUN_TEST(SimpleError());
@@ -264,6 +287,8 @@ void LangTest()
 	RUN_TEST(ScopeTest());
 	RUN_TEST(AssignmentExpressions());
 	RUN_TEST(ShortenedAssignmentExpressions());
-#endif
 	RUN_TEST(BasicIfTest());
+	RUN_TEST(BlockTest());
+	RUN_TEST(SimpleParenTest());
+	RUN_TEST(ParenTest());
 }

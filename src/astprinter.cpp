@@ -68,15 +68,7 @@ void ASTPrinter::visit(const AssignmentASTNode& node, int depth)
 
 void ASTPrinter::visit(const BinaryASTNode& node, int depth)
 {
-	std::string opName;
-	switch (node.type) {
-	case TokenType::PLUS: opName = "Add"; break;
-	case TokenType::MINUS: opName = "Sub"; break;
-	case TokenType::MULT: opName = "Mul"; break;
-	case TokenType::DIVIDE: opName = "Div"; break;
-	default: REQUIRE(false);
-	}
-
+	std::string opName = Token::toString(node.type);
 	fmt::print("{: >{}}", "", depth * 2);
 	fmt::print("Binary: {}\n", opName);
 

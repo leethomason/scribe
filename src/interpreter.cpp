@@ -25,23 +25,21 @@ Value Interpreter::interpret(const std::string& input, const std::string& ctxNam
     for (const auto& stmt : stmts) {
 		// Clear the stack at the beginning of the loop so
 		// that an expression statement can "return" a result.
-		stack.clear();
+		RestoreStack rs(stack);
 
 #if DEBUG_INTERPRETER()
 		ASTPrinter printer;
 		stmt->accept(printer);
 #endif
         stmt->accept(*this);
+		if (stack.size() == 1)
+			rc = stack[0];
     }
-	if (!interpreterOkay)
-		return rc;
+	REQUIRE(stack.size() <= 1);
 
 	if (stack.size() == 1) {
 		rc = stack[0];
 		stack.clear();
-	}
-	else if (stack.size() > 1) {
-		assert(false);
 	}
     return rc;
 }
@@ -97,13 +95,14 @@ void Interpreter::visit(const ASTIfStmtNode& node)
 
 	Value cond = stack.back();
 	popStack();
+
+	RestoreStack rs(stack);
 	if (cond.isTruthy()) {
 		node.thenBranch->accept(*this);
 	}
 	else if (node.elseBranch) {
 		node.elseBranch->accept(*this);
 	}
-	REQUIRE(stack.empty());
 }
 
 void Interpreter::visit(const ASTBlockStmtNode& node)
@@ -138,11 +137,12 @@ void Interpreter::visit(const ASTVarDeclStmtNode& node)
 	}
 
 	if (node.expr) {
+		RestoreStack rs(stack);
+
 		node.expr->accept(*this, 0);
 		REQUIRE(stack.size() == 1);
 		REQUIRE(stack[0].type == value.type);	// Should have been established by parser
 		value = stack[0];
-		stack.clear();
 	}
 
 	if (!env.define(node.name, value)) {
@@ -228,6 +228,52 @@ void Interpreter::visit(const AssignmentASTNode& node, int depth)
 	}
 }
 
+Value Interpreter::numberBinaryOp(TokenType op, const Value& lhs, const Value& rhs)
+{
+	switch (op) {
+	case TokenType::PLUS: return Value::Number(lhs.vNumber + rhs.vNumber);
+	case TokenType::MINUS: return Value::Number(lhs.vNumber - rhs.vNumber);
+	case TokenType::MULT: return Value::Number(lhs.vNumber * rhs.vNumber);
+	case TokenType::DIVIDE: return Value::Number(lhs.vNumber / rhs.vNumber);
+	case TokenType::GREATER: return Value::Boolean(lhs.vNumber > rhs.vNumber);
+	case TokenType::GREATER_EQUAL: return Value::Boolean(lhs.vNumber >= rhs.vNumber);
+	case TokenType::LESS: return Value::Boolean(lhs.vNumber < rhs.vNumber);
+	case TokenType::LESS_EQUAL: return Value::Boolean(lhs.vNumber <= rhs.vNumber);
+	case TokenType::BANG_EQUAL: return Value::Boolean(lhs.vNumber != rhs.vNumber);
+	case TokenType::EQUAL_EQUAL: return Value::Boolean(lhs.vNumber == rhs.vNumber);
+	default:
+		assert(false);
+	}
+	return Value();
+}
+
+Value Interpreter::stringBinaryOp(TokenType op, const Value& lhs, const Value& rhs)
+{
+	switch (op) {
+	case TokenType::PLUS: return Value::String(*lhs.vString + *rhs.vString);
+	case TokenType::GREATER: return Value::Boolean(lhs.vString > rhs.vString);
+	case TokenType::GREATER_EQUAL: return Value::Boolean(lhs.vString >= rhs.vString);
+	case TokenType::LESS: return Value::Boolean(lhs.vString < rhs.vString);
+	case TokenType::LESS_EQUAL: return Value::Boolean(lhs.vString <= rhs.vString);
+	case TokenType::BANG_EQUAL: return Value::Boolean(lhs.vString != rhs.vString);
+	case TokenType::EQUAL_EQUAL: return Value::Boolean(lhs.vString == rhs.vString);
+	default:
+		assert(false);
+	}
+	return Value();
+}
+
+Value Interpreter::boolBinaryOp(TokenType op, const Value& lhs, const Value& rhs)
+{
+	switch (op) {
+	case TokenType::BANG_EQUAL: return Value::Boolean(lhs.vBoolean != rhs.vBoolean);
+	case TokenType::EQUAL_EQUAL: return Value::Boolean(lhs.vBoolean == rhs.vBoolean);
+	default:
+		assert(false);
+	}
+	return Value();
+}
+
 void Interpreter::visit(const BinaryASTNode& node, int depth)
 {
 	(void)depth;
@@ -239,37 +285,35 @@ void Interpreter::visit(const BinaryASTNode& node, int depth)
 	if (!verifyUnderflow("BinaryOp", 2)) 
 		return;
 
-	Value rhs = getStack(RHS);
-	Value lhs = getStack(LHS);
+	const Value& rhs = getStack(RHS);
+	const Value& lhs = getStack(LHS);
 
-	if (lhs.type == ValueType::tString) {
-		// String concat
-		if (!verifyTypes("BinaryOp::String Concat", { ValueType::tString, ValueType::tString })) return;
-		popStack(2);
+	if (lhs.type != rhs.type) {
+		runtimeError("BinaryOp: type mismatch");
+		return;
+	}
 
-		Value r = Value::String(*lhs.vString + *rhs.vString);
-		stack.push_back(r);
+	Value result;
+
+	if (lhs.type == ValueType::tNumber) {
+		result = numberBinaryOp(node.type, lhs, rhs);
+	}
+	else if (lhs.type == ValueType::tString) {
+		result = stringBinaryOp(node.type, lhs, rhs);
+	}
+	else if (lhs.type == ValueType::tBoolean) {
+		result = boolBinaryOp(node.type, lhs, rhs);
 	}
 	else {
-		if (!verifyTypes("BinaryOp", { ValueType::tNumber, ValueType::tNumber })) return;
-		popStack(2);
-
-		double right = rhs.vNumber;
-		double left = lhs.vNumber;
-		double r = 0.0;
-
-		switch (node.type) {
-		case TokenType::PLUS: r = left + right; break;
-		case TokenType::MINUS: r = left - right; break;
-		case TokenType::MULT: r = left * right; break;
-		case TokenType::DIVIDE: r = left / right; break;
-		default:
-			internalError("Unexpected Binary Op");
-			assert(false);
-		}
-
-		stack.push_back(Value::Number(r));
+		runtimeError("BinaryOp: unhandled type");
 	}
+	if(result.type == ValueType::tNone) {
+		runtimeError("BinaryOp: unhandled op for the type");
+		return;
+	}
+
+	popStack(2);
+	stack.push_back(result);
 }
 
 void Interpreter::visit(const UnaryASTNode& node, int depth)

@@ -191,6 +191,8 @@ std::string Token::toString(TokenType type)
         "LESS",
         "LESS_EQUAL",
     };
+    // Check the name and count list are in sync
+    assert(name[static_cast<int>(TokenType::count) - 1] == std::string("LESS_EQUAL"));
     return name[static_cast<int>(type)];
 }
 
