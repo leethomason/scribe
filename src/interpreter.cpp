@@ -44,7 +44,6 @@ Value Interpreter::interpret(const std::string& input, const std::string& ctxNam
     return rc;
 }
 
-
 void Interpreter::visit(const ASTExprStmtNode& node)
 {
 	if (!interpreterOkay) 

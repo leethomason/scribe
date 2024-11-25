@@ -146,11 +146,19 @@ Token Tokenizer::innerGet()
     case '>': token = match('=') ? Token(TokenType::GREATER_EQUAL, _line, ">=") : Token(TokenType::GREATER, _line, sym); break;
     case '<': token = match('=') ? Token(TokenType::LESS_EQUAL, _line, "<=") : Token(TokenType::LESS, _line, sym); break;
     case ':': token = Token(TokenType::COLON, _line, sym); break;
+    case '&': 
+        if(match('&')) return Token(TokenType::LOGIC_AND, _line, "&&"); 
+        break;
+    case '|': 
+        if(match('|')) return Token(TokenType::LOGIC_OR, _line, "||"); 
+        break;
 
     default:
-        ErrorReporter::report("fixme", _line, fmt::format("Unexpected character: {}", c));
-        return Token();
+        break;
     }
+    if (token.type == TokenType::error) {
+		ErrorReporter::report("fixme", _line, fmt::format("Unexpected character: {}", c));
+	}
     return token;
 }
 
@@ -190,9 +198,12 @@ std::string Token::toString(TokenType type)
         "GREATER_EQUAL",
         "LESS",
         "LESS_EQUAL",
+
+        "LOGIC_OR",
+        "LOGIC_AND",
     };
     // Check the name and count list are in sync
-    assert(name[static_cast<int>(TokenType::count) - 1] == std::string("LESS_EQUAL"));
+    assert(name[static_cast<int>(TokenType::count) - 1] == std::string("LOGIC_AND"));
     return name[static_cast<int>(type)];
 }
 

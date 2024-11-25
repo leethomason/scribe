@@ -42,6 +42,18 @@ var f = Breakfast()
 
 e = {}   // empty, not null
 
+### logical operators
+
+if a && b {
+	// okay
+}
+
+or prefer:
+
+if a and b {
+	// okay
+}
+
 ### 'if' clauses
 
 if true {

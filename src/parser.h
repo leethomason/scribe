@@ -37,6 +37,8 @@ private:
 	ASTExprPtr expression();
 	ASTExprPtr assignment();
 	ASTExprPtr equality();
+	ASTExprPtr logicalOR();
+	ASTExprPtr logicalAND();
 	ASTExprPtr comparison();
 	ASTExprPtr term();
 	ASTExprPtr factor();

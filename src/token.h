@@ -40,6 +40,9 @@ enum class TokenType {
     LESS,           // '<'
     LESS_EQUAL,     // '<='
 
+    LOGIC_OR,       // '||'     // going with Swift here
+    LOGIC_AND,      // '&&'
+
     count
 };
 
