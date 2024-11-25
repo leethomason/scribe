@@ -212,7 +212,8 @@ ASTExprPtr Parser::expression()
 
 ASTExprPtr Parser::assignment()
 {
-	ASTExprPtr expr = equality();
+	ASTExprPtr expr = logicalOR();
+
 	Token t;
 	if (check(TokenType::EQUAL, t)) {
 		// The expression should be an l-value
@@ -224,6 +225,30 @@ ASTExprPtr Parser::assignment()
 			return nullptr;
 		}
 		return std::make_shared<AssignmentASTNode>(ident->name, rValue);
+	}
+	return expr;
+}
+
+ASTExprPtr Parser::logicalOR()
+{
+	ASTExprPtr expr = logicalAND();
+
+	Token t;
+	while (check(TokenType::LOGIC_OR, t)) {
+		ASTExprPtr rhs = logicalAND();
+		expr = std::make_shared<LogicalASTNode>(t.type, expr, rhs);
+	}
+	return expr;
+}
+
+ASTExprPtr Parser::logicalAND()
+{
+	ASTExprPtr expr = equality();
+
+	Token t;
+	while (check(TokenType::LOGIC_AND, t)) {
+		ASTExprPtr rhs = equality();
+		expr = std::make_shared<LogicalASTNode>(t.type, expr, rhs);
 	}
 	return expr;
 }

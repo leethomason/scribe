@@ -91,6 +91,17 @@ void ASTPrinter::visit(const UnaryASTNode& node, int depth)
 	node.right->accept(*this, depth + 1);
 }
 
+void ASTPrinter::visit(const LogicalASTNode& node, int depth)
+{
+	std::string opName = Token::toString(node.type);
+
+	fmt::print("{: >{}}", "", depth * 2);
+	fmt::print("Logical: {}\n", opName);
+
+	node.left->accept(*this, depth + 1);
+	node.right->accept(*this, depth + 1);
+}
+
 void ASTPrinter::print(const ASTExprPtr& ast)
 {
 	ast->accept(*this, 0);

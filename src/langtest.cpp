@@ -116,7 +116,7 @@ static void TestVarDuck()
 static void TestVarDecl()
 {
 	const std::string s =
-		"var x: number = 9\n"
+		"var x: num = 9\n"
 		"return x";
 
 	Run(s, Value::Number(9));
@@ -139,7 +139,6 @@ static void TestHelloWorldVar()
 	Run(s, Value::String("Hello, World!"));
 }
 
-// Need 'if' to turn on...
 static void BadVarSyntax()
 {
 	const std::string s =
@@ -269,6 +268,32 @@ static void BasicIfTest()
 	Run(s, Value::Number(2));
 }
 
+static void LogicalOR()
+{
+	const std::string s =
+		"var a: bool = false\n"
+		"var b: bool = true\n"
+		"var c: str = 'bye'\n"
+		"if a || b {\n"
+		"	c = 'hi'\n"
+		"}\n"
+		"return c\n";
+	Run(s, Value::String("hi"));
+}
+
+static void LogicalAND()
+{
+	const std::string s =
+		"var a: bool = false\n"
+		"var b: bool = true\n"
+		"var c: str = 'bye'\n"
+		"if a && b {\n"
+		"	c = 'hi'\n"
+		"}\n"
+		"return c\n";
+	Run(s, Value::String("bye"));
+}
+
 void LangTest()
 {
 	RUN_TEST(SimplePrint());
@@ -291,4 +316,7 @@ void LangTest()
 	RUN_TEST(BlockTest());
 	RUN_TEST(SimpleParenTest());
 	RUN_TEST(ParenTest());
+	RUN_TEST(BadVarSyntax());
+	RUN_TEST(LogicalOR());
+	RUN_TEST(LogicalAND());
 }

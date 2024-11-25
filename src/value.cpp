@@ -11,7 +11,7 @@ const char* TypeName(ValueType t)
 		"none",
 		"number",
 		"string",
-		"bool",
+		"boolean",
 		"array",
 		"map",
 	};
@@ -20,8 +20,8 @@ const char* TypeName(ValueType t)
 
 ValueType IdentToTypeName(const std::string& s)
 {
-	if (s == "number") return ValueType::tNumber;
-	if (s == "string") return ValueType::tString;
+	if (s == "num") return ValueType::tNumber;
+	if (s == "str") return ValueType::tString;
 	if (s == "bool") return ValueType::tBoolean;
 
 	return ValueType::tNone;

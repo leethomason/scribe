@@ -22,6 +22,7 @@ public:
 	void visit(const AssignmentASTNode& node, int depth) override;
 	void visit(const BinaryASTNode& node, int depth) override;
 	void visit(const UnaryASTNode& node, int depth) override;
+	void visit(const LogicalASTNode& node, int depth) override;
 
 	void setOutput(std::string& out) { output = &out; }
 

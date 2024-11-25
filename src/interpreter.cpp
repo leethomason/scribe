@@ -338,3 +338,32 @@ void Interpreter::visit(const UnaryASTNode& node, int depth)
 		stack.push_back(Value::Boolean(!truthy));
 	}
 }
+
+void Interpreter::visit(const LogicalASTNode& node, int depth)
+{
+	REQUIRE(node.type == TokenType::LOGIC_AND || node.type == TokenType::LOGIC_OR);
+		
+	if (!interpreterOkay)
+		return;
+
+	size_t stackSize = stack.size();
+	node.left->accept(*this, depth + 1);
+	REQUIRE(stack.size() == stackSize + 1);
+	bool isTruthy = getStack(1).isTruthy();
+	popStack();
+
+	if (node.type == TokenType::LOGIC_OR) {
+		if (isTruthy) {
+			stack.push_back(Value::Boolean(true));
+			return;
+		}
+	}
+	else {
+		if (!isTruthy) {
+			stack.push_back(Value::Boolean(false));
+			return;
+		}
+	}
+	node.right->accept(*this, 0);
+	REQUIRE(stack.size() == stackSize + 1);
+}
