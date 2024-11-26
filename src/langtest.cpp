@@ -309,7 +309,6 @@ static void BasicWhile()
 
 void LangTest()
 {
-#if 0
 	RUN_TEST(SimplePrint());
 	RUN_TEST(SimpleReturn());
 	RUN_TEST(SimpleError());
@@ -333,6 +332,5 @@ void LangTest()
 	RUN_TEST(BadVarSyntax());
 	RUN_TEST(LogicalOR());
 	RUN_TEST(LogicalAND());
-#endif
 	RUN_TEST(BasicWhile());
 }
