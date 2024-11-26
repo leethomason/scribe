@@ -3,6 +3,9 @@
 #include "ast.h"
 #include "environment.h"
 
+#include <exception>
+#include <stdexcept>
+
 class Interpreter : public ASTStmtVisitor, public ASTExprVisitor
 {
 public:
@@ -30,6 +33,11 @@ public:
 	std::vector<Value> stack;
 
 private:
+	class InterpreterError : public std::runtime_error {
+		public:
+		InterpreterError(const std::string& msg) : std::runtime_error(msg) {}
+	};
+
 	void runtimeError(const std::string& msg);
 	void internalError(const std::string& msg);
 
@@ -73,7 +81,6 @@ private:
 	static constexpr int LHS = 2;
 	static constexpr int RHS = 1;
 
-	bool interpreterOkay = true;
 	std::string* output = nullptr;
 
 	EnvironmentStack env;
