@@ -6,7 +6,7 @@
 #include "astprinter.h"
 #include "bcgen.h"
 
-#define DEBUG_INTERPRETER() 1
+#define DEBUG_INTERPRETER() 0
 
 Value Interpreter::interpret(const std::string& input, const std::string& ctxName)
 {
@@ -29,9 +29,9 @@ Value Interpreter::interpret(const std::string& input, const std::string& ctxNam
 
 #if DEBUG_INTERPRETER()
 		ASTPrinter printer;
-		stmt->accept(printer);
+		stmt->accept(printer, 0);
 #endif
-        stmt->accept(*this);
+        stmt->accept(*this, 0);
 		if (stack.size() == 1)
 			rc = stack[0];
     }
@@ -44,24 +44,24 @@ Value Interpreter::interpret(const std::string& input, const std::string& ctxNam
     return rc;
 }
 
-void Interpreter::visit(const ASTExprStmtNode& node)
+void Interpreter::visit(const ASTExprStmtNode& node, int depth)
 {
+	CheckStack cs(stack, 1);
+
 	if (!interpreterOkay) 
 		return;
-    node.expr->accept(*this, 0);
+    node.expr->accept(*this, depth + 1);
 	if (!interpreterOkay)
 		return;
-
-	assert(stack.size() == 1);
 }
 
-void Interpreter::visit(const ASTPrintStmtNode& node)
+void Interpreter::visit(const ASTPrintStmtNode& node, int depth)
 {
 	if (!interpreterOkay)
 		return;
 
 	REQUIRE(stack.empty());
-	node.expr->accept(*this, 0);
+	node.expr->accept(*this, depth + 1);
 	REQUIRE(stack.size() == 1);
 
 	std::string s = fmt::format("{}\n", stack[0].toString());
@@ -70,24 +70,24 @@ void Interpreter::visit(const ASTPrintStmtNode& node)
 	popStack();
 }
 
-void Interpreter::visit(const ASTReturnStmtNode& node)
+void Interpreter::visit(const ASTReturnStmtNode& node, int depth)
 {
 	if (!interpreterOkay) 
 		return;
 
-	node.expr->accept(*this, 0);
+	node.expr->accept(*this, depth + 1);
 
 	if (!interpreterOkay)
 		return;
 	REQUIRE(stack.size() == 1);
 }
 
-void Interpreter::visit(const ASTIfStmtNode& node)
+void Interpreter::visit(const ASTIfStmtNode& node, int depth)
 {
 	if (!interpreterOkay)
 		return;
 
-	node.condition->accept(*this, 0);
+	node.condition->accept(*this, depth + 1);
 	if (!interpreterOkay)
 		return;
 	REQUIRE(stack.size() == 1);
@@ -97,28 +97,47 @@ void Interpreter::visit(const ASTIfStmtNode& node)
 
 	RestoreStack rs(stack);
 	if (cond.isTruthy()) {
-		node.thenBranch->accept(*this);
+		node.thenBranch->accept(*this, depth + 1);
 	}
 	else if (node.elseBranch) {
-		node.elseBranch->accept(*this);
+		node.elseBranch->accept(*this, depth + 1);
 	}
 }
 
-void Interpreter::visit(const ASTBlockStmtNode& node)
+void Interpreter::visit(const ASTWhileStmtNode& node, int depth)
+{
+	if (!interpreterOkay)	// FIXME: not sustainable to keep checking interpreterOkay. Need exception for runtime errors.
+		return;
+	while (true) {
+		size_t stackSz = stack.size();
+		node.condition->accept(*this, depth + 1);
+		REQUIRE(stack.size() == stackSz + 1);
+		bool truthy = getStack(1).isTruthy();
+		popStack();
+
+		if (!truthy)
+			break;
+
+		RestoreStack rs(stack);
+		node.body->accept(*this, depth + 1);
+	}
+}
+
+void Interpreter::visit(const ASTBlockStmtNode& node, int depth)
 {
 	if (!interpreterOkay)
 		return;
 
 	env.push();
 	for (const auto& stmt : node.stmts) {
-		stmt->accept(*this);
+		stmt->accept(*this, depth + 1);
 		if (!interpreterOkay)
 			break;
 	}
 	env.pop();
 }
 
-void Interpreter::visit(const ASTVarDeclStmtNode& node)
+void Interpreter::visit(const ASTVarDeclStmtNode& node, int depth)
 {
 	if (!interpreterOkay)
 		return;
@@ -138,7 +157,7 @@ void Interpreter::visit(const ASTVarDeclStmtNode& node)
 	if (node.expr) {
 		RestoreStack rs(stack);
 
-		node.expr->accept(*this, 0);
+		node.expr->accept(*this, depth + 1);
 		REQUIRE(stack.size() == 1);
 		REQUIRE(stack[0].type == value.type);	// Should have been established by parser
 		value = stack[0];
@@ -213,12 +232,13 @@ void Interpreter::visit(const IdentifierASTNode& node, int depth)
 void Interpreter::visit(const AssignmentASTNode& node, int depth)
 {
 	(void)depth;
+	CheckStack cs(stack, 1);	// Assignment leaves a value on the stack. Drives me a little crazy.
+	// Really want to make this more elegant.
 
-	node.right->accept(*this, 0);
+	node.right->accept(*this, depth + 1);
 	if (!interpreterOkay) 
 		return;
 
-	REQUIRE(stack.size() == 1);
 	Value value = stack.back();
 
 	if (!env.set(node.name, value)) {
@@ -279,8 +299,8 @@ void Interpreter::visit(const BinaryASTNode& node, int depth)
 	if (!interpreterOkay) 
 		return;
 
-	node.left->accept(*this, 0);
-	node.right->accept(*this, 0);
+	node.left->accept(*this, depth + 1);
+	node.right->accept(*this, depth + 1);
 	if (!verifyUnderflow("BinaryOp", 2)) 
 		return;
 
@@ -322,7 +342,7 @@ void Interpreter::visit(const UnaryASTNode& node, int depth)
 		return;
 	REQUIRE(node.type == TokenType::MINUS || node.type == TokenType::BANG);
 
-	node.right->accept(*this, 0);
+	node.right->accept(*this, depth + 1);
 	if (!verifyUnderflow("Unary", 1)) 
 		return;
 
@@ -364,6 +384,6 @@ void Interpreter::visit(const LogicalASTNode& node, int depth)
 			return;
 		}
 	}
-	node.right->accept(*this, 0);
+	node.right->accept(*this, depth + 1);
 	REQUIRE(stack.size() == stackSize + 1);
 }

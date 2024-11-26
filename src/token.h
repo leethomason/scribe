@@ -3,15 +3,15 @@
 #include <string>
 
 enum class TokenType {
-    eof,        // End of file/input
-    error,      // Parsing error
+    eof,            // End of file/input
+    error,          // Parsing error
 
     // Numbers & vars
-    NUMBER,     // Number
+    NUMBER,         // Number
     STRING,
     TRUE,
     FALSE,
-    IDENT,      // Variable name
+    IDENT,          // Variable name
 
     // Keywords
     VAR,            // variable declaration
@@ -19,6 +19,7 @@ enum class TokenType {
     PRINT,	        // print to console
 	IF,			    // if statement
 	ELSE,           // else statement
+    WHILE,		    // while statement
 
     // Sybols & operations
     PLUS,           // '+'

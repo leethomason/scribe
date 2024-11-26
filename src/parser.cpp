@@ -18,11 +18,13 @@
 	statement ->   exprStmt 
 				 | ifStmt
 				 | printStmt
+				 | whileStmt
 				 | returnStmt
 				 | block
 	exprStmt -> expr
 	ifStmt -> "if" expression "{" statement ( "else" "{" statement )?	// Note that the "{" is not consumed by the ifStmt, but by the block
 	printStmt -> "print" expr
+	whileStmt -> "while" expression block
 	returnStmt -> "return" expr
 	block -> "{" declaration* "}"
 
@@ -147,6 +149,8 @@ ASTStmtPtr Parser::statement()
 		return printStatement();
 	if (check(TokenType::IF))
 		return ifStatement();
+	if (check(TokenType::WHILE))
+		return whileStatement();
 	return expressionStatement();
 }
 
@@ -183,6 +187,19 @@ ASTStmtPtr Parser::ifStatement()
 	}
 
 	return std::make_shared<ASTIfStmtNode>(condition, thenBranch, elseBranch);
+}
+
+ASTStmtPtr Parser::whileStatement()
+{
+	ASTExprPtr condition = expression();
+
+	if (!check(TokenType::LEFT_BRACE)) {
+		ErrorReporter::report(ctxName, tok.peek().line, "Expected '{'");
+		return nullptr;
+	}
+	ASTStmtPtr body = block();
+	REQUIRE(body);
+	return std::make_shared<ASTWhileStmtNode>(condition, body);
 }
 
 ASTStmtPtr Parser::block()

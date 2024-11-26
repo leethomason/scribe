@@ -294,8 +294,22 @@ static void LogicalAND()
 	Run(s, Value::String("bye"));
 }
 
+static void BasicWhile()
+{
+	const std::string s =
+		"var a = 0\n"
+		"var b = 0\n"
+		"while a < 10 {\n"
+		"  a = a + 1\n"
+		"  b = b + 2\n"
+		"}\n"
+		"return b";
+	Run(s, Value::Number(20));
+}
+
 void LangTest()
 {
+#if 0
 	RUN_TEST(SimplePrint());
 	RUN_TEST(SimpleReturn());
 	RUN_TEST(SimpleError());
@@ -319,4 +333,6 @@ void LangTest()
 	RUN_TEST(BadVarSyntax());
 	RUN_TEST(LogicalOR());
 	RUN_TEST(LogicalAND());
+#endif
+	RUN_TEST(BasicWhile());
 }

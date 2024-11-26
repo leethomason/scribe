@@ -11,12 +11,13 @@ public:
 	void visit(const UnaryASTNode& node, int depth) override;
 	void visit(const LogicalASTNode& node, int depth) override;
 
-	void visit(const ASTExprStmtNode&) override;
-	void visit(const ASTPrintStmtNode&) override;
-	void visit(const ASTReturnStmtNode&) override;
-	void visit(const ASTVarDeclStmtNode&) override;
-	void visit(const ASTBlockStmtNode&) override;
-	void visit(const ASTIfStmtNode& node) override;
+	void visit(const ASTExprStmtNode&, int depth) override;
+	void visit(const ASTPrintStmtNode&, int depth) override;
+	void visit(const ASTReturnStmtNode&, int depth) override;
+	void visit(const ASTVarDeclStmtNode&, int depth) override;
+	void visit(const ASTBlockStmtNode&, int depth) override;
+	void visit(const ASTIfStmtNode& node, int depth) override;
+	void visit(const ASTWhileStmtNode& node, int depth) override;
 
 	void print(const ASTExprPtr& ast);
 };

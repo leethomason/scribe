@@ -2,48 +2,57 @@
 
 #include <fmt/core.h>
 
-void ASTPrinter::visit(const ASTExprStmtNode& node)
+void ASTPrinter::visit(const ASTExprStmtNode& node, int depth)
 {
 	fmt::print("STMT expr\n");
-	node.expr->accept(*this, 1);
+	node.expr->accept(*this, depth + 1);
 }
 
-void ASTPrinter::visit(const ASTPrintStmtNode& node)
+void ASTPrinter::visit(const ASTPrintStmtNode& node, int depth)
 {
 	fmt::print("STMT print\n");
-	node.expr->accept(*this, 1);
+	node.expr->accept(*this, depth + 1);
 }
 
-void ASTPrinter::visit(const ASTReturnStmtNode& node)
+void ASTPrinter::visit(const ASTReturnStmtNode& node, int depth)
 {
 	fmt::print("STMT return\n");
-	node.expr->accept(*this, 1);
+	node.expr->accept(*this, depth + 1);
 }
 
-void ASTPrinter::visit(const ASTBlockStmtNode& node)
+void ASTPrinter::visit(const ASTBlockStmtNode& node, int depth)
 {
 	fmt::print("STMT block {{\n");
 	for (const auto& stmt : node.stmts)
-		stmt->accept(*this);
+		stmt->accept(*this, depth + 1);
 	fmt::print("}}\n");
 }
 
-void ASTPrinter::visit(const ASTIfStmtNode& node)
+void ASTPrinter::visit(const ASTIfStmtNode& node, int depth)
 {
 	fmt::print("STMT if\n");
-	node.condition->accept(*this, 1);
-	node.thenBranch->accept(*this);
+	node.condition->accept(*this, depth + 1);
+	node.thenBranch->accept(*this, depth + 1);
 	if (node.elseBranch) {
 		fmt::print("     else\n");
-		node.elseBranch->accept(*this);
+		node.elseBranch->accept(*this, depth + 1);
 	}
 }
 
-void ASTPrinter::visit(const ASTVarDeclStmtNode& node)
+void ASTPrinter::visit(const ASTWhileStmtNode& node, int depth)
+{
+	fmt::print("STMT while\n");
+	fmt::print("  Condition\n");
+	node.condition->accept(*this, depth + 1);
+	fmt::print("  Body\n");
+	node.body->accept(*this, depth + 1);
+}
+
+void ASTPrinter::visit(const ASTVarDeclStmtNode& node, int depth)
 {
 	fmt::print("STMT var decl: {}: {}\n", node.name, TypeName(node.valueType));
 	if (node.expr)
-		node.expr->accept(*this, 1);
+		node.expr->accept(*this, depth + 1);
 }
 
 void ASTPrinter::visit(const ValueASTNode& node, int depth)

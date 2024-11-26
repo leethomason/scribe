@@ -9,12 +9,13 @@ public:
     Value interpret(const std::string& input, const std::string& contextName);
 
 	// ASTStmtVisitor
-    virtual void visit(const ASTExprStmtNode&) override;
-    virtual void visit(const ASTPrintStmtNode&) override;
-	virtual void visit(const ASTReturnStmtNode&) override;
-	virtual void visit(const ASTVarDeclStmtNode&) override;
-	virtual void visit(const ASTBlockStmtNode&) override;
-	virtual void visit(const ASTIfStmtNode& node) override;
+    virtual void visit(const ASTExprStmtNode&, int depth) override;
+    virtual void visit(const ASTPrintStmtNode&, int depth) override;
+	virtual void visit(const ASTReturnStmtNode&, int depth) override;
+	virtual void visit(const ASTVarDeclStmtNode&, int depth) override;
+	virtual void visit(const ASTBlockStmtNode&, int depth) override;
+	virtual void visit(const ASTIfStmtNode& node, int depth) override;
+	virtual void visit(const ASTWhileStmtNode& node, int depth) override;
 
 	// ASTExprVisitor
 	void visit(const ValueASTNode& node, int depth) override;
@@ -48,6 +49,16 @@ private:
 		~RestoreStack() { stack.resize(size); }
 		std::vector<Value>& stack;
 		size_t size;
+	};
+
+	// Checking that the stack is left as is expected.
+	struct CheckStack {
+		CheckStack(std::vector<Value>& stack, size_t delta) : stack(stack) {
+			expected = stack.size() + delta;
+		};
+		~CheckStack() { REQUIRE(stack.size() == expected); }
+		std::vector<Value>& stack;
+		size_t expected = 0;
 	};
 
 	Value numberBinaryOp(TokenType op, const Value& lhs, const Value& rhs);
