@@ -3,6 +3,7 @@
 
 #include <assert.h>
 
+#if 0
 #define TEST(x)                                                 \
 	if (!(x)) {	                                                \
 		fmt::print("Test failure line {} in {}\n", __LINE__, __FILE__);\
@@ -184,3 +185,4 @@ void Machine::test()
 	RUN_TEST(XPlusYIsThree(OpCode::DEFINE_LOCAL));
 	RUN_TEST(CatHelloWorld());
 }
+#endif

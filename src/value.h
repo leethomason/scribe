@@ -6,42 +6,40 @@
 #include <vector>
 #include <map>
 
-enum class ValueType {
-	tNone,
+enum class PType : uint8_t {
+	tNone,		// not nil - used for error and initialization
 	tNumber,
 	tString,
 	tBoolean,
-	tArray,
-	tMap,
-	count
+	tClass		// need to add a class type as well
 };
 
-class ValueType2 {
+enum class Layout : uint8_t {
+	tScalar,
+	tList,
+	tMap
+};
+
+class ValueType {
 public:
-	enum class Primary : uint8_t {
-		tNone,		// not nil - used for error and initialization
-		tNumber,
-		tString,
-		tBoolean,
-		tClass		// need to add a class type as well
-	};
-	enum class Secondary : uint8_t {
-		tScalar,
-		tList,
-		tMap
-	};
-	Primary primary = Primary::tNone;
-	Secondary secondary = Secondary::tScalar;
+	ValueType() {}
+	ValueType(PType p) : pType(p) {}
+	ValueType(PType p, Layout s) : pType(p), layout(s) {}
+
+	PType pType = PType::tNone;
+	Layout layout = Layout::tScalar;
+
+	std::string pTypeName() const;
+	std::string typeName() const;
+
+	static ValueType fromTypeName(const std::string&);
+
+	bool operator==(const ValueType& rhs) const { return rhs.pType == pType && rhs.layout == layout; }
+	bool operator!=(const ValueType& rhs) const { return !(*this == rhs); }
 };
-
-const char* TypeName(ValueType t);
-
-// Currently: tNumber, tString, tBoolean
-// tNone for error
-ValueType IdentToTypeName(const std::string&);
 
 struct Value {
-	Value() : type(ValueType::tNone), vNumber(0) {}
+	Value() : vNumber(0) {}
 	~Value(); // I. destructor
 
 	Value(const Value& rhs); // II. copy constructor
@@ -56,18 +54,19 @@ struct Value {
 	// is a mess. Use constructor functions.
 
 	static Value Number(double v) {
-		Value val; val.type = ValueType::tNumber; val.vNumber = v; return val;
+		Value val; val.type.pType = PType::tNumber; val.vNumber = v; return val;
 	}
 	static Value String(const std::string& v) {
-		Value val; val.type = ValueType::tString; val.vString = new std::string(v); return val;
+		Value val; val.type.pType = PType::tString; val.vString = new std::string(v); return val;
 	}
 	static Value Boolean(bool v) {
-		Value val; val.type = ValueType::tBoolean; val.vBoolean = v; return val;
+		Value val; val.type.pType = PType::tBoolean; val.vBoolean = v; return val;
 	}
+	static Value Default(ValueType valueType);
 
 	std::string toString() const;
 
-	// Ooh boy. This is always up to debate.
+	// Oh boy. This is always up to debate.
 	bool isTruthy() const;
 	bool isFalsey() const { return !isTruthy(); }
 
@@ -83,5 +82,4 @@ struct Value {
 private:
 	void clear();
 	void copy(const Value& rhs);
-	//void move(Value& other);
 };

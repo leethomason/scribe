@@ -23,7 +23,7 @@ int main()
     _CrtMemCheckpoint(&s1);
 #endif
     
-    Machine::test();
+    //Machine::test();
     Tokenizer::test();
     LangTest();
 
@@ -42,7 +42,7 @@ int main()
                 ErrorReporter::clear();
             }
 
-            if (rc.type != ValueType::tNone) {
+            if (rc.type != ValueType()) {
 				fmt::print("Result: {}\n", rc.toString());
 			}
         }

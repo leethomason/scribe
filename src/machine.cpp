@@ -3,6 +3,7 @@
 #include <fmt/core.h>
 #include <assert.h>
 
+#if 0
 static const char* gOpCodeNames[static_cast<int>(OpCode::count)] = {
 	"NO_OP",
 	"PUSH",
@@ -40,7 +41,7 @@ bool Machine::verifyTypes(const std::string& ctx, const std::vector<ValueType>& 
 	for (size_t i = 0; i < types.size(); i++) {
 		ValueType type = getStack(1).type;
 		if (type != types[i]) {
-			setErrorMessage(fmt::format("{}: expected '{}' at stack -{}", ctx, TypeName(type), i+1));
+			setErrorMessage(fmt::format("{}: expected '{}' at stack -{}", ctx, type.typeName(), i + 1));
 			return false;
 		}
 	}
@@ -56,9 +57,13 @@ void Machine::popStack(int n)
 
 void Machine::binaryOp(OpCode opCode)
 {
-	bool stringAdd = stack.size() > 1 && getStack(1).type == ValueType::tString;
+	bool stringAdd = stack.size() > 1 && getStack(1).type.pType== PType::tString;
+	assert(getStack(1).type.layout == Layout::tScalar); // others not implemented
 	if (stringAdd) {
-		if (!verifyTypes("ADD concat", {ValueType::tString, ValueType::tString})) return;
+		if (!verifyTypes("ADD concat", {
+			ValueType(PType::tString), 
+			ValueType(PType::tString) })) 
+			return;
 
 		const std::string& lhs = *getStack(2).vString;
 		const std::string& rhs = *getStack(1).vString;
@@ -67,7 +72,10 @@ void Machine::binaryOp(OpCode opCode)
 		stack.push_back(Value::String(result));
 	}
 	else {
-		if (!verifyTypes(gOpCodeNames[(int)opCode], {ValueType::tNumber, ValueType::tNumber})) return;
+		if (!verifyTypes(gOpCodeNames[(int)opCode], {
+			ValueType(PType::tNumber), 
+			ValueType(PType::tNumber) })) 
+			return;
 
 		double rhs = getStack(1).vNumber;
 		double lhs = getStack(2).vNumber;
@@ -93,7 +101,7 @@ void Machine::equal(OpCode op)
 	const Value& rhs = getStack(1);
 	const Value& lhs = getStack(2);
 	if (rhs.type != lhs.type) {
-		setErrorMessage(fmt::format("{}: type mismatch: {} != {}", opName, TypeName(lhs.type), TypeName(rhs.type)));
+		setErrorMessage(fmt::format("{}: type mismatch: {} != {}", opName, lhs.type.typeName(), rhs.type.typeName()));
 		return;
 	}
 	bool result = rhs == lhs;
@@ -107,7 +115,7 @@ void Machine::compare(OpCode opCode)
 {
 	REQUIRE(opCode == OpCode::LESS || opCode == OpCode::LESS_EQUAL || opCode == OpCode::GREATER || opCode == OpCode::GREATER_EQUAL);
 	const std::string& opName = gOpCodeNames[(int)opCode];
-	if (!verifyTypes(opName, { ValueType::tNumber, ValueType::tNumber })) return;
+	if (!verifyTypes(opName, { P::tNumber, ValueType::tNumber })) return;
 
 	double rhs = getStack(1).vNumber;
 	double lhs = getStack(2).vNumber;
@@ -385,3 +393,4 @@ void Machine::dump(const std::vector<Instruction>& instructions, const ConstPool
 		}
 	}
 }
+#endif

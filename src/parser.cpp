@@ -114,8 +114,8 @@ ASTStmtPtr Parser::varDecl()
 			ErrorReporter::report(ctxName, t.line, "Expected type");
 			return nullptr;
 		}
-		ValueType valueType = IdentToTypeName(type.lexeme);
-		if (valueType == ValueType::tNone) {
+		ValueType valueType = ValueType::fromTypeName(type.lexeme);
+		if (valueType == ValueType()) {
 			ErrorReporter::report(ctxName, t.line, "Unrecognized type");
 			return nullptr;
 		}
@@ -137,7 +137,7 @@ ASTStmtPtr Parser::varDecl()
 
 		// Very simple duck typing rules!
 		ValueType valueType = expr->duckType();
-		if (valueType == ValueType::tNone) {
+		if (valueType == ValueType()) {
 			ErrorReporter::report(ctxName, t.line, "Could not duck type");
 			return nullptr;
 		}

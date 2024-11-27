@@ -3,32 +3,33 @@
 #include <fmt/core.h>
 #include <assert.h>
 
-const char* TypeName(ValueType t)
+Value Value::Default(ValueType valueType)
 {
-	REQUIRE((int)t >= 0 && (int)t < (int)ValueType::count);
+	Value v;
 
-	static const char* names[] = {
-		"none",
-		"number",
-		"string",
-		"boolean",
-		"array",
-		"map",
-	};
-	return names[static_cast<int>(t)];
+	if (valueType.layout == Layout::tScalar) {
+		switch (valueType.pType) {
+		case PType::tNumber:
+			v = Value::Number(0.0);
+			break;
+		case PType::tBoolean:
+			v = Value::Boolean(false);
+			break;
+		case PType::tString:
+			v = Value::String("");
+			break;
+		default:
+			break; // will throw an error.
+		}
+	}
+	else {
+		assert(false); // not yet implemented
+	}
+	return v;
 }
 
-ValueType IdentToTypeName(const std::string& s)
-{
-	if (s == "num") return ValueType::tNumber;
-	if (s == "str") return ValueType::tString;
-	if (s == "bool") return ValueType::tBoolean;
 
-	return ValueType::tNone;
-}
-
-
-Value::Value(const Value& rhs) : type(ValueType::tNone)
+Value::Value(const Value& rhs)
 {
 	copy(rhs);
 }
@@ -44,13 +45,13 @@ bool Value::operator==(const Value& rhs) const
 {
 	if (type != rhs.type) return false;
 
-	switch (type) {
-	case ValueType::tNone: return true;
-	case ValueType::tNumber: return vNumber == rhs.vNumber;
-	case ValueType::tBoolean: return vBoolean == rhs.vBoolean;
-	case ValueType::tString: return *vString == *rhs.vString;
-	case ValueType::tArray: return *vArray == *rhs.vArray;
-	case ValueType::tMap: return *vMap == *rhs.vMap;
+	switch (type.pType) {
+	case PType::tNone: return true;
+	case PType::tNumber: return vNumber == rhs.vNumber;
+	case PType::tBoolean: return vBoolean == rhs.vBoolean;
+	case PType::tString: return *vString == *rhs.vString;
+	default:
+		assert(false); // not yet implemnted
 	}
 	return false;
 }
@@ -107,16 +108,19 @@ void Value::move(Value& other)
 
 void Value::clear()
 {
-	switch (type) {
-	case ValueType::tNone:
-	case ValueType::tNumber:
-	case ValueType::tBoolean:
+	assert(type.layout == Layout::tScalar); // not yet implemented
+
+	switch (type.pType) {
+	case PType::tNone:
+	case PType::tNumber:
+	case PType::tBoolean:
 		break;
-	case ValueType::tString: delete vString; break;
-	case ValueType::tArray: delete vArray; break;
-	case ValueType::tMap: delete vMap; break;
+	case PType::tString: delete vString;
+		break;
+	default:
+		assert(false); // not implemented
 	}
-	type = ValueType::tNone;
+	type = PType::tNone;
 	vNumber = 0;
 }
 
@@ -124,43 +128,39 @@ void Value::copy(const Value& rhs)
 {
 	clear();
 	type = rhs.type;
-	switch (type) {
-	case ValueType::tNone:
+	switch (type.pType) {
+	case PType::tNone:
 		vNumber = 0;
 		break;
-	case ValueType::tNumber:
+	case PType::tNumber:
 		vNumber = rhs.vNumber;
 		break;
-	case ValueType::tBoolean:
+	case PType::tBoolean:
 		vBoolean = rhs.vBoolean;
 		break;
-	case ValueType::tString: 
+	case PType::tString:
 		vString = new std::string(*rhs.vString); 
 		break;
-	case ValueType::tArray: 
-		vArray = new std::vector<Value>(*rhs.vArray); 
-		break;
-	case ValueType::tMap: 
-		vMap = new std::map<std::string, Value>(*rhs.vMap); 
-		break;
+	default:
+		assert(false); // not yet implemented
 	}
 }
 
 std::string Value::toString() const
 {
-	switch (type) {
-	case ValueType::tNone:
+	assert(type.layout == Layout::tScalar); // not yet implemented
+
+	switch (type.pType) {
+	case PType::tNone:
 		return "none";
-	case ValueType::tNumber:
+	case PType::tNumber:
 		return fmt::format("{}", vNumber);
-	case ValueType::tBoolean:
+	case PType::tBoolean:
 		return vBoolean ? "true" : "false";
-	case ValueType::tString:
+	case PType::tString:
 		return *vString;
-	case ValueType::tArray:
-		return "[]";
-	case ValueType::tMap:
-		return "{}";
+	default:
+		assert(false); // not implemented
 	}
 	assert(false);
 	return "";
@@ -168,20 +168,67 @@ std::string Value::toString() const
 
 bool Value::isTruthy() const
 {
-	switch (type) {
-	case ValueType::tNone:
+	assert(type.layout == Layout::tScalar); // not yet implemented
+
+	switch (type.pType) {
+	case PType::tNone:
 		return false;
-	case ValueType::tNumber:
-		return vNumber != 0;
-	case ValueType::tBoolean:
+	case PType::tNumber:
+		return vNumber != 0.0;
+	case PType::tBoolean:
 		return vBoolean;
-	case ValueType::tString:
+	case PType::tString:
 		return !vString->empty();
-	case ValueType::tArray:
-		return !vArray->empty();
-	case ValueType::tMap:
-		return !vMap->empty();
+	default:
+		assert(false); // not yet implemented
 	}
 	REQUIRE(false);
 	return false;
+}
+
+std::string ValueType::pTypeName() const
+{
+	std::string name;
+	switch (pType) {
+	case PType::tNone: return "none";
+	case PType::tNumber: return "num";
+	case PType::tBoolean: return "bool";
+	case PType::tString: return "str";
+	default:
+		assert(false); // not yet implemented
+	}
+	return name;
+}
+
+std::string ValueType::typeName() const
+{
+	std::string name = pTypeName();
+
+	if (layout == Layout::tList)
+		name += "[]";
+	else if (layout == Layout::tMap)
+		name += "{}";
+
+	assert(!name.empty());
+	return name;
+}
+
+/*static*/ ValueType ValueType::fromTypeName(const std::string& name)
+{
+	ValueType type;
+	type.layout = Layout::tScalar;
+
+	if (name == "num") {
+		type.pType = PType::tNumber;
+	}
+	else if (name == "bool") {
+		type.pType = PType::tBoolean;
+	}
+	else if (name == "str") {
+		type.pType = PType::tString;
+	}
+	else {
+		assert(false); // not yet implemented
+	}
+	return type;
 }

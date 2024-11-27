@@ -165,7 +165,7 @@ public:
     }
 
     std::string name;
-    ValueType valueType = ValueType::tNone;
+    ValueType valueType;
     ASTExprPtr expr;
 };
 
@@ -189,7 +189,7 @@ public:
     virtual void accept(ASTExprVisitor& visitor, int depth) const = 0;
 
     virtual ValueType duckType() const {
-        return ValueType::tNone;
+        return ValueType();
     }
     virtual const IdentifierASTNode* asIdentifier() { return nullptr; }
 };

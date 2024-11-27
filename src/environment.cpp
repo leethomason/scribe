@@ -55,7 +55,7 @@ Value EnvironmentStack::get(const std::string& name)
 	Value v;
 	for (auto it = stack.rbegin(); it != stack.rend(); ++it) {
 		v = it->get(name);
-		if (v.type != ValueType::tNone)
+		if (v.type != ValueType())
 			break;
 	}
 	return v;

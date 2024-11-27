@@ -117,16 +117,7 @@ void Interpreter::visit(const ASTVarDeclStmtNode& node, int depth)
 {
 	REQUIRE(stack.empty());
 
-	Value value;
-
-	// This assigns default values for types.
-	switch (node.valueType) {
-	case ValueType::tNumber: value = Value::Number(0.0); break;
-	case ValueType::tString: value = Value::String(""); break;
-	case ValueType::tBoolean: value = Value::Boolean(false); break;
-	default:
-		assert(false); // unimplemented? internal error.
-	}
+	Value value = Value::Default(node.valueType);
 
 	if (node.expr) {
 		RestoreStack rs(stack);
@@ -172,7 +163,22 @@ bool Interpreter::verifyTypes(const std::string& ctx, const std::vector<ValueTyp
 	for (size_t i = 0; i < types.size(); i++) {
 		ValueType type = stack[stack.size() - i - 1].type;
 		if (type != types[i]) {
-			runtimeError(fmt::format("{}: expected '{}' at stack -{}", ctx, TypeName(type), i + 1));
+			runtimeError(fmt::format("{}: expected '{}' at stack {}", ctx, type.typeName(), i + 1));
+			return false;
+		}
+	}
+	return true;
+}
+
+bool Interpreter::verifyScalarTypes(const std::string& ctx, const std::vector<PType>& types)
+{
+	REQUIRE(types.size() > 0);
+
+	if (!verifyUnderflow(ctx, (int)types.size())) return false;
+	for (size_t i = 0; i < types.size(); i++) {
+		ValueType type = stack[stack.size() - i - 1].type;
+		if (type.layout != Layout::tScalar || type.pType != types[i]) {
+			runtimeError(fmt::format("{}: expected '{}' at stack {}", ctx, type.typeName(), i + 1));
 			return false;
 		}
 	}
@@ -192,7 +198,7 @@ void Interpreter::visit(const IdentifierASTNode& node, int depth)
 
 	Value value = env.get(node.name);
 
-	if (value.type == ValueType::tNone) {
+	if (value.type == ValueType()) {
 		runtimeError(fmt::format("Could not find var: {}", node.name));
 		return;
 	}
@@ -279,20 +285,21 @@ void Interpreter::visit(const BinaryASTNode& node, int depth)
 	}
 
 	Value result;
+	assert(lhs.type.layout == Layout::tScalar);	// need to implement reference
 
-	if (lhs.type == ValueType::tNumber) {
+	if (lhs.type.pType == PType::tNumber) {
 		result = numberBinaryOp(node.type, lhs, rhs);
 	}
-	else if (lhs.type == ValueType::tString) {
+	else if (lhs.type.pType == PType::tString) {
 		result = stringBinaryOp(node.type, lhs, rhs);
 	}
-	else if (lhs.type == ValueType::tBoolean) {
+	else if (lhs.type.pType == PType::tBoolean) {
 		result = boolBinaryOp(node.type, lhs, rhs);
 	}
 	else {
 		runtimeError("BinaryOp: unhandled type");
 	}
-	if(result.type == ValueType::tNone) {
+	if(result.type == ValueType()) {
 		runtimeError("BinaryOp: unhandled op for the type");
 		return;
 	}
@@ -314,7 +321,7 @@ void Interpreter::visit(const UnaryASTNode& node, int depth)
 	popStack();
 
 	if (node.type == TokenType::MINUS) {
-		if (!verifyTypes("Negative", { ValueType::tNumber })) return;
+		if (!verifyScalarTypes("Negative", { PType::tNumber })) return;
 		stack.push_back(Value::Number(-val.vNumber));
 	}
 	else if (node.type == TokenType::BANG) {

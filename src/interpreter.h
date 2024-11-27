@@ -43,6 +43,7 @@ private:
 
 	bool verifyUnderflow(const std::string& ctx, int n);
 	bool verifyTypes(const std::string& ctx, const std::vector<ValueType>& types);	// checks underflow as well
+	bool verifyScalarTypes(const std::string& ctx, const std::vector<PType>& types); // checks underflow
 
 	void popStack(int n = 1) {
 		REQUIRE(n >= 0);

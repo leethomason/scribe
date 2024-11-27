@@ -50,7 +50,7 @@ void ASTPrinter::visit(const ASTWhileStmtNode& node, int depth)
 
 void ASTPrinter::visit(const ASTVarDeclStmtNode& node, int depth)
 {
-	fmt::print("STMT var decl: {}: {}\n", node.name, TypeName(node.valueType));
+	fmt::print("STMT var decl: {}: {}\n", node.name, node.valueType.typeName());
 	if (node.expr)
 		node.expr->accept(*this, depth + 1);
 }

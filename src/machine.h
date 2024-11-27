@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <stdint.h>
 
+#if 0
 // The virtual machine.
 // Given a stack of instructions, executes them.
 class Machine
@@ -72,3 +73,4 @@ private:
 	void popScope();
 	void print();
 };
+#endif
