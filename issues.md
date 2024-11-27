@@ -8,6 +8,7 @@
 * map
 * byte code machine
 * exceptions
+* ternary operator
 
 ## Interpreter Code
 

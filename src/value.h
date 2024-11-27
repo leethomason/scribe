@@ -16,6 +16,24 @@ enum class ValueType {
 	count
 };
 
+class ValueType2 {
+public:
+	enum class Primary : uint8_t {
+		tNone,		// not nil - used for error and initialization
+		tNumber,
+		tString,
+		tBoolean,
+		tClass		// need to add a class type as well
+	};
+	enum class Secondary : uint8_t {
+		tScalar,
+		tList,
+		tMap
+	};
+	Primary primary = Primary::tNone;
+	Secondary secondary = Secondary::tScalar;
+};
+
 const char* TypeName(ValueType t);
 
 // Currently: tNumber, tString, tBoolean

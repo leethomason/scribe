@@ -144,6 +144,8 @@ Token Tokenizer::innerGet()
     case ')': token = Token(TokenType::RIGHT_PAREN, _line, sym); break;
     case '{': token = Token(TokenType::LEFT_BRACE, _line, sym); break;
     case '}': token = Token(TokenType::RIGHT_BRACE, _line, sym); break;
+    case '[': token = Token(TokenType::LEFT_BRACKET, _line, sym); break;
+    case ']': token = Token(TokenType::RIGHT_BRACKET, _line, sym); break;
     case '!': token = match('=') ? Token(TokenType::BANG_EQUAL, _line, "!=") : Token(TokenType::BANG, _line, sym); break;
     case '>': token = match('=') ? Token(TokenType::GREATER_EQUAL, _line, ">=") : Token(TokenType::GREATER, _line, sym); break;
     case '<': token = match('=') ? Token(TokenType::LESS_EQUAL, _line, "<=") : Token(TokenType::LESS, _line, sym); break;

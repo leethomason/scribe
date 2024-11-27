@@ -3,18 +3,16 @@
 #include "errorreporting.h"
 
 /*
-	Issues: 
-		* handling EOL (no semicolon)
-		* ternary! ternary is good.
-		* note that peeking '{' or '}' terminates bunches of things - need to correctly get that in the grammar 
-
 	program -> declaration* EOF
 
 	declaration ->   varDecl 
 				   | statement
-	varDecl ->   "var" IDENTIFIER ( "=" expression )?
-	           | "var" ":" IDENTIFIER ( "=" expression )?
-	assignment -> IDENTIFIER "=" expression
+	varDecl ->   "var" IDENTIFIER "=" expression						// must be able to duck type
+	           | "var" IDENTIFIER ":" IDENTIFIER ( "=" expression )?
+			   | "var" IDENTIFIER "=" "[" (expression ",")* "]"			// trailing comma can be ommitted
+			   | "var" IDENTIFIER ":" IDENTIFIER "[]" ( "=" "[" (expression ",")* "]" )?
+	assignment ->   IDENTIFIER "=" expression
+	              | IDENTIFIER "[" expression "]" "=" expression
 	statement ->   exprStmt 
 				 | ifStmt
 				 | printStmt
@@ -93,6 +91,13 @@ ASTStmtPtr Parser::declaration()
 
 ASTStmtPtr Parser::varDecl()
 {
+	// There's a lot of possibilites here!
+	// var a = 0			// duck typed
+	// var a: num = 0		// declared type
+	// var a = [0, 1, 2]	// duck typed
+	// var a: num[] = []	// declared type
+	// the "var" has already been read, so we know where we are
+
 	Token t = tok.get();
 	if (t.type != TokenType::IDENT) {
 		ErrorReporter::report(ctxName, t.line, "Expected identifier");
@@ -100,8 +105,10 @@ ASTStmtPtr Parser::varDecl()
 	}
 
 	if (check(TokenType::COLON)) {
-		// "var" ":" IDENTIFIER ( "=" expression )?
+		// var a: num = 0		// declared type
+		// var a: num[] = []	// declared type
 
+		
 		Token type = tok.get();
 		if (type.type != TokenType::IDENT) {
 			ErrorReporter::report(ctxName, t.line, "Expected type");

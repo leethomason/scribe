@@ -7,6 +7,23 @@ Experimental / toy script language for games
 * `num` - 64 bit floating point number
 * `str` - string [wip: utf-8]
 * `bool` - boolean
+* `list` - array of values
+
+```
+var x // okay: creates w/ default value (0)
+var y: num // okay: creates w/ default value (0)
+var z: num = 1 // okay: creates w/ value (1)
+w = 1 // ERROR: must declare type
+```
+
+```
+var a: num[] = [1, 2, 3]
+var b: num[] = []
+var c = [1, 2, 3]
+var d = [] // ERROR: must declare type
+print a[0] // okay: prints 1
+print a[3] // ERROR: out of bounds, throws exception
+```
 
 ## Logical Operators
 
