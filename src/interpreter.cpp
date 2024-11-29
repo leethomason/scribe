@@ -38,10 +38,17 @@ Value Interpreter::interpret(const std::string& input, const std::string& ctxNam
 				rc = stack[0];
 		}
 		REQUIRE(stack.size() <= 1);
+
+		// FIXME: metric to clear the heap.
+		// Might also make sense at allocation?
 	}
 	catch (InterpreterError& e) {
 		fmt::print("Interpreter run-time error: {}\n", e.what());
 	}
+	heap.collect();
+	if (heap.objects().size() > 0)
+		heap.report();
+
     return rc;
 }
 
@@ -128,6 +135,15 @@ void Interpreter::visit(const ASTVarDeclStmtNode& node, int depth)
 		value = stack[0];
 	}
 
+	if (!node.exprList.empty()) {
+		size_t stackSz = stack.size();
+		for (const auto& expr : node.exprList) {
+			expr->accept(*this, depth + 1);
+		}
+		REQUIRE(stack.size() == stackSz + node.exprList.size());
+
+		//value = Value::List(values);
+	}
 	if (!env.define(node.name, value)) {
 		runtimeError(fmt::format("Env variable {} already defined", node.name));
 		return;

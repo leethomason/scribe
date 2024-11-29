@@ -1,18 +1,24 @@
 #pragma once
 
 #include "error.h"
-#include "type.h"
 
 #include <vector>
 
+class NumList;
+class BoolList;
+class StrList;
+
 /* 
-* Construction sets the ref count to 0 - normally incremented when attached to a heap pointer
+* A HeapObject is constructed like any other object.
+* However, it MUST:
+* - be added to the heap
+* - be held by a HeapPtr
 */
 class HeapObject {
 public:
 	HeapObject() {}
 	virtual ~HeapObject() {}
-
+	virtual const char* name() const = 0;	// debugging
 
 	void addRef() {
 		_refCount++;
@@ -31,111 +37,106 @@ private:
 
 class Heap {
 public:
-	void add(HeapObject* obj) {
-		_objects.push_back(obj);
-		_activeObjects++;
-	};
-
-	void release(HeapObject* obj) {
-		obj->release();
-		if (obj->getRefCount() == 0) {
-			_activeObjects--;
-		}
-		if (_activeObjects == 0 || _activeObjects < _objects.size() / 2) {
-			collect();
-		}
-	}
-
 	// This is not garbage collection, just a way to clean up the heap.
 	// Objects can be using memory with no references, so this collect()
 	// method will delete them.
 	void collect();
 
+	// When a HeapObject is created, it MUST be added to the heap.
+	void add(HeapObject* obj) {
+		_objects.push_back(obj);
+	};
+
+	const std::vector<HeapObject*>& objects() const {
+		return _objects;
+	}
+
+	// Reports open objects.
+	// Generally want to collect() first
+	void report();
+
 private:
 	std::vector<HeapObject*> _objects;
-	int _activeObjects = 0;
 };
 
 // A heap pointer is a smart pointer that automatically increments the ref count
-// List* list = new List();
-// HeapPtr<List> listPtr(heap, list);
-//
 class HeapPtr {
 public:
-	HeapPtr() : _heap(nullptr), _ptr(nullptr) {}
-	HeapPtr(Heap* heap, HeapObject* ptr) : _heap(heap), _ptr(ptr) {
-		REQUIRE(heap);
+	HeapPtr() : _ptr(nullptr) {}
+	HeapPtr(HeapObject* ptr) : _ptr(ptr) {
 		REQUIRE(ptr);
-		_heap->add(_ptr);
 		_ptr->addRef();
 	}
-	HeapPtr(const HeapPtr& other) : _heap(other._heap), _ptr(other._ptr) {
-		_heap->add(_ptr);
-		_ptr->addRef();
+	HeapPtr(const HeapPtr& other) : _ptr(other._ptr) {
+		if (_ptr)
+			_ptr->addRef();
 	}
 	~HeapPtr() {
-		_heap->release(_ptr);
+		if (_ptr) {
+			_ptr->release();
+		}
 	}
-	void init(Heap* heap, HeapObject* ptr) {
-		REQUIRE(!_heap);
+	void set(HeapObject* ptr) {
 		REQUIRE(!_ptr);
-		_heap = heap;
 		_ptr = ptr;
-		_heap->add(_ptr);
 		_ptr->addRef();
 	}
+
+	void clear() {
+		if (_ptr) {
+			_ptr->release();
+			_ptr = nullptr;
+		}
+	}
+
 private:
-	Heap* _heap;
 	HeapObject* _ptr;
 };
 
-class MemBuf {
+template<typename T> 
+class ObjList : public HeapObject
+{
 public:
-	MemBuf(int initial);
-	~MemBuf();
+	ObjList(int initialSize) {
+		setSize(initialSize);
+	}
+	virtual ~ObjList() {}
 
-	void* data();
-	const void* constData() const;
-	void ensureCap(int cap);
-};
-
-class List : public HeapObject {
-public:
-	List(ValueType valueType, int initialCap);
-	~List() {}
-
-	union PrimitiveValue {
-		double vNum;
-		bool vBool;
-		std::string* vStr;
-	};
-
-	PrimitiveValue get(int i) const {
-		REQUIRE(i >= 0 && i < _size);
-		const void* data = _buf.constData();
-		const char* p = (const char*)data + i * _stride;
-		return *(PrimitiveValue*)p;
+	T get(int i) const {
+		return _list[i];
 	}
 
-	void set(int i, PrimitiveValue value) {
-		REQUIRE(i >= 0 && i < _size);
-		void* data = _buf.data();
-		char* p = (char*)data + i * _stride;
-		*(PrimitiveValue*)p = value;
+	void set(int i, T v) {
+		_list[i] = v;
 	}
 
 	int size() const {
-		return _size;
+		return (int)_list.size();
 	}
 
 	void setSize(int size) {
-		_size = size;
-		_buf.ensureCap(size * _stride);
+		_list.resize(size);
 	}
 
 private:
-	ValueType _valueType;
-	int _stride = 0;
-	int _size = 0;
-	MemBuf _buf;
+	std::vector<double> _list;
 };
+
+class NumList : public ObjList<double> {
+public:
+	NumList(int initialSize) : ObjList(initialSize) {}
+	virtual const char* name() const override { return "NumList"; }
+};
+
+class BoolList : public ObjList<bool> {
+public:
+	BoolList(int initialSize) : ObjList(initialSize) {}
+	virtual const char* name() const override { return "BoolList"; }
+};
+
+class StrList : public ObjList<std::string> {
+	public:
+	StrList(int initialSize) : ObjList(initialSize) {}
+	virtual const char* name() const override { return "StrList"; }
+};
+

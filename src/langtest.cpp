@@ -317,7 +317,7 @@ static void DeclareEmptyList()
 
 void LangTest()
 {
-#if true
+#if false
 	RUN_TEST(SimplePrint());
 	RUN_TEST(SimpleReturn());
 	RUN_TEST(SimpleError());

@@ -175,6 +175,9 @@ ASTStmtPtr Parser::varDecl()
 
 		return std::make_shared<ASTVarDeclStmtNode>(t.lexeme, valueType, expr);
 	}
+	assert(false);	// logic isn't correct, something isn't implemented.
+					// this method is huge and needs to be simplified
+	return nullptr;
 }
 
 ASTStmtPtr Parser::statement()

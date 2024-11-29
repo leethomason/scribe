@@ -24,10 +24,27 @@ Value Value::Default(ValueType valueType, Heap& heap)
 	}
 	else if (valueType.layout == Layout::tList) {
 		v.type = valueType;
-		HeapObject* obj = new List(valueType, 0);
-		v.heapPtr.init(&heap, obj);
+		HeapObject* obj = nullptr;
+
+		switch (valueType.pType) {
+		case PType::tNumber:
+			obj = new NumList(0);
+			break;
+		case PType::tBoolean:
+			obj = new BoolList(0);
+			break;
+		case PType::tString:
+			obj = new StrList(0);
+			break;
+		default:
+			break;
+		}
+		REQUIRE(obj);
+		heap.add(obj);
+		v.heapPtr.set(obj);
 	}
 	else if (valueType.layout == Layout::tMap) {
+		assert(false); // not yet implemented
 	}
 	else {
 		assert(false); // not yet implemented
@@ -51,6 +68,8 @@ Value& Value::operator=(const Value& rhs)
 bool Value::operator==(const Value& rhs) const
 {
 	if (type != rhs.type) return false;
+	assert(type.layout == Layout::tScalar); // not yet implemented
+	assert(rhs.type.layout == Layout::tScalar); // not yet implemented
 
 	switch (type.pType) {
 	case PType::tNone: return true;
@@ -68,54 +87,14 @@ Value::~Value()
 	clear();
 }
 
-#if 0
-Value::Value(Value&& other) noexcept
-{
-	move(other);
-}
-
-Value& Value::operator=(Value&& rhs) noexcept
-{
-	if (this == &rhs) return *this;
-	move(rhs);
-	return *this;
-}
-
-void Value::move(Value& other)
-{
-	clear();
-	type = other.type;
-	other.type = Type::tNone;
-
-	switch (type) {
-	case Type::tNone: 
-		vNumber = 0; 
-		break;
-	case Type::tNumber:
-		vNumber = other.vNumber;
-		break;
-	case Type::tBoolean:
-		vBoolean = other.vBoolean;
-		break;
-	case Type::tString:
-		vString = other.vString; 
-		other.vString = nullptr;
-		break;
-	case Type::tArray:
-		vArray = other.vArray;
-		other.vArray = nullptr;
-		break;
-	case Type::tMap:
-		vMap = other.vMap;
-		other.vMap = nullptr;
-		break;
-	}
-}
-#endif
-
 void Value::clear()
 {
-	assert(type.layout == Layout::tScalar); // not yet implemented
+	if (type.layout == Layout::tList) {
+		heapPtr.clear();
+	}
+	else if (type.layout == Layout::tMap) {
+		assert(false); // not yet implemented
+	}
 
 	switch (type.pType) {
 	case PType::tNone:
@@ -125,7 +104,7 @@ void Value::clear()
 	case PType::tString: delete vString;
 		break;
 	default:
-		assert(false); // not implemented
+		REQUIRE(false);
 	}
 	type = PType::tNone;
 	vNumber = 0;
@@ -134,6 +113,8 @@ void Value::clear()
 void Value::copy(const Value& rhs)
 {
 	clear();
+	assert(type.layout == Layout::tScalar); // not yet implemented
+
 	type = rhs.type;
 	switch (type.pType) {
 	case PType::tNone:
@@ -202,7 +183,7 @@ std::string ValueType::pTypeName() const
 	case PType::tBoolean: return "bool";
 	case PType::tString: return "str";
 	default:
-		assert(false); // not yet implemented
+		REQUIRE(false);
 	}
 	return name;
 }
