@@ -135,15 +135,6 @@ void Interpreter::visit(const ASTVarDeclStmtNode& node, int depth)
 		value = stack[0];
 	}
 
-	if (!node.exprList.empty()) {
-		size_t stackSz = stack.size();
-		for (const auto& expr : node.exprList) {
-			expr->accept(*this, depth + 1);
-		}
-		REQUIRE(stack.size() == stackSz + node.exprList.size());
-
-		//value = Value::List(values);
-	}
 	if (!env.define(node.name, value)) {
 		runtimeError(fmt::format("Env variable {} already defined", node.name));
 		return;

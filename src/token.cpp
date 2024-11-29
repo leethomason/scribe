@@ -173,6 +173,7 @@ std::string Token::toString(TokenType type)
     static const char* name[static_cast<int>(TokenType::count)] = {
         "EOF",
         "ERROR",
+
         "NUMBER",
         "STRING",
         "TRUE",
@@ -190,12 +191,17 @@ std::string Token::toString(TokenType type)
         "MINUS",
         "MULT",
         "DIVIDE",
+
         "LEFT_PAREN",
         "RIGHT_PAREN",
         "LEFT_BRACE",
         "RIGHT_BRACE",
+        "LEFT_BRACKET",
+        "RIGHT_BRACKET",
+        
         "BANG",
         "COLON",
+        "COMMA",
 
         "EQUAL",
         "EQUAL_EQUAL",

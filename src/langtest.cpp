@@ -216,8 +216,8 @@ static void AssignmentExpressions()
 		"var b = 2\n"
 		"var c = 3\n"
 		"a = b = c\n"
-		"return a";
-	Run(s, Value::Number(3));
+			"return a";
+		Run(s, Value::Number(3));
 }
 
 static void ShortenedAssignmentExpressions()
@@ -315,9 +315,17 @@ static void DeclareEmptyList()
 	Run(s, Value::Number(-8.0));
 }
 
+static void DeclareNumList()
+{
+	const std::string s =
+		"var a: num[] = [1, 2, 3]\n";
+	//	"return a[1]";
+	//Run(s, Value::Number(2.0));
+	Run(s, Value());
+}
+
 void LangTest()
 {
-#if false
 	RUN_TEST(SimplePrint());
 	RUN_TEST(SimpleReturn());
 	RUN_TEST(SimpleError());
@@ -342,6 +350,9 @@ void LangTest()
 	RUN_TEST(LogicalOR());
 	RUN_TEST(LogicalAND());
 	RUN_TEST(BasicWhile());
-#endif
+#if false
+	// come back to this: https://calebschoepp.com/blog/2020/adding-a-list-data-type-to-lox/
 	RUN_TEST(DeclareEmptyList());
+	RUN_TEST(DeclareNumList());
+#endif
 }

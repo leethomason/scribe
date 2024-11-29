@@ -157,11 +157,8 @@ class ASTVarDeclStmtNode : public ASTStmtNode
 {
 public:
     ASTVarDeclStmtNode(const std::string& name, ValueType valueType, ASTExprPtr expr) : name(name), valueType(valueType), expr(expr) {
-        LOG_AST(ASTVarDeclStmtNode-expr);
+        LOG_AST(ASTVarDeclStmtNode);
     }
-    ASTVarDeclStmtNode(const std::string& name, ValueType valueType, const std::vector<ASTExprPtr>& exprList) : name(name), valueType(valueType), exprList(exprList) {
-		LOG_AST(ASTVarDeclStmtNode-exprList);
-	}
     virtual void accept(ASTStmtVisitor& visitor, int depth) const override { 
         LOG_AST_VISIT(ASTVarDeclStmtNode, depth);
         visitor.visit(*this, depth);
@@ -170,7 +167,6 @@ public:
     std::string name;
     ValueType valueType;
     ASTExprPtr expr;
-    std::vector<ASTExprPtr> exprList;
 };
 
 // -------- Expressions ----------

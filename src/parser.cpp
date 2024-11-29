@@ -9,10 +9,7 @@
 				   | statement
 	varDecl ->   "var" IDENTIFIER "=" expression						// must be able to duck type
 	           | "var" IDENTIFIER ":" IDENTIFIER ( "=" expression )?
-			   | "var" IDENTIFIER "=" "[" (expression ",")* "]"			// trailing comma can be ommitted
-			   | "var" IDENTIFIER ":" IDENTIFIER "[]" ( "=" "[" (expression ",")* "]" )?
 	assignment ->   IDENTIFIER "=" expression
-	              | IDENTIFIER "[" expression "]" "=" expression
 	statement ->   exprStmt 
 				 | ifStmt
 				 | printStmt
@@ -26,7 +23,7 @@
 	returnStmt -> "return" expr
 	block -> "{" declaration* "}"
 
-	expr -> assignment
+	expression -> assignment
 	assignment ->   IDENTIFIER "=" assignment
 				  | equality
 	logic_or -> logic_and ( "||" logic_and )*
@@ -36,7 +33,7 @@
 	term -> factor ( ( "+" | "-" ) factor )*
 	factor -> unary ( ( "*" | "/" ) unary )*
 	unary -> ( "!" | "-" ) unary | primary
-	primary -> NUMBER | STRING | "true" | "false" | "(" expr ")" | IDENTIFIER
+	primary -> NUMBER | STRING | "true" | "false" | "(" expression ")" | IDENTIFIER
 */
 
 bool Parser::check(TokenType type) 
@@ -109,7 +106,7 @@ ASTStmtPtr Parser::varDecl()
 		// var a: num[] = []	// declared type
 		// var a: num
 		// var a: num[]
-		
+
 		Token type;
 		// Read type
 		if (!check({ TokenType::IDENT }, type)) {
@@ -130,33 +127,11 @@ ASTStmtPtr Parser::varDecl()
 			valueType.layout = Layout::tList;
 		}
 
+		ASTExprPtr expr = nullptr;
 		if (check(TokenType::EQUAL)) {
-			if (valueType.layout == Layout::tList) {
-				if (!check(TokenType::LEFT_BRACKET)) {
-					ErrorReporter::report(ctxName, t.line, "Expected '['");
-					return nullptr;
-				}
-				std::vector<ASTExprPtr> exprList;
-				while (!check(TokenType::RIGHT_BRACKET)) {
-					ASTExprPtr expr = expression();
-					exprList.push_back(expr);
-					if (!check(TokenType::COMMA)) {
-						break;
-					}
-				}
-				return std::make_shared<ASTVarDeclStmtNode>(t.lexeme, valueType, exprList);
-			}
-			else if (valueType.layout == Layout::tMap) {
-				assert(false); // not yet implemented
-			}
-			else {
-				ASTExprPtr expr = expression();
-				return std::make_shared<ASTVarDeclStmtNode>(t.lexeme, valueType, expr);
-			}
+			expr = expression();
 		}
-		else {
-			return std::make_shared<ASTVarDeclStmtNode>(t.lexeme, valueType, nullptr);
-		}
+		return std::make_shared<ASTVarDeclStmtNode>(t.lexeme, valueType, expr);
 	}
 	else {
 		// "var" IDENTIFIER ( "=" expression )?
@@ -175,9 +150,11 @@ ASTStmtPtr Parser::varDecl()
 
 		return std::make_shared<ASTVarDeclStmtNode>(t.lexeme, valueType, expr);
 	}
+	/*
 	assert(false);	// logic isn't correct, something isn't implemented.
 					// this method is huge and needs to be simplified
 	return nullptr;
+	*/
 }
 
 ASTStmtPtr Parser::statement()

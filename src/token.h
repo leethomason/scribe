@@ -26,12 +26,14 @@ enum class TokenType {
     MINUS,          // '-'
     MULT,           // '*'
     DIVIDE,         // '/'
+
     LEFT_PAREN,     // '('
     RIGHT_PAREN,    // ')'
     LEFT_BRACE,     // '{'
     RIGHT_BRACE,    // '}'
     LEFT_BRACKET,   // '['
     RIGHT_BRACKET,  // ']'
+
     BANG,           // '!'
     COLON,	        // ':'
     COMMA,          // ','
