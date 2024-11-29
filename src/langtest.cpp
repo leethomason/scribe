@@ -307,8 +307,17 @@ static void BasicWhile()
 	Run(s, Value::Number(20));
 }
 
+static void DeclareEmptyList()
+{
+	const std::string s =
+		"var a: num[] = []\n"
+		"return -8";
+	Run(s, Value::Number(-8.0));
+}
+
 void LangTest()
 {
+#if true
 	RUN_TEST(SimplePrint());
 	RUN_TEST(SimpleReturn());
 	RUN_TEST(SimpleError());
@@ -333,4 +342,6 @@ void LangTest()
 	RUN_TEST(LogicalOR());
 	RUN_TEST(LogicalAND());
 	RUN_TEST(BasicWhile());
+#endif
+	RUN_TEST(DeclareEmptyList());
 }

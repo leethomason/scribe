@@ -85,5 +85,6 @@ private:
 	std::string* output = nullptr;
 
 	EnvironmentStack env;
+	Heap heap;
 };
 

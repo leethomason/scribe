@@ -107,10 +107,12 @@ ASTStmtPtr Parser::varDecl()
 	if (check(TokenType::COLON)) {
 		// var a: num = 0		// declared type
 		// var a: num[] = []	// declared type
-
+		// var a: num
+		// var a: num[]
 		
-		Token type = tok.get();
-		if (type.type != TokenType::IDENT) {
+		Token type;
+		// Read type
+		if (!check({ TokenType::IDENT }, type)) {
 			ErrorReporter::report(ctxName, t.line, "Expected type");
 			return nullptr;
 		}
@@ -119,13 +121,42 @@ ASTStmtPtr Parser::varDecl()
 			ErrorReporter::report(ctxName, t.line, "Unrecognized type");
 			return nullptr;
 		}
-
-		ASTExprPtr expr = nullptr;
-		if (check(TokenType::EQUAL)) {
-			expr = expression();
+		// Scalar, list, map
+		if (check(TokenType::LEFT_BRACKET)) {
+			if (!check(TokenType::RIGHT_BRACKET)) {
+				ErrorReporter::report(ctxName, t.line, "Expected ']'");
+				return nullptr;
+			}
+			valueType.layout = Layout::tList;
 		}
 
-		return std::make_shared<ASTVarDeclStmtNode>(t.lexeme, valueType, expr);
+		if (check(TokenType::EQUAL)) {
+			if (valueType.layout == Layout::tList) {
+				if (!check(TokenType::LEFT_BRACKET)) {
+					ErrorReporter::report(ctxName, t.line, "Expected '['");
+					return nullptr;
+				}
+				std::vector<ASTExprPtr> exprList;
+				while (!check(TokenType::RIGHT_BRACKET)) {
+					ASTExprPtr expr = expression();
+					exprList.push_back(expr);
+					if (!check(TokenType::COMMA)) {
+						break;
+					}
+				}
+				return std::make_shared<ASTVarDeclStmtNode>(t.lexeme, valueType, exprList);
+			}
+			else if (valueType.layout == Layout::tMap) {
+				assert(false); // not yet implemented
+			}
+			else {
+				ASTExprPtr expr = expression();
+				return std::make_shared<ASTVarDeclStmtNode>(t.lexeme, valueType, expr);
+			}
+		}
+		else {
+			return std::make_shared<ASTVarDeclStmtNode>(t.lexeme, valueType, nullptr);
+		}
 	}
 	else {
 		// "var" IDENTIFIER ( "=" expression )?

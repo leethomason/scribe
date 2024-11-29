@@ -34,6 +34,7 @@ enum class TokenType {
     RIGHT_BRACKET,  // ']'
     BANG,           // '!'
     COLON,	        // ':'
+    COMMA,          // ','
 
     EQUAL,          // '='
     EQUAL_EQUAL,    // '=='

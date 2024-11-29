@@ -117,7 +117,7 @@ void Interpreter::visit(const ASTVarDeclStmtNode& node, int depth)
 {
 	REQUIRE(stack.empty());
 
-	Value value = Value::Default(node.valueType);
+	Value value = Value::Default(node.valueType, heap);
 
 	if (node.expr) {
 		RestoreStack rs(stack);

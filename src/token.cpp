@@ -150,6 +150,7 @@ Token Tokenizer::innerGet()
     case '>': token = match('=') ? Token(TokenType::GREATER_EQUAL, _line, ">=") : Token(TokenType::GREATER, _line, sym); break;
     case '<': token = match('=') ? Token(TokenType::LESS_EQUAL, _line, "<=") : Token(TokenType::LESS, _line, sym); break;
     case ':': token = Token(TokenType::COLON, _line, sym); break;
+    case ',': token = Token(TokenType::COMMA, _line, sym); break;
     case '&': 
         if(match('&')) return Token(TokenType::LOGIC_AND, _line, "&&"); 
         break;

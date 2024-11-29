@@ -60,9 +60,12 @@ private:
 // List* list = new List();
 // HeapPtr<List> listPtr(heap, list);
 //
-template <typename T>
 class HeapPtr {
-	HeapPtr(Heap* heap, T* ptr) : _heap(heap), _ptr(ptr) {
+public:
+	HeapPtr() : _heap(nullptr), _ptr(nullptr) {}
+	HeapPtr(Heap* heap, HeapObject* ptr) : _heap(heap), _ptr(ptr) {
+		REQUIRE(heap);
+		REQUIRE(ptr);
 		_heap->add(_ptr);
 		_ptr->addRef();
 	}
@@ -73,9 +76,17 @@ class HeapPtr {
 	~HeapPtr() {
 		_heap->release(_ptr);
 	}
+	void init(Heap* heap, HeapObject* ptr) {
+		REQUIRE(!_heap);
+		REQUIRE(!_ptr);
+		_heap = heap;
+		_ptr = ptr;
+		_heap->add(_ptr);
+		_ptr->addRef();
+	}
 private:
 	Heap* _heap;
-	T* _ptr;
+	HeapObject* _ptr;
 };
 
 class MemBuf {
@@ -88,10 +99,10 @@ public:
 	void ensureCap(int cap);
 };
 
-class PrimitiveList : public HeapObject {
+class List : public HeapObject {
 public:
-	PrimitiveList(ValueType valueType);
-	~PrimitiveList() {}
+	List(ValueType valueType, int initialCap);
+	~List() {}
 
 	union PrimitiveValue {
 		double vNum;

@@ -3,7 +3,7 @@
 #include <fmt/core.h>
 #include <assert.h>
 
-Value Value::Default(ValueType valueType)
+Value Value::Default(ValueType valueType, Heap& heap)
 {
 	Value v;
 
@@ -21,6 +21,13 @@ Value Value::Default(ValueType valueType)
 		default:
 			break; // will throw an error.
 		}
+	}
+	else if (valueType.layout == Layout::tList) {
+		v.type = valueType;
+		HeapObject* obj = new List(valueType, 0);
+		v.heapPtr.init(&heap, obj);
+	}
+	else if (valueType.layout == Layout::tMap) {
 	}
 	else {
 		assert(false); // not yet implemented

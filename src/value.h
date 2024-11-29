@@ -2,6 +2,7 @@
 
 #include "error.h"
 #include "type.h"
+#include "heap.h"
 
 #include <string>
 #include <vector>
@@ -31,7 +32,7 @@ struct Value {
 	static Value Boolean(bool v) {
 		Value val; val.type.pType = PType::tBoolean; val.vBoolean = v; return val;
 	}
-	static Value Default(ValueType valueType);
+	static Value Default(ValueType valueType, Heap& heap);
 
 	std::string toString() const;
 
@@ -44,9 +45,8 @@ struct Value {
 		double vNumber;
 		std::string* vString;
 		bool vBoolean;
-		std::vector<Value>* vArray;
-		std::map<std::string, Value>* vMap;
 	};
+	HeapPtr heapPtr;
 
 private:
 	void clear();
