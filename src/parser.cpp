@@ -11,12 +11,17 @@
 	           | "var" IDENTIFIER ":" IDENTIFIER ( "=" expression )?
 	assignment ->   IDENTIFIER "=" expression
 	statement ->   exprStmt 
+				 | forStmt
 				 | ifStmt
 				 | printStmt
 				 | whileStmt
 				 | returnStmt
 				 | block
 	exprStmt -> expr
+	forStmt -> "for" "(" (varDecl | exprStmt | ";" ) 
+				expression? ";"
+				expression? 
+				block
 	ifStmt -> "if" expression "{" statement ( "else" "{" statement )?	// Note that the "{" is not consumed by the ifStmt, but by the block
 	printStmt -> "print" expr
 	whileStmt -> "while" expression block
@@ -161,6 +166,8 @@ ASTStmtPtr Parser::statement()
 {
 	if (check(TokenType::LEFT_BRACE))
 		return block();
+	if (check(TokenType::FOR))
+		return forStatement();
 	if (check(TokenType::RETURN))
 		return returnStatement();
 	if (check(TokenType::PRINT))
@@ -218,6 +225,82 @@ ASTStmtPtr Parser::whileStatement()
 	ASTStmtPtr body = block();
 	REQUIRE(body);
 	return std::make_shared<ASTWhileStmtNode>(condition, body);
+}
+
+ASTStmtPtr Parser::forStatement()
+{
+	// "for" (varDecl | exprStmt | ";" ) 
+	//			expression? ";"
+	//			expression? 
+	//			block
+
+	ASTStmtPtr init = nullptr;
+	ASTExprPtr condition = nullptr;
+	ASTExprPtr increment = nullptr;
+	ASTStmtPtr body = nullptr;
+
+	if (!check(TokenType::SEMICOLON)) {
+		if (check(TokenType::VAR)) {
+			init = varDecl();
+		}
+		else {
+			init = expressionStatement();
+		}
+		if (!check(TokenType::SEMICOLON)) {
+			ErrorReporter::report(ctxName, tok.peek().line, "Expected ';'");
+			return nullptr;
+		}
+	}
+
+	if (!check(TokenType::SEMICOLON)) {
+		condition = expression();
+		if (!check(TokenType::SEMICOLON)) {
+			ErrorReporter::report(ctxName, tok.peek().line, "Expected ';'");
+			return nullptr;
+		}
+	}
+
+	if (!check(TokenType::LEFT_BRACE)) {
+		increment = expression();
+	}
+
+	if (!check(TokenType::LEFT_BRACE)) {
+		ErrorReporter::report(ctxName, tok.peek().line, "Expected '{'");
+		return nullptr;
+	}
+
+	body = block();
+	REQUIRE(body);
+
+	// so this is:
+	/*
+		{												// outer block
+			var i = 0;			// init
+			while (i < 10) {	// condition			// inner: coniditon + block
+				print i;		// body 
+				i = i + 1;		// increment
+			}
+		}
+	*/
+
+	// Start with the inner block.
+	std::vector<ASTStmtPtr> inner;
+	inner.push_back(body);
+	inner.push_back(std::make_shared<ASTExprStmtNode>(increment));
+	std::shared_ptr<ASTBlockStmtNode> innerBlock = std::make_shared<ASTBlockStmtNode>(inner);
+
+	if (!condition)
+		condition = std::make_shared<ValueASTNode>(Value::Boolean(true));
+	std::shared_ptr<ASTWhileStmtNode> whileStmt = std::make_shared<ASTWhileStmtNode>(condition, innerBlock);
+
+	// Now the outer block
+	std::vector<ASTStmtPtr> outer;
+	if (init)
+		outer.push_back(init);
+	outer.push_back(whileStmt);
+
+	std::shared_ptr<ASTBlockStmtNode> outerBlock = std::make_shared<ASTBlockStmtNode>(outer);
+	return outerBlock;
 }
 
 ASTStmtPtr Parser::block()

@@ -33,6 +33,7 @@ private:
 	ASTStmtPtr returnStatement();
 	ASTStmtPtr ifStatement();
 	ASTStmtPtr whileStatement();
+	ASTStmtPtr forStatement();
 	ASTStmtPtr block();				// consumes final brace but not opening one
 
 	ASTExprPtr expression();

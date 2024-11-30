@@ -123,6 +123,8 @@ Token Tokenizer::innerGet()
 			return Token(TokenType::ELSE, _line, t);
         if (t == "while")
             return Token(TokenType::WHILE, _line, t);
+        if (t == "for")
+            return Token(TokenType::FOR, _line, t);
 
         Token token(TokenType::IDENT, _line, t);
         return token;
@@ -151,6 +153,7 @@ Token Tokenizer::innerGet()
     case '<': token = match('=') ? Token(TokenType::LESS_EQUAL, _line, "<=") : Token(TokenType::LESS, _line, sym); break;
     case ':': token = Token(TokenType::COLON, _line, sym); break;
     case ',': token = Token(TokenType::COMMA, _line, sym); break;
+    case ';': token = Token(TokenType::SEMICOLON, _line, sym); break;
     case '&': 
         if(match('&')) return Token(TokenType::LOGIC_AND, _line, "&&"); 
         break;
@@ -186,6 +189,7 @@ std::string Token::toString(TokenType type)
 		"IF",
 		"ELSE",
         "WHILE",
+        "FOR",
 
         "PLUS",
         "MINUS",
@@ -202,6 +206,7 @@ std::string Token::toString(TokenType type)
         "BANG",
         "COLON",
         "COMMA",
+        "SEMICOLON",
 
         "EQUAL",
         "EQUAL_EQUAL",

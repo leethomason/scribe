@@ -20,6 +20,7 @@ enum class TokenType {
 	IF,			    // if statement
 	ELSE,           // else statement
     WHILE,		    // while statement
+    FOR,            // for statement    
 
     // Sybols & operations
     PLUS,           // '+'
@@ -37,6 +38,7 @@ enum class TokenType {
     BANG,           // '!'
     COLON,	        // ':'
     COMMA,          // ','
+    SEMICOLON,      // ';'
 
     EQUAL,          // '='
     EQUAL_EQUAL,    // '=='

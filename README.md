@@ -42,6 +42,12 @@ Question:
 * Is the map v. list dichotomy worth it?
 
 ```
+for var i = 0; i < 10; i++ {
+    print i
+}
+```
+
+```
 class Breakfast {
     var eggs: number
     var bacon: number

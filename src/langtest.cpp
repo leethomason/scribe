@@ -75,7 +75,7 @@ static void SimpleReturn()
 static void SimpleError()
 {
 	const std::string s =
-		"return 13;";
+		"return ; 13";
 
 	Run(s, Value(), true, 0);
 }
@@ -324,6 +324,41 @@ static void DeclareNumList()
 	Run(s, Value());
 }
 
+static void BasicForTest()
+{
+	const std::string s =
+		"var rc = 0\n"
+		"for var i = 0; i < 10; i = i + 1 {\n"
+		"	rc = rc + 2\n"
+		"}\n"
+		"return rc";
+	Run(s, Value::Number(20));
+}
+
+static void BasicForTestNoInit()
+{
+	const std::string s =
+		"var rc = 0\n"
+		"var i = 0\n"
+		"for ; i < 10; i = i + 1 {\n"
+		"	rc = rc + 2\n"
+		"}\n"
+		"return rc";
+	Run(s, Value::Number(20));
+}
+
+static void BasicForTestNoDecl()
+{
+	const std::string s =
+		"var rc = 0\n"
+		"var i = 0\n"
+		"for i = 1; i < 10 + 1; i = i + 1 {\n"
+		"	rc = rc + 2\n"
+		"}\n"
+		"return rc";
+	Run(s, Value::Number(20));
+}
+
 void LangTest()
 {
 	RUN_TEST(SimplePrint());
@@ -350,7 +385,12 @@ void LangTest()
 	RUN_TEST(LogicalOR());
 	RUN_TEST(LogicalAND());
 	RUN_TEST(BasicWhile());
+	RUN_TEST(BasicForTest());
+	RUN_TEST(BasicForTestNoInit());
+	RUN_TEST(BasicForTestNoDecl());
+
 #if false
+	// note this: https://github.com/munificent/craftinginterpreters/blob/master/note/answers/chapter13_inheritance/3.md
 	// come back to this: https://calebschoepp.com/blog/2020/adding-a-list-data-type-to-lox/
 	RUN_TEST(DeclareEmptyList());
 	RUN_TEST(DeclareNumList());
