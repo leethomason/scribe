@@ -65,6 +65,7 @@ void Interpreter::visit(const ASTExprStmtNode& node, int depth)
     node.expr->accept(*this, depth + 1);
 }
 
+/*
 void Interpreter::visit(const ASTPrintStmtNode& node, int depth)
 {
 	REQUIRE(stack.empty());
@@ -76,6 +77,7 @@ void Interpreter::visit(const ASTPrintStmtNode& node, int depth)
 	fmt::print(s);
 	popStack();
 }
+*/
 
 void Interpreter::visit(const ASTReturnStmtNode& node, int depth)
 {

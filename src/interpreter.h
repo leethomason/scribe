@@ -15,7 +15,7 @@ public:
 
 	// ASTStmtVisitor
     virtual void visit(const ASTExprStmtNode&, int depth) override;
-    virtual void visit(const ASTPrintStmtNode&, int depth) override;
+    //virtual void visit(const ASTPrintStmtNode&, int depth) override;
 	virtual void visit(const ASTReturnStmtNode&, int depth) override;
 	virtual void visit(const ASTVarDeclStmtNode&, int depth) override;
 	virtual void visit(const ASTBlockStmtNode&, int depth) override;
@@ -30,8 +30,6 @@ public:
 	void visit(const UnaryASTNode& node, int depth) override;
 	void visit(const LogicalASTNode& node, int depth) override;
 	void visit(const CallASTNode& node, int depth) override;
-
-	void setOutput(std::string& out) { output = &out; }
 
 	std::vector<Value> stack;
 	FFI ffi;
@@ -85,8 +83,6 @@ private:
 	}
 	static constexpr int LHS = 2;
 	static constexpr int RHS = 1;
-
-	std::string* output = nullptr;
 
 	EnvironmentStack env;
 	Heap heap;

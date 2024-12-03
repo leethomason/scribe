@@ -23,7 +23,7 @@ public:
 	void generate(const ASTStmtNode& node);
 
 	void visit(const ASTExprStmtNode& node, int) override;
-	void visit(const ASTPrintStmtNode& node, int) override;
+	//void visit(const ASTPrintStmtNode& node, int) override;
 
 private:
 	std::vector<Instruction>& bc;

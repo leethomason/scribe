@@ -111,8 +111,8 @@ Token Tokenizer::innerGet()
             return Token(TokenType::VAR, _line, t);
         if (t == "return") 
             return Token(TokenType::RETURN, _line, t);
-        if (t == "print") 
-            return Token(TokenType::PRINT, _line, t);
+        //if (t == "print") 
+        //   return Token(TokenType::PRINT, _line, t);
         if (t == "true") 
             return Token(TokenType::TRUE, _line, t);
         if (t == "false") 
@@ -185,7 +185,7 @@ std::string Token::toString(TokenType type)
 
         "VAR",
         "RET",
-        "PRINT",
+        //"PRINT",
 		"IF",
 		"ELSE",
         "WHILE",

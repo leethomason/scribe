@@ -23,7 +23,24 @@ public:
 	}
 };
 
-class STDPrint : public FFIHandler
+class STDFormatBase : public FFIHandler
+{
+public:
+	std::string format(const std::vector<Value>& args) 
+	{
+		std::string rc;
+
+		for (size_t i = 0; i < args.size(); i++) {
+			rc += fmt::format("{}", args[i].toString());
+			if (i < args.size() - 1) {
+				rc += ", ";
+			}
+		}
+		return rc;
+	}
+};
+
+class STDPrint : public STDFormatBase
 {
 public:
 	virtual Value call(const std::string& name,
@@ -33,23 +50,36 @@ public:
 		(void)returnType;
 		(void)name;
 
-		for (size_t i = 0; i < args.size(); i++) {
-			fmt::print("{}", args[i].toString());
-			if (i < args.size() - 1) {
-				fmt::print(", ");
-			}
-		}
-		fmt::print("\n");
+		std::string str = format(args);
+		fmt::print("{}\n", str);
+
 		return Value();
+	}
+};
+
+class STDFormat : public STDFormatBase
+{
+public:
+	virtual Value call(const std::string& name,
+		const std::vector<Value>& args,
+		ValueType returnType) override
+	{
+		(void)returnType;
+		(void)name;
+
+		std::string str = format(args);
+		return Value::String(str);
 	}
 };
 
 static STDClock stdClock;
 static STDPrint stdPrint;
+static STDFormat stdFormat;
 
 void AttachStdLib(FFI& ffi, Environment& env)
 {
 	ffi.add("clock", false, {}, ValueType(PType::tNum), &stdClock, env);
-	ffi.add("print2", true, {}, ValueType(PType::tNone), &stdPrint, env);
+	ffi.add("print", true, {}, ValueType(PType::tNone), &stdPrint, env);
+	ffi.add("format", true, {}, ValueType(PType::tStr), &stdFormat, env);
 }
 

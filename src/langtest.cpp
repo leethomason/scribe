@@ -32,9 +32,7 @@ static void Run(const std::string& s, Value expectedResult = Value(), bool expec
 static void PrintRun(const std::string& s, const std::string& expectedPrint, bool expectedError = false, int errorLine = -1)
 {
 	Interpreter ip;
-	std::string out;
-	ip.setOutput(out);
-	Value r = ip.interpret(s, "langtest-print");
+	Value out = ip.interpret(s, "langtest-print");
 
 	if (expectedError) {
 		TEST(ErrorReporter::hasError());
@@ -48,20 +46,22 @@ static void PrintRun(const std::string& s, const std::string& expectedPrint, boo
 		TEST(!ErrorReporter::hasError());
 	}
 	ErrorReporter::clear();
-	TEST(out == expectedPrint);
+
+	TEST(out.type.pType == PType::tStr);
+	TEST(out.type.layout == Layout::tScalar);
+	TEST(*out.vString == expectedPrint);
 }
 
 static void SimplePrint()
 {
 	const std::string s =
-		"print 13";
+		"return format(13)";
 
 	Interpreter ip;
-	std::string out;
-	ip.setOutput(out);
-
-	ip.interpret(s, "langtest");
-	TEST(out == "13\n");
+	Value out = ip.interpret(s, "langtest");
+	TEST(out.type.pType == PType::tStr);
+	TEST(out.type.layout == Layout::tScalar);
+	TEST(*out.vString == "13");
 }
 
 static void SimpleReturn()
@@ -178,6 +178,7 @@ static void NoRedeclare()
 static void ScopeTest()
 {
 	const std::string s =
+		"var out: str\n"
 		"var a = 'global a'\n"
 		"var b = 'global b'\n"
 		"var c = 'global c'\n"
@@ -186,23 +187,14 @@ static void ScopeTest()
 		"	var b = 'outer b'\n"
 		"	{\n"
 		"		var a = 'inner a'\n"
-		"		print a print b print c\n"
+		"		out = out + format(a, b, c) + '..'\n"
 		"   }\n"
-		"	print a print b print c\n"
+		"	out = out + format(a, b, c) + '..'\n"
 		"}\n"
-		"print a print b print c\n";
+		"return out + format(a, b, c)\n";
 
 	const std::string expected =
-		"inner a\n"
-		"outer b\n"
-		"global c\n"
-		"outer a\n"
-		"outer b\n"
-		"global c\n"
-		"global a\n"
-		"global b\n"
-		"global c\n";
-
+		"inner a, outer b, global c..outer a, outer b, global c..global a, global b, global c";
 	PrintRun(s, expected);
 }
 
@@ -216,7 +208,7 @@ static void AssignmentExpressions()
 		"var b = 2\n"
 		"var c = 3\n"
 		"a = b = c\n"
-			"return a";
+		"return a";
 		Run(s, Value::Number(3));
 }
 
@@ -365,7 +357,7 @@ static void SimpleFFIClock()
 		"print clock()\n"
 		"var a: num = clock()\n"
 		"var b: num = clock()\n"
-		"print2(a, b, b-a)\n"
+		"print(a, b, b-a)\n"
 		"return b >= a\n";
 	Run(s, Value::Boolean(true));
 }

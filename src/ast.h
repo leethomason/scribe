@@ -25,7 +25,7 @@
 
 class ASTStmtNode;
 class ASTExprStmtNode;
-class ASTPrintStmtNode;
+//class ASTPrintStmtNode;
 class ASTReturnStmtNode;
 class ASTBlockStmtNode;
 class ASTVarDeclStmtNode;
@@ -51,7 +51,7 @@ class ASTStmtVisitor
 {
 public:
 	virtual void visit(const ASTExprStmtNode&, int depth) = 0;
-	virtual void visit(const ASTPrintStmtNode&, int depth) = 0;
+	//virtual void visit(const ASTPrintStmtNode&, int depth) = 0;
     virtual void visit(const ASTReturnStmtNode&, int depth) = 0;
 	virtual void visit(const ASTBlockStmtNode&, int depth) = 0;
     virtual void visit(const ASTVarDeclStmtNode&, int depth) = 0;
@@ -79,6 +79,7 @@ public:
 	ASTExprPtr expr;
 };
 
+/*
 class ASTPrintStmtNode : public ASTStmtNode
 {
 public:
@@ -92,6 +93,7 @@ public:
 
 	ASTExprPtr expr;
 };
+*/
 
 class ASTReturnStmtNode : public ASTStmtNode
 {

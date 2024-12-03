@@ -172,8 +172,8 @@ ASTStmtPtr Parser::statement()
 		return forStatement();
 	if (check(TokenType::RETURN))
 		return returnStatement();
-	if (check(TokenType::PRINT))
-		return printStatement();
+	//if (check(TokenType::PRINT))
+	//	return printStatement();
 	if (check(TokenType::IF))
 		return ifStatement();
 	if (check(TokenType::WHILE))
@@ -181,11 +181,13 @@ ASTStmtPtr Parser::statement()
 	return expressionStatement();
 }
 
+/*
 ASTStmtPtr Parser::printStatement()
 {
 	ASTExprPtr expr = expression();
 	return std::make_shared<ASTPrintStmtNode>(expr);
 }
+*/
 
 ASTStmtPtr Parser::returnStatement()
 {

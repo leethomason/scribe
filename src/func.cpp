@@ -47,7 +47,9 @@ FFI::RC FFI::call(const std::string& name, std::vector<Value>& stack, int nArgs)
 
 	std::vector<Value> args(nArgs);
 	for (int i = 0; i < nArgs; ++i) {
-		const Value& value = stack[stack.size() - 1 - i];
+		// The stack order is "reversed" from the arg order.
+		// Go backward to put the args in the expected order.
+		const Value& value = stack[stack.size() - nArgs + i];
 		if (!funcDef.variante && value.type != funcDef.argTypes[i]) {
 			return RC::kIncorrectArgType;
 		}

@@ -16,7 +16,7 @@ enum class TokenType {
     // Keywords
     VAR,            // variable declaration
     RETURN,         // push to stack
-    PRINT,	        // print to console
+    //PRINT,	        // print to console
 	IF,			    // if statement
 	ELSE,           // else statement
     WHILE,		    // while statement
