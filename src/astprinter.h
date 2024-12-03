@@ -13,7 +13,6 @@ public:
 	void visit(const CallASTNode& node, int depth) override;
 
 	void visit(const ASTExprStmtNode&, int depth) override;
-	//void visit(const ASTPrintStmtNode&, int depth) override;
 	void visit(const ASTReturnStmtNode&, int depth) override;
 	void visit(const ASTVarDeclStmtNode&, int depth) override;
 	void visit(const ASTBlockStmtNode&, int depth) override;

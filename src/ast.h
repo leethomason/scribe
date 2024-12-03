@@ -51,7 +51,6 @@ class ASTStmtVisitor
 {
 public:
 	virtual void visit(const ASTExprStmtNode&, int depth) = 0;
-	//virtual void visit(const ASTPrintStmtNode&, int depth) = 0;
     virtual void visit(const ASTReturnStmtNode&, int depth) = 0;
 	virtual void visit(const ASTBlockStmtNode&, int depth) = 0;
     virtual void visit(const ASTVarDeclStmtNode&, int depth) = 0;
@@ -78,22 +77,6 @@ public:
 
 	ASTExprPtr expr;
 };
-
-/*
-class ASTPrintStmtNode : public ASTStmtNode
-{
-public:
-	ASTPrintStmtNode(ASTExprPtr expr) : expr(expr) {
-        LOG_AST(ASTPrintStmtNode);
-    }
-    virtual void accept(ASTStmtVisitor& visitor, int depth) const override {         
-        LOG_AST_VISIT(ASTPrintStmtNode, depth);
-        visitor.visit(*this, depth); 
-    }
-
-	ASTExprPtr expr;
-};
-*/
 
 class ASTReturnStmtNode : public ASTStmtNode
 {

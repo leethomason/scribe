@@ -8,14 +8,6 @@ void ASTPrinter::visit(const ASTExprStmtNode& node, int depth)
 	node.expr->accept(*this, depth + 1);
 }
 
-/*
-void ASTPrinter::visit(const ASTPrintStmtNode& node, int depth)
-{
-	fmt::print("STMT print\n");
-	node.expr->accept(*this, depth + 1);
-}
-*/
-
 void ASTPrinter::visit(const ASTReturnStmtNode& node, int depth)
 {
 	fmt::print("STMT return\n");

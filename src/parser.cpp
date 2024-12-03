@@ -13,7 +13,6 @@
 	statement ->   exprStmt 
 				 | forStmt
 				 | ifStmt
-				 | printStmt
 				 | whileStmt
 				 | returnStmt
 				 | block
@@ -23,7 +22,6 @@
 				expression? 
 				block
 	ifStmt -> "if" expression "{" statement ( "else" "{" statement )?	// Note that the "{" is not consumed by the ifStmt, but by the block
-	printStmt -> "print" expr
 	whileStmt -> "while" expression block
 	returnStmt -> "return" expr
 	block -> "{" declaration* "}"
@@ -172,22 +170,12 @@ ASTStmtPtr Parser::statement()
 		return forStatement();
 	if (check(TokenType::RETURN))
 		return returnStatement();
-	//if (check(TokenType::PRINT))
-	//	return printStatement();
 	if (check(TokenType::IF))
 		return ifStatement();
 	if (check(TokenType::WHILE))
 		return whileStatement();
 	return expressionStatement();
 }
-
-/*
-ASTStmtPtr Parser::printStatement()
-{
-	ASTExprPtr expr = expression();
-	return std::make_shared<ASTPrintStmtNode>(expr);
-}
-*/
 
 ASTStmtPtr Parser::returnStatement()
 {

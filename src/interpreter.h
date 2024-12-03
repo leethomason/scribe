@@ -15,7 +15,6 @@ public:
 
 	// ASTStmtVisitor
     virtual void visit(const ASTExprStmtNode&, int depth) override;
-    //virtual void visit(const ASTPrintStmtNode&, int depth) override;
 	virtual void visit(const ASTReturnStmtNode&, int depth) override;
 	virtual void visit(const ASTVarDeclStmtNode&, int depth) override;
 	virtual void visit(const ASTBlockStmtNode&, int depth) override;
