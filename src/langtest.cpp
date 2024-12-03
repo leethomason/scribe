@@ -365,9 +365,7 @@ static void SimpleFFIClock()
 		"print clock()\n"
 		"var a: num = clock()\n"
 		"var b: num = clock()\n"
-		"print a\n"
-		"print b\n"
-		"print b - a\n"
+		"print2(a, b, b-a)\n"
 		"return b >= a\n";
 	Run(s, Value::Boolean(true));
 }

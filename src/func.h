@@ -27,6 +27,7 @@ class FFI
 public:
 	bool add(
 		const std::string& name, 
+		bool variant,
 		const std::vector<ValueType>& argTypes, 
 		ValueType returnType, 
 		FFIHandler*,
@@ -44,6 +45,7 @@ public:
 private:
 	struct FuncDef {
 		std::string name;
+		bool variante = false;
 		std::vector<ValueType> argTypes;
 		ValueType returnType;
 		FFIHandler* handler;

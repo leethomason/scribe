@@ -5,6 +5,7 @@
 #include <fmt/core.h>
 
 bool FFI::add(const std::string& name, 
+	bool variant,
 	const std::vector<ValueType>& argTypes, 
 	ValueType returnType, 
 	FFIHandler* handler,
@@ -21,6 +22,7 @@ bool FFI::add(const std::string& name,
 
 	FuncDef def = {
 		name,
+		variant,
 		argTypes,
 		returnType,
 		handler
@@ -39,14 +41,14 @@ FFI::RC FFI::call(const std::string& name, std::vector<Value>& stack, int nArgs)
 	}
 	const FuncDef& funcDef = it->second;
 
-	if (stack.size() < nArgs || nArgs != funcDef.argTypes.size()) {
+	if (stack.size() < nArgs || (!funcDef.variante && nArgs != funcDef.argTypes.size())) {
 		return RC::kIncorrectNumArgs;
 	}
 
 	std::vector<Value> args(nArgs);
 	for (int i = 0; i < nArgs; ++i) {
 		const Value& value = stack[stack.size() - 1 - i];
-		if (value.type != funcDef.argTypes[i]) {
+		if (!funcDef.variante && value.type != funcDef.argTypes[i]) {
 			return RC::kIncorrectArgType;
 		}
 		args[i] = value;
