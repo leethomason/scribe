@@ -5,10 +5,10 @@
 
 enum class PType : uint8_t {
 	tNone,		// not nil - used for error and initialization
-	tNumber,
-	tString,
-	tBoolean,
-	//tClass		// need to add a class type as well
+	tNum,
+	tStr,
+	tBool,
+	tFunc,
 };
 
 enum class Layout : uint8_t {

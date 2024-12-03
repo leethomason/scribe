@@ -6,6 +6,7 @@
 #include <map>
 
 class Interpreter;
+class Environment;
 
 class Callable
 {
@@ -24,10 +25,12 @@ public:
 class FFI
 {
 public:
-	bool add(const std::string& name, 
+	bool add(
+		const std::string& name, 
 		const std::vector<ValueType>& argTypes, 
 		ValueType returnType, 
-		FFIHandler*);
+		FFIHandler*,
+		Environment& env);
 
 	enum class RC {
 		kOkay,

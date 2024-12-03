@@ -365,13 +365,15 @@ static void SimpleFFIClock()
 		"print clock()\n"
 		"var a: num = clock()\n"
 		"var b: num = clock()\n"
+		"print a\n"
+		"print b\n"
+		"print b - a\n"
 		"return b >= a\n";
 	Run(s, Value::Boolean(true));
 }
 
 void LangTest()
 {
-#if 0
 	RUN_TEST(SimplePrint());
 	RUN_TEST(SimpleReturn());
 	RUN_TEST(SimpleError());
@@ -399,7 +401,6 @@ void LangTest()
 	RUN_TEST(BasicForTest());
 	RUN_TEST(BasicForTestNoInit());
 	RUN_TEST(BasicForTestNoDecl());
-#endif
 	RUN_TEST(SimpleFFIClock());
 
 #if false

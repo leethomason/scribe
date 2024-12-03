@@ -9,15 +9,17 @@ Value Value::Default(ValueType valueType, Heap& heap)
 
 	if (valueType.layout == Layout::tScalar) {
 		switch (valueType.pType) {
-		case PType::tNumber:
+		case PType::tNum:
 			v = Value::Number(0.0);
 			break;
-		case PType::tBoolean:
+		case PType::tBool:
 			v = Value::Boolean(false);
 			break;
-		case PType::tString:
+		case PType::tStr:
 			v = Value::String("");
 			break;
+
+		case PType::tFunc:
 		default:
 			break; // will throw an error.
 		}
@@ -27,15 +29,16 @@ Value Value::Default(ValueType valueType, Heap& heap)
 		HeapObject* obj = nullptr;
 
 		switch (valueType.pType) {
-		case PType::tNumber:
+		case PType::tNum:
 			obj = new NumList(0);
 			break;
-		case PType::tBoolean:
+		case PType::tBool:
 			obj = new BoolList(0);
 			break;
-		case PType::tString:
+		case PType::tStr:
 			obj = new StrList(0);
 			break;
+		case PType::tFunc:
 		default:
 			break;
 		}
@@ -73,9 +76,10 @@ bool Value::operator==(const Value& rhs) const
 
 	switch (type.pType) {
 	case PType::tNone: return true;
-	case PType::tNumber: return vNumber == rhs.vNumber;
-	case PType::tBoolean: return vBoolean == rhs.vBoolean;
-	case PType::tString: return *vString == *rhs.vString;
+	case PType::tNum: return vNumber == rhs.vNumber;
+	case PType::tBool: return vBoolean == rhs.vBoolean;
+	case PType::tStr: return *vString == *rhs.vString;
+	case PType::tFunc: return *vString == *rhs.vString;
 	default:
 		assert(false); // not yet implemnted
 	}
@@ -98,10 +102,14 @@ void Value::clear()
 
 	switch (type.pType) {
 	case PType::tNone:
-	case PType::tNumber:
-	case PType::tBoolean:
+	case PType::tNum:
+	case PType::tBool:
 		break;
-	case PType::tString: delete vString;
+	case PType::tStr: 
+		delete vString;
+		break;
+	case PType::tFunc:
+		delete vString;
 		break;
 	default:
 		REQUIRE(false);
@@ -120,14 +128,17 @@ void Value::copy(const Value& rhs)
 	case PType::tNone:
 		vNumber = 0;
 		break;
-	case PType::tNumber:
+	case PType::tNum:
 		vNumber = rhs.vNumber;
 		break;
-	case PType::tBoolean:
+	case PType::tBool:
 		vBoolean = rhs.vBoolean;
 		break;
-	case PType::tString:
+	case PType::tStr:
 		vString = new std::string(*rhs.vString); 
+		break;
+	case PType::tFunc:
+		vString = new std::string(*rhs.vString);
 		break;
 	default:
 		assert(false); // not yet implemented
@@ -141,11 +152,13 @@ std::string Value::toString() const
 	switch (type.pType) {
 	case PType::tNone:
 		return "none";
-	case PType::tNumber:
+	case PType::tNum:
 		return fmt::format("{}", vNumber);
-	case PType::tBoolean:
+	case PType::tBool:
 		return vBoolean ? "true" : "false";
-	case PType::tString:
+	case PType::tStr:
+		return *vString;
+	case PType::tFunc:
 		return *vString;
 	default:
 		assert(false); // not implemented
@@ -161,12 +174,14 @@ bool Value::isTruthy() const
 	switch (type.pType) {
 	case PType::tNone:
 		return false;
-	case PType::tNumber:
+	case PType::tNum:
 		return vNumber != 0.0;
-	case PType::tBoolean:
+	case PType::tBool:
 		return vBoolean;
-	case PType::tString:
+	case PType::tStr:
 		return !vString->empty();
+	case PType::tFunc:
+		return true;
 	default:
 		assert(false); // not yet implemented
 	}
@@ -179,9 +194,10 @@ std::string ValueType::pTypeName() const
 	std::string name;
 	switch (pType) {
 	case PType::tNone: return "none";
-	case PType::tNumber: return "num";
-	case PType::tBoolean: return "bool";
-	case PType::tString: return "str";
+	case PType::tNum: return "num";
+	case PType::tBool: return "bool";
+	case PType::tStr: return "str";
+	case PType::tFunc: return "func";
 	default:
 		REQUIRE(false);
 	}
@@ -207,13 +223,13 @@ std::string ValueType::typeName() const
 	type.layout = Layout::tScalar;
 
 	if (name == "num") {
-		type.pType = PType::tNumber;
+		type.pType = PType::tNum;
 	}
 	else if (name == "bool") {
-		type.pType = PType::tBoolean;
+		type.pType = PType::tBool;
 	}
 	else if (name == "str") {
-		type.pType = PType::tString;
+		type.pType = PType::tStr;
 	}
 	else {
 		assert(false); // not yet implemented

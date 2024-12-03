@@ -7,11 +7,11 @@
 #include "scribelib.h"
 #include "astprinter.h"
 
-#define DEBUG_INTERPRETER() 1
+#define DEBUG_INTERPRETER() 0
 
 Interpreter::Interpreter()
 {
-	AttachStdLib(ffi);
+	AttachStdLib(ffi, env.globalEnv());
 }
 
 Value Interpreter::interpret(const std::string& input, const std::string& ctxName)
@@ -300,13 +300,13 @@ void Interpreter::visit(const BinaryASTNode& node, int depth)
 	Value result;
 	assert(lhs.type.layout == Layout::tScalar);	// need to implement reference
 
-	if (lhs.type.pType == PType::tNumber) {
+	if (lhs.type.pType == PType::tNum) {
 		result = numberBinaryOp(node.type, lhs, rhs);
 	}
-	else if (lhs.type.pType == PType::tString) {
+	else if (lhs.type.pType == PType::tStr) {
 		result = stringBinaryOp(node.type, lhs, rhs);
 	}
-	else if (lhs.type.pType == PType::tBoolean) {
+	else if (lhs.type.pType == PType::tBool) {
 		result = boolBinaryOp(node.type, lhs, rhs);
 	}
 	else {
@@ -334,7 +334,7 @@ void Interpreter::visit(const UnaryASTNode& node, int depth)
 	popStack();
 
 	if (node.type == TokenType::MINUS) {
-		if (!verifyScalarTypes("Negative", { PType::tNumber })) return;
+		if (!verifyScalarTypes("Negative", { PType::tNum })) return;
 		stack.push_back(Value::Number(-val.vNumber));
 	}
 	else if (node.type == TokenType::BANG) {
@@ -381,7 +381,7 @@ void Interpreter::visit(const CallASTNode& node, int depth)
 		CheckStack cs(stack, 1);
 		node.callee->accept(*this, depth + 1);
 	}
-	ValueType funcType(PType::tString);
+	ValueType funcType(PType::tFunc);
 	const Value& func = getStack(1);
 	if (func.type != funcType) {
 		internalError("func has incorrect type");

@@ -30,6 +30,8 @@ public:
 	bool set(const std::string& name, const Value& v);
 	Value get(const std::string& name);
 
+	Environment& globalEnv() { return stack[0]; }
+
 private:
 	std::vector<Environment> stack;
 };

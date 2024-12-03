@@ -1,12 +1,14 @@
 #include "func.h"
 #include "errorreporting.h"
+#include "environment.h"
 
 #include <fmt/core.h>
 
 bool FFI::add(const std::string& name, 
 	const std::vector<ValueType>& argTypes, 
 	ValueType returnType, 
-	FFIHandler* handler)
+	FFIHandler* handler,
+	Environment& env)
 {
 	REQUIRE(!name.empty());
 	REQUIRE(handler);
@@ -24,6 +26,8 @@ bool FFI::add(const std::string& name,
 		handler
 	};
 	funcDefs[name] = def;
+
+	env.define(name, Value::Func(name));
 	return true;
 }
 

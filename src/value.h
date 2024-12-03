@@ -24,13 +24,16 @@ struct Value {
 	// is a mess. Use constructor functions.
 
 	static Value Number(double v) {
-		Value val; val.type.pType = PType::tNumber; val.vNumber = v; return val;
+		Value val; val.type.pType = PType::tNum; val.vNumber = v; return val;
 	}
 	static Value String(const std::string& v) {
-		Value val; val.type.pType = PType::tString; val.vString = new std::string(v); return val;
+		Value val; val.type.pType = PType::tStr; val.vString = new std::string(v); return val;
 	}
 	static Value Boolean(bool v) {
-		Value val; val.type.pType = PType::tBoolean; val.vBoolean = v; return val;
+		Value val; val.type.pType = PType::tBool; val.vBoolean = v; return val;
+	}
+	static Value Func(const std::string& v) {
+		Value val; val.type.pType = PType::tFunc; val.vString = new std::string(v); return val;
 	}
 	static Value Default(ValueType valueType, Heap& heap);
 
