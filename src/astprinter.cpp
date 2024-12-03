@@ -2,19 +2,19 @@
 
 #include <fmt/core.h>
 
-void ASTPrinter::visit(const ASTExprStmtNode& node, int depth)
+void ASTPrinter::visit(const ASTExprStmt& node, int depth)
 {
 	fmt::print("STMT expr\n");
 	node.expr->accept(*this, depth + 1);
 }
 
-void ASTPrinter::visit(const ASTReturnStmtNode& node, int depth)
+void ASTPrinter::visit(const ASTReturnStmt& node, int depth)
 {
 	fmt::print("STMT return\n");
 	node.expr->accept(*this, depth + 1);
 }
 
-void ASTPrinter::visit(const ASTBlockStmtNode& node, int depth)
+void ASTPrinter::visit(const ASTBlockStmt& node, int depth)
 {
 	fmt::print("STMT block {{\n");
 	for (const auto& stmt : node.stmts)
@@ -22,7 +22,7 @@ void ASTPrinter::visit(const ASTBlockStmtNode& node, int depth)
 	fmt::print("}}\n");
 }
 
-void ASTPrinter::visit(const ASTIfStmtNode& node, int depth)
+void ASTPrinter::visit(const ASTIfStmt& node, int depth)
 {
 	fmt::print("STMT if\n");
 	node.condition->accept(*this, depth + 1);
@@ -33,7 +33,7 @@ void ASTPrinter::visit(const ASTIfStmtNode& node, int depth)
 	}
 }
 
-void ASTPrinter::visit(const ASTWhileStmtNode& node, int depth)
+void ASTPrinter::visit(const ASTWhileStmt& node, int depth)
 {
 	fmt::print("STMT while\n");
 	fmt::print("  Condition\n");
@@ -42,26 +42,26 @@ void ASTPrinter::visit(const ASTWhileStmtNode& node, int depth)
 	node.body->accept(*this, depth + 1);
 }
 
-void ASTPrinter::visit(const ASTVarDeclStmtNode& node, int depth)
+void ASTPrinter::visit(const ASTVarDeclStmt& node, int depth)
 {
 	fmt::print("STMT var decl: {}: {}\n", node.name, node.valueType.typeName());
 	if (node.expr)
 		node.expr->accept(*this, depth + 1);
 }
 
-void ASTPrinter::visit(const ValueASTNode& node, int depth)
+void ASTPrinter::visit(const ASTValueExpr& node, int depth)
 {
 	fmt::print("{: >{}}", "", depth * 2);
 	fmt::print("Value: {}\n", node.value.toString());
 }
 
-void ASTPrinter::visit(const IdentifierASTNode& node, int depth)
+void ASTPrinter::visit(const ASTIdentifierExpr& node, int depth)
 {
 	fmt::print("{: >{}}", "", depth * 2);
 	fmt::print("Identifier: {}\n", node.name);
 }
 
-void ASTPrinter::visit(const AssignmentASTNode& node, int depth)
+void ASTPrinter::visit(const ASTAssignmentExpr& node, int depth)
 {
 	fmt::print("{: >{}}", "", depth * 2);
 	fmt::print("Assignment: {}\n", node.name);
@@ -69,7 +69,7 @@ void ASTPrinter::visit(const AssignmentASTNode& node, int depth)
 	node.right->accept(*this, depth + 1);
 }
 
-void ASTPrinter::visit(const BinaryASTNode& node, int depth)
+void ASTPrinter::visit(const ASTBinaryExpr& node, int depth)
 {
 	std::string opName = Token::toString(node.type);
 	fmt::print("{: >{}}", "", depth * 2);
@@ -79,7 +79,7 @@ void ASTPrinter::visit(const BinaryASTNode& node, int depth)
 	node.right->accept(*this, depth + 1);
 }
 
-void ASTPrinter::visit(const UnaryASTNode& node, int depth)
+void ASTPrinter::visit(const ASTUnaryExpr& node, int depth)
 {
 	std::string opName;
 	switch (node.type) {
@@ -94,7 +94,7 @@ void ASTPrinter::visit(const UnaryASTNode& node, int depth)
 	node.right->accept(*this, depth + 1);
 }
 
-void ASTPrinter::visit(const LogicalASTNode& node, int depth)
+void ASTPrinter::visit(const ASTLogicalExpr& node, int depth)
 {
 	std::string opName = Token::toString(node.type);
 
@@ -105,7 +105,7 @@ void ASTPrinter::visit(const LogicalASTNode& node, int depth)
 	node.right->accept(*this, depth + 1);
 }
 
-void ASTPrinter::visit(const CallASTNode& node, int depth)
+void ASTPrinter::visit(const ASTCallExpr& node, int depth)
 {
 	fmt::print("{: >{}}", "", depth * 2);
 	fmt::print("Call: \n");

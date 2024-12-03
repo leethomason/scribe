@@ -136,7 +136,7 @@ ASTStmtPtr Parser::varDecl()
 		if (check(TokenType::EQUAL)) {
 			expr = expression();
 		}
-		return std::make_shared<ASTVarDeclStmtNode>(t.lexeme, valueType, expr);
+		return std::make_shared<ASTVarDeclStmt>(t.lexeme, valueType, expr);
 	}
 	else {
 		// "var" IDENTIFIER ( "=" expression )?
@@ -153,7 +153,7 @@ ASTStmtPtr Parser::varDecl()
 			return nullptr;
 		}
 
-		return std::make_shared<ASTVarDeclStmtNode>(t.lexeme, valueType, expr);
+		return std::make_shared<ASTVarDeclStmt>(t.lexeme, valueType, expr);
 	}
 	/*
 	assert(false);	// logic isn't correct, something isn't implemented.
@@ -180,7 +180,7 @@ ASTStmtPtr Parser::statement()
 ASTStmtPtr Parser::returnStatement()
 {
 	ASTExprPtr expr = expression();
-	return std::make_shared<ASTReturnStmtNode>(expr);
+	return std::make_shared<ASTReturnStmt>(expr);
 }
 
 ASTStmtPtr Parser::ifStatement()
@@ -203,7 +203,7 @@ ASTStmtPtr Parser::ifStatement()
 		elseBranch = block();
 	}
 
-	return std::make_shared<ASTIfStmtNode>(condition, thenBranch, elseBranch);
+	return std::make_shared<ASTIfStmt>(condition, thenBranch, elseBranch);
 }
 
 ASTStmtPtr Parser::whileStatement()
@@ -216,7 +216,7 @@ ASTStmtPtr Parser::whileStatement()
 	}
 	ASTStmtPtr body = block();
 	REQUIRE(body);
-	return std::make_shared<ASTWhileStmtNode>(condition, body);
+	return std::make_shared<ASTWhileStmt>(condition, body);
 }
 
 ASTStmtPtr Parser::forStatement()
@@ -278,12 +278,12 @@ ASTStmtPtr Parser::forStatement()
 	// Start with the inner block.
 	std::vector<ASTStmtPtr> inner;
 	inner.push_back(body);
-	inner.push_back(std::make_shared<ASTExprStmtNode>(increment));
-	std::shared_ptr<ASTBlockStmtNode> innerBlock = std::make_shared<ASTBlockStmtNode>(inner);
+	inner.push_back(std::make_shared<ASTExprStmt>(increment));
+	std::shared_ptr<ASTBlockStmt> innerBlock = std::make_shared<ASTBlockStmt>(inner);
 
 	if (!condition)
-		condition = std::make_shared<ValueASTNode>(Value::Boolean(true));
-	std::shared_ptr<ASTWhileStmtNode> whileStmt = std::make_shared<ASTWhileStmtNode>(condition, innerBlock);
+		condition = std::make_shared<ASTValueExpr>(Value::Boolean(true));
+	std::shared_ptr<ASTWhileStmt> whileStmt = std::make_shared<ASTWhileStmt>(condition, innerBlock);
 
 	// Now the outer block
 	std::vector<ASTStmtPtr> outer;
@@ -291,7 +291,7 @@ ASTStmtPtr Parser::forStatement()
 		outer.push_back(init);
 	outer.push_back(whileStmt);
 
-	std::shared_ptr<ASTBlockStmtNode> outerBlock = std::make_shared<ASTBlockStmtNode>(outer);
+	std::shared_ptr<ASTBlockStmt> outerBlock = std::make_shared<ASTBlockStmt>(outer);
 	return outerBlock;
 }
 
@@ -306,13 +306,13 @@ ASTStmtPtr Parser::block()
 		ErrorReporter::report(ctxName, tok.peek().line, "Expected '}'");
 		return nullptr;
 	}
-	return std::make_shared<ASTBlockStmtNode>(stmts);
+	return std::make_shared<ASTBlockStmt>(stmts);
 }
 
 ASTStmtPtr Parser::expressionStatement()
 {
 	ASTExprPtr expr = expression();
-	return std::make_shared<ASTExprStmtNode>(expr);
+	return std::make_shared<ASTExprStmt>(expr);
 }
 
 ASTExprPtr Parser::expression()
@@ -328,13 +328,13 @@ ASTExprPtr Parser::assignment()
 	if (check(TokenType::EQUAL, t)) {
 		// The expression should be an l-value
 		ASTExprPtr rValue = assignment();
-		const IdentifierASTNode* ident = expr->asIdentifier();
+		const ASTIdentifierExpr* ident = expr->asIdentifier();
 
 		if (!ident) {
 			ErrorReporter::report(ctxName, t.line, "Invalid assignment target, not an l-value");
 			return nullptr;
 		}
-		return std::make_shared<AssignmentASTNode>(ident->name, rValue);
+		return std::make_shared<ASTAssignmentExpr>(ident->name, rValue);
 	}
 	return expr;
 }
@@ -346,7 +346,7 @@ ASTExprPtr Parser::logicalOR()
 	Token t;
 	while (check(TokenType::LOGIC_OR, t)) {
 		ASTExprPtr rhs = logicalAND();
-		expr = std::make_shared<LogicalASTNode>(t.type, expr, rhs);
+		expr = std::make_shared<ASTLogicalExpr>(t.type, expr, rhs);
 	}
 	return expr;
 }
@@ -358,7 +358,7 @@ ASTExprPtr Parser::logicalAND()
 	Token t;
 	while (check(TokenType::LOGIC_AND, t)) {
 		ASTExprPtr rhs = equality();
-		expr = std::make_shared<LogicalASTNode>(t.type, expr, rhs);
+		expr = std::make_shared<ASTLogicalExpr>(t.type, expr, rhs);
 	}
 	return expr;
 }
@@ -369,7 +369,7 @@ ASTExprPtr Parser::equality()
 	Token t;
 	while(match({TokenType::EQUAL_EQUAL, TokenType::BANG_EQUAL}, t)) {
 		ASTExprPtr right = comparison();
-		expr = std::make_shared<BinaryASTNode>(t.type, expr, right);
+		expr = std::make_shared<ASTBinaryExpr>(t.type, expr, right);
 	}
 	return expr;
 }
@@ -380,7 +380,7 @@ ASTExprPtr Parser::comparison()
 	Token t;
 	while (match({TokenType::GREATER, TokenType::GREATER_EQUAL, TokenType::LESS, TokenType::LESS_EQUAL}, t)) {
 		ASTExprPtr right = term();
-		expr = std::make_shared<BinaryASTNode>(t.type, expr, right);
+		expr = std::make_shared<ASTBinaryExpr>(t.type, expr, right);
 	}
 	return expr;
 }
@@ -391,7 +391,7 @@ ASTExprPtr Parser::term()
 	Token t;
 	while (match({TokenType::PLUS, TokenType::MINUS}, t)) {
 		ASTExprPtr right = factor();
-		expr = std::make_shared<BinaryASTNode>(t.type, expr, right);
+		expr = std::make_shared<ASTBinaryExpr>(t.type, expr, right);
 	}
 	return expr;
 }
@@ -402,7 +402,7 @@ ASTExprPtr Parser::factor()
 	Token t;
 	while (match({TokenType::MULT, TokenType::DIVIDE}, t)) {
 		ASTExprPtr right = unary();
-		expr = std::make_shared<BinaryASTNode>(t.type, expr, right);
+		expr = std::make_shared<ASTBinaryExpr>(t.type, expr, right);
 	}
 	return expr;
 }
@@ -413,7 +413,7 @@ ASTExprPtr Parser::unary()
 	Token t;
 	if (match({TokenType::BANG, TokenType::MINUS}, t)) {
 		ASTExprPtr right = unary();
-		return std::make_shared<UnaryASTNode>(t.type, right);
+		return std::make_shared<ASTUnaryExpr>(t.type, right);
 	}
 	return call();
 }
@@ -447,7 +447,7 @@ ASTExprPtr Parser::finishCall(ASTExprPtr expr)
 		return nullptr;
 	}
 	// FIXME: maximum argument count
-	return std::make_shared<CallASTNode>(expr, t, arguments);
+	return std::make_shared<ASTCallExpr>(expr, t, arguments);
 }
 
 // NUMBER | STRING | identifier | "true" | "false" | "(" expr ")"
@@ -456,15 +456,15 @@ ASTExprPtr Parser::primary()
 	Token t = tok.get();
 	switch(t.type) {
 		case TokenType::NUMBER:
-			return std::make_shared<ValueASTNode>(Value::Number(t.dValue));
+			return std::make_shared<ASTValueExpr>(Value::Number(t.dValue));
 		case TokenType::STRING:
-			return std::make_shared<ValueASTNode>(Value::String(t.lexeme));
+			return std::make_shared<ASTValueExpr>(Value::String(t.lexeme));
 		case TokenType::IDENT:
-			return std::make_shared<IdentifierASTNode>(t.lexeme);
+			return std::make_shared<ASTIdentifierExpr>(t.lexeme);
 		case TokenType::TRUE:	
-			return std::make_shared<ValueASTNode>(Value::Boolean(true));
+			return std::make_shared<ASTValueExpr>(Value::Boolean(true));
 		case TokenType::FALSE:
-			return std::make_shared<ValueASTNode>(Value::Boolean(false));
+			return std::make_shared<ASTValueExpr>(Value::Boolean(false));
 
 		case TokenType::LEFT_PAREN:
 		{

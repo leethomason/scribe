@@ -24,24 +24,23 @@
 #endif
 
 class ASTStmtNode;
-class ASTExprStmtNode;
-//class ASTPrintStmtNode;
-class ASTReturnStmtNode;
-class ASTBlockStmtNode;
-class ASTVarDeclStmtNode;
-class ASTIfStmtNode;
-class ASTWhileStmtNode;
+class ASTExprStmt;
+class ASTReturnStmt;
+class ASTBlockStmt;
+class ASTVarDeclStmt;
+class ASTIfStmt;
+class ASTWhileStmt;
 
 using ASTStmtPtr = std::shared_ptr<ASTStmtNode>;
 
 class ASTExprNode;
-class ValueASTNode;
-class AssignmentASTNode;
-class IdentifierASTNode;
-class BinaryASTNode;
-class UnaryASTNode;
-class LogicalASTNode;
-class CallASTNode;
+class ASTValueExpr;
+class ASTAssignmentExpr;
+class ASTIdentifierExpr;
+class ASTBinaryExpr;
+class ASTUnaryExpr;
+class ASTLogicalExpr;
+class ASTCallExpr;
 
 using ASTExprPtr = std::shared_ptr<ASTExprNode>;
 
@@ -50,12 +49,12 @@ using ASTExprPtr = std::shared_ptr<ASTExprNode>;
 class ASTStmtVisitor
 {
 public:
-	virtual void visit(const ASTExprStmtNode&, int depth) = 0;
-    virtual void visit(const ASTReturnStmtNode&, int depth) = 0;
-	virtual void visit(const ASTBlockStmtNode&, int depth) = 0;
-    virtual void visit(const ASTVarDeclStmtNode&, int depth) = 0;
-	virtual void visit(const ASTIfStmtNode&, int depth) = 0;
-    virtual void visit(const ASTWhileStmtNode&, int depth) = 0;
+	virtual void visit(const ASTExprStmt&, int depth) = 0;
+    virtual void visit(const ASTReturnStmt&, int depth) = 0;
+	virtual void visit(const ASTBlockStmt&, int depth) = 0;
+    virtual void visit(const ASTVarDeclStmt&, int depth) = 0;
+	virtual void visit(const ASTIfStmt&, int depth) = 0;
+    virtual void visit(const ASTWhileStmt&, int depth) = 0;
 };
 
 class ASTStmtNode {
@@ -64,42 +63,42 @@ class ASTStmtNode {
 	virtual void accept(ASTStmtVisitor& visitor, int depth) const = 0;
 };
 
-class ASTExprStmtNode : public ASTStmtNode
+class ASTExprStmt : public ASTStmtNode
 {
 public:
-	ASTExprStmtNode(ASTExprPtr expr) : expr(expr) {
-        LOG_AST(ASTExprStmtNode);
+	ASTExprStmt(ASTExprPtr expr) : expr(expr) {
+        LOG_AST(ASTExprStmt);
     }
     virtual void accept(ASTStmtVisitor& visitor, int depth) const override { 
-        LOG_AST_VISIT(ASTExprStmtNode, depth);
+        LOG_AST_VISIT(ASTExprStmt, depth);
         visitor.visit(*this, depth);  
     }
 
 	ASTExprPtr expr;
 };
 
-class ASTReturnStmtNode : public ASTStmtNode
+class ASTReturnStmt : public ASTStmtNode
 {
 public:
-    ASTReturnStmtNode(ASTExprPtr expr) : expr(expr) {
-        LOG_AST(ASTReturnStmtNode);
+    ASTReturnStmt(ASTExprPtr expr) : expr(expr) {
+        LOG_AST(ASTReturnStmt);
     }
     virtual void accept(ASTStmtVisitor& visitor, int depth) const override { 
-        LOG_AST_VISIT(ASTReturnStmtNode, depth);
+        LOG_AST_VISIT(ASTReturnStmt, depth);
         visitor.visit(*this, depth); 
     }
 
     ASTExprPtr expr;
 };
 
-class ASTWhileStmtNode : public ASTStmtNode
+class ASTWhileStmt : public ASTStmtNode
 {
 public:
-    ASTWhileStmtNode(ASTExprPtr condition, ASTStmtPtr body) : condition(condition), body(body) {
-        LOG_AST(ASTWhileStmtNode);
+    ASTWhileStmt(ASTExprPtr condition, ASTStmtPtr body) : condition(condition), body(body) {
+        LOG_AST(ASTWhileStmt);
     }
     virtual void accept(ASTStmtVisitor& visitor, int depth) const override { 
-        LOG_AST_VISIT(ASTWhileStmtNode, depth);
+        LOG_AST_VISIT(ASTWhileStmt, depth);
         visitor.visit(*this, depth); 
     }
 
@@ -107,30 +106,30 @@ public:
     ASTStmtPtr body;
 };
 
-class ASTBlockStmtNode : public ASTStmtNode
+class ASTBlockStmt : public ASTStmtNode
 {
 public:
-	ASTBlockStmtNode(const std::vector<ASTStmtPtr>& stmts) : stmts(stmts) {
-        LOG_AST(ASTBlockStmtNode);
+	ASTBlockStmt(const std::vector<ASTStmtPtr>& stmts) : stmts(stmts) {
+        LOG_AST(ASTBlockStmt);
     }
 	virtual void accept(ASTStmtVisitor& visitor, int depth) const override { 
-        LOG_AST_VISIT(ASTBlockStmtNode, depth);
+        LOG_AST_VISIT(ASTBlockStmt, depth);
         visitor.visit(*this, depth); 
     }
 	
     std::vector<ASTStmtPtr> stmts;
 };
 
-class ASTIfStmtNode : public ASTStmtNode
+class ASTIfStmt : public ASTStmtNode
 {
 public:
-	ASTIfStmtNode(ASTExprPtr condition, ASTStmtPtr thenBranch, ASTStmtPtr elseBranch) : condition(condition), thenBranch(thenBranch), elseBranch(elseBranch) {
+	ASTIfStmt(ASTExprPtr condition, ASTStmtPtr thenBranch, ASTStmtPtr elseBranch) : condition(condition), thenBranch(thenBranch), elseBranch(elseBranch) {
         REQUIRE(condition);
         REQUIRE(thenBranch);
-        LOG_AST(ASTIfStmtNode);
+        LOG_AST(ASTIfStmt);
     }
 	virtual void accept(ASTStmtVisitor& visitor, int depth) const override { 
-        LOG_AST_VISIT(ASTIfStmtNode, depth);
+        LOG_AST_VISIT(ASTIfStmt, depth);
         visitor.visit(*this, depth);
     }
 
@@ -139,14 +138,14 @@ public:
 	ASTStmtPtr elseBranch;
 };
 
-class ASTVarDeclStmtNode : public ASTStmtNode
+class ASTVarDeclStmt : public ASTStmtNode
 {
 public:
-    ASTVarDeclStmtNode(const std::string& name, ValueType valueType, ASTExprPtr expr) : name(name), valueType(valueType), expr(expr) {
-        LOG_AST(ASTVarDeclStmtNode);
+    ASTVarDeclStmt(const std::string& name, ValueType valueType, ASTExprPtr expr) : name(name), valueType(valueType), expr(expr) {
+        LOG_AST(ASTVarDeclStmt);
     }
     virtual void accept(ASTStmtVisitor& visitor, int depth) const override { 
-        LOG_AST_VISIT(ASTVarDeclStmtNode, depth);
+        LOG_AST_VISIT(ASTVarDeclStmt, depth);
         visitor.visit(*this, depth);
     }
 
@@ -160,13 +159,13 @@ public:
 class ASTExprVisitor
 {
 public:
-    virtual void visit(const AssignmentASTNode&, int depth) = 0;
-    virtual void visit(const ValueASTNode&, int depth) = 0;
-    virtual void visit(const IdentifierASTNode&, int depth) = 0;
-    virtual void visit(const BinaryASTNode&, int depth) = 0;
-    virtual void visit(const UnaryASTNode&, int depth) = 0;
-    virtual void visit(const LogicalASTNode&, int depth) = 0;
-    virtual void visit(const CallASTNode&, int depth) = 0;
+    virtual void visit(const ASTAssignmentExpr&, int depth) = 0;
+    virtual void visit(const ASTValueExpr&, int depth) = 0;
+    virtual void visit(const ASTIdentifierExpr&, int depth) = 0;
+    virtual void visit(const ASTBinaryExpr&, int depth) = 0;
+    virtual void visit(const ASTUnaryExpr&, int depth) = 0;
+    virtual void visit(const ASTLogicalExpr&, int depth) = 0;
+    virtual void visit(const ASTCallExpr&, int depth) = 0;
 };
 
 // Abstract syntax tree (AST) nodes
@@ -178,18 +177,18 @@ public:
     virtual ValueType duckType() const {
         return ValueType();
     }
-    virtual const IdentifierASTNode* asIdentifier() { return nullptr; }
+    virtual const ASTIdentifierExpr* asIdentifier() { return nullptr; }
 };
 
-class ValueASTNode : public ASTExprNode
+class ASTValueExpr : public ASTExprNode
 {
 public:
-    ValueASTNode(const Value& value) : value(value) {
-        LOG_AST(ValueASTNode);
+    ASTValueExpr(const Value& value) : value(value) {
+        LOG_AST(ASTValueExpr);
     }
 
     virtual void accept(ASTExprVisitor& visitor, int depth) const override { 
-        LOG_AST_VISIT(ValueASTNode, depth);
+        LOG_AST_VISIT(ASTValueExpr, depth);
         visitor.visit(*this, depth);
     }
 
@@ -200,15 +199,15 @@ public:
     Value value;
 };
 
-class AssignmentASTNode : public ASTExprNode
+class ASTAssignmentExpr : public ASTExprNode
 {
 public:
-	AssignmentASTNode(const std::string& name, ASTExprPtr right) : name(name), right(right) {
-        LOG_AST(AssignmentASTNode);
+	ASTAssignmentExpr(const std::string& name, ASTExprPtr right) : name(name), right(right) {
+        LOG_AST(ASTAssignmentExpr);
     }
 
     virtual void accept(ASTExprVisitor& visitor, int depth) const override { 
-        LOG_AST_VISIT(AssignmentASTNode, depth);
+        LOG_AST_VISIT(ASTAssignmentExpr, depth);
         visitor.visit(*this, depth);
     }
 
@@ -216,31 +215,31 @@ public:
 	ASTExprPtr right;
 };
 
-class IdentifierASTNode : public ASTExprNode
+class ASTIdentifierExpr : public ASTExprNode
 { 
 public:
-	IdentifierASTNode(const std::string& name) : name(name) {
-        LOG_AST(IdentifierASTNode);
+	ASTIdentifierExpr(const std::string& name) : name(name) {
+        LOG_AST(ASTIdentifierExpr);
     }
     virtual void accept(ASTExprVisitor& visitor, int depth) const override { 
-        LOG_AST_VISIT(IdentifierASTNode, depth);
+        LOG_AST_VISIT(ASTIdentifierExpr, depth);
         visitor.visit(*this, depth); 
     }
-    virtual const IdentifierASTNode* asIdentifier() override { return this; }
+    virtual const ASTIdentifierExpr* asIdentifier() override { return this; }
 
     std::string name;
 };
 
-class BinaryASTNode : public ASTExprNode
+class ASTBinaryExpr : public ASTExprNode
 {
 public:
-    BinaryASTNode(TokenType type, ASTExprPtr left, ASTExprPtr right) : type(type) {
+    ASTBinaryExpr(TokenType type, ASTExprPtr left, ASTExprPtr right) : type(type) {
         this->left = left;
         this->right = right;
-        LOG_AST(BinaryASTNode);
+        LOG_AST(ASTBinaryExpr);
     }
     virtual void accept(ASTExprVisitor& visitor, int depth) const override { 
-        LOG_AST_VISIT(BinaryASTNode, depth);
+        LOG_AST_VISIT(ASTBinaryExpr, depth);
         visitor.visit(*this, depth); 
     }
 
@@ -249,15 +248,15 @@ public:
     ASTExprPtr right;
 };
 
-class UnaryASTNode : public ASTExprNode
+class ASTUnaryExpr : public ASTExprNode
 {
 public:
-    UnaryASTNode(TokenType type,ASTExprPtr right) : type(type) {
+    ASTUnaryExpr(TokenType type,ASTExprPtr right) : type(type) {
         this->right = right;
-        LOG_AST(UnaryASTNode);
+        LOG_AST(ASTUnaryExpr);
     }
     virtual void accept(ASTExprVisitor& visitor, int depth) const override { 
-        LOG_AST_VISIT(UnaryASTNode, depth);
+        LOG_AST_VISIT(ASTUnaryExpr, depth);
         visitor.visit(*this, depth); 
     }
 
@@ -265,14 +264,14 @@ public:
     ASTExprPtr right;
 };
 
-class CallASTNode : public ASTExprNode
+class ASTCallExpr : public ASTExprNode
 {
 public:
-    CallASTNode(ASTExprPtr callee, Token paren, const std::vector<ASTExprPtr>& arguments) :
+    ASTCallExpr(ASTExprPtr callee, Token paren, const std::vector<ASTExprPtr>& arguments) :
         callee(callee), paren(paren), arguments(arguments) {}
 
     virtual void accept(ASTExprVisitor& visitor, int depth) const override {
-        LOG_AST_VISIT(CallASTNode, depth);
+        LOG_AST_VISIT(ASTCallExpr, depth);
         visitor.visit(*this, depth);
     }
 
@@ -281,16 +280,16 @@ public:
     std::vector<ASTExprPtr> arguments;
 };
 
-class LogicalASTNode : public ASTExprNode
+class ASTLogicalExpr : public ASTExprNode
 {
     public:
-	LogicalASTNode(TokenType type, ASTExprPtr left, ASTExprPtr right) : type(type) {
+	ASTLogicalExpr(TokenType type, ASTExprPtr left, ASTExprPtr right) : type(type) {
 		this->left = left;
 		this->right = right;
-		LOG_AST(LogicalASTNode);
+		LOG_AST(ASTLogicalExpr);
 	}
 	virtual void accept(ASTExprVisitor& visitor, int depth) const override { 
-        LOG_AST_VISIT(LogicalASTNode, depth);
+        LOG_AST_VISIT(ASTLogicalExpr, depth);
         visitor.visit(*this, depth); 
     }
 

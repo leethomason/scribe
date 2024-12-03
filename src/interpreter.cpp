@@ -58,7 +58,7 @@ Value Interpreter::interpret(const std::string& input, const std::string& ctxNam
     return rc;
 }
 
-void Interpreter::visit(const ASTExprStmtNode& node, int depth)
+void Interpreter::visit(const ASTExprStmt& node, int depth)
 {
 	CheckStack cs(stack, 1);
 
@@ -79,13 +79,13 @@ void Interpreter::visit(const ASTPrintStmtNode& node, int depth)
 }
 */
 
-void Interpreter::visit(const ASTReturnStmtNode& node, int depth)
+void Interpreter::visit(const ASTReturnStmt& node, int depth)
 {
 	node.expr->accept(*this, depth + 1);
 	REQUIRE(stack.size() == 1);
 }
 
-void Interpreter::visit(const ASTIfStmtNode& node, int depth)
+void Interpreter::visit(const ASTIfStmt& node, int depth)
 {
 	node.condition->accept(*this, depth + 1);
 	REQUIRE(stack.size() == 1);
@@ -102,7 +102,7 @@ void Interpreter::visit(const ASTIfStmtNode& node, int depth)
 	}
 }
 
-void Interpreter::visit(const ASTWhileStmtNode& node, int depth)
+void Interpreter::visit(const ASTWhileStmt& node, int depth)
 {
 	while (true) {
 		size_t stackSz = stack.size();
@@ -119,7 +119,7 @@ void Interpreter::visit(const ASTWhileStmtNode& node, int depth)
 	}
 }
 
-void Interpreter::visit(const ASTBlockStmtNode& node, int depth)
+void Interpreter::visit(const ASTBlockStmt& node, int depth)
 {
 	env.push();
 	for (const auto& stmt : node.stmts) {
@@ -128,7 +128,7 @@ void Interpreter::visit(const ASTBlockStmtNode& node, int depth)
 	env.pop();
 }
 
-void Interpreter::visit(const ASTVarDeclStmtNode& node, int depth)
+void Interpreter::visit(const ASTVarDeclStmt& node, int depth)
 {
 	REQUIRE(stack.empty());
 
@@ -200,14 +200,14 @@ bool Interpreter::verifyScalarTypes(const std::string& ctx, const std::vector<PT
 	return true;
 }
 
-void Interpreter::visit(const ValueASTNode& node, int depth)
+void Interpreter::visit(const ASTValueExpr& node, int depth)
 {
 	(void)depth;
 
 	stack.push_back(node.value);
 }
 
-void Interpreter::visit(const IdentifierASTNode& node, int depth)
+void Interpreter::visit(const ASTIdentifierExpr& node, int depth)
 {
 	(void)depth;
 
@@ -220,7 +220,7 @@ void Interpreter::visit(const IdentifierASTNode& node, int depth)
 	stack.push_back(value);
 }
 
-void Interpreter::visit(const AssignmentASTNode& node, int depth)
+void Interpreter::visit(const ASTAssignmentExpr& node, int depth)
 {
 	(void)depth;
 	CheckStack cs(stack, 1);	// Assignment leaves a value on the stack. Drives me a little crazy.
@@ -282,7 +282,7 @@ Value Interpreter::boolBinaryOp(TokenType op, const Value& lhs, const Value& rhs
 	return Value();
 }
 
-void Interpreter::visit(const BinaryASTNode& node, int depth)
+void Interpreter::visit(const ASTBinaryExpr& node, int depth)
 {
 	(void)depth;
 
@@ -323,7 +323,7 @@ void Interpreter::visit(const BinaryASTNode& node, int depth)
 	stack.push_back(result);
 }
 
-void Interpreter::visit(const UnaryASTNode& node, int depth)
+void Interpreter::visit(const ASTUnaryExpr& node, int depth)
 {
 	(void)depth;
 	REQUIRE(node.type == TokenType::MINUS || node.type == TokenType::BANG);
@@ -345,7 +345,7 @@ void Interpreter::visit(const UnaryASTNode& node, int depth)
 	}
 }
 
-void Interpreter::visit(const LogicalASTNode& node, int depth)
+void Interpreter::visit(const ASTLogicalExpr& node, int depth)
 {
 	REQUIRE(node.type == TokenType::LOGIC_AND || node.type == TokenType::LOGIC_OR);
 		
@@ -371,7 +371,7 @@ void Interpreter::visit(const LogicalASTNode& node, int depth)
 	REQUIRE(stack.size() == stackSize + 1);
 }
 
-void Interpreter::visit(const CallASTNode& node, int depth)
+void Interpreter::visit(const ASTCallExpr& node, int depth)
 {
 	// The "function call" can itself be an expression, which leads to:
 	// foo()()
