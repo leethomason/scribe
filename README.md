@@ -34,6 +34,28 @@ logical operators isn't very useful.)
 * `&&` - logical "and"
 * `||` - logical "or"
 
+## Control
+
+### while
+
+```
+var i = 0
+while i < 10 {
+    i = i + 1
+}
+```
+
+### for
+
+Noting that all the parts of the "for" are optional.
+
+```
+for var i = 0; i < 10; i++ {
+    print i
+}
+```
+
+
 ## Basics (WIP)
 
 Question:
@@ -41,11 +63,6 @@ Question:
 * Is is possible to remove the ';' at the end of a statement?
 * Is the map v. list dichotomy worth it?
 
-```
-for var i = 0; i < 10; i++ {
-    print i
-}
-```
 
 ```
 class Breakfast {

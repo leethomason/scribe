@@ -8,7 +8,7 @@ enum class PType : uint8_t {
 	tNumber,
 	tString,
 	tBoolean,
-	tClass		// need to add a class type as well
+	//tClass		// need to add a class type as well
 };
 
 enum class Layout : uint8_t {

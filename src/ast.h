@@ -41,6 +41,7 @@ class IdentifierASTNode;
 class BinaryASTNode;
 class UnaryASTNode;
 class LogicalASTNode;
+class CallASTNode;
 
 using ASTExprPtr = std::shared_ptr<ASTExprNode>;
 
@@ -180,6 +181,7 @@ public:
     virtual void visit(const BinaryASTNode&, int depth) = 0;
     virtual void visit(const UnaryASTNode&, int depth) = 0;
     virtual void visit(const LogicalASTNode&, int depth) = 0;
+    virtual void visit(const CallASTNode&, int depth) = 0;
 };
 
 // Abstract syntax tree (AST) nodes
@@ -276,6 +278,22 @@ public:
 
     TokenType type;
     ASTExprPtr right;
+};
+
+class CallASTNode : public ASTExprNode
+{
+public:
+    CallASTNode(ASTExprPtr callee, Token paren, const std::vector<ASTExprPtr>& arguments) :
+        callee(callee), paren(paren), arguments(arguments) {}
+
+    virtual void accept(ASTExprVisitor& visitor, int depth) const override {
+        LOG_AST_VISIT(CallASTNode, depth);
+        visitor.visit(*this, depth);
+    }
+
+    ASTExprPtr callee;
+    Token paren;
+    std::vector<ASTExprPtr> arguments;
 };
 
 class LogicalASTNode : public ASTExprNode

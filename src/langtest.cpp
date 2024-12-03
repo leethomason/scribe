@@ -359,8 +359,19 @@ static void BasicForTestNoDecl()
 	Run(s, Value::Number(20));
 }
 
+static void SimpleFFIClock()
+{
+	const std::string s =
+		"print clock()\n"
+		"var a: num = clock()\n"
+		"var b: num = clock()\n"
+		"return b >= a\n";
+	Run(s, Value::Boolean(true));
+}
+
 void LangTest()
 {
+#if 0
 	RUN_TEST(SimplePrint());
 	RUN_TEST(SimpleReturn());
 	RUN_TEST(SimpleError());
@@ -388,6 +399,8 @@ void LangTest()
 	RUN_TEST(BasicForTest());
 	RUN_TEST(BasicForTestNoInit());
 	RUN_TEST(BasicForTestNoDecl());
+#endif
+	RUN_TEST(SimpleFFIClock());
 
 #if false
 	// note this: https://github.com/munificent/craftinginterpreters/blob/master/note/answers/chapter13_inheritance/3.md

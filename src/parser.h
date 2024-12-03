@@ -46,4 +46,7 @@ private:
 	ASTExprPtr factor();
 	ASTExprPtr unary();
 	ASTExprPtr primary();
+	ASTExprPtr call();
+	ASTExprPtr finishCall(ASTExprPtr expr);
+
 };

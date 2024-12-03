@@ -37,8 +37,10 @@
 	comparison -> term ( ( ">" | ">=" | "<" | "<=" ) term )*
 	term -> factor ( ( "+" | "-" ) factor )*
 	factor -> unary ( ( "*" | "/" ) unary )*
-	unary -> ( "!" | "-" ) unary | primary
+	unary -> ( "!" | "-" ) unary | call
+	call -> primary ( "(" arguments? ")" )*
 	primary -> NUMBER | STRING | "true" | "false" | "(" expression ")" | IDENTIFIER
+	arguments -> expression ( "," expression )*
 */
 
 bool Parser::check(TokenType type) 
@@ -423,7 +425,39 @@ ASTExprPtr Parser::unary()
 		ASTExprPtr right = unary();
 		return std::make_shared<UnaryASTNode>(t.type, right);
 	}
-	return primary();
+	return call();
+}
+
+ASTExprPtr Parser::call()
+{
+	ASTExprPtr expr = primary();
+
+	while (true) {
+		if (check(TokenType::LEFT_PAREN)) {
+			expr = finishCall(expr);
+		}
+		else {
+			break;
+		}
+	}
+	return expr;
+}
+
+ASTExprPtr Parser::finishCall(ASTExprPtr expr)
+{
+	std::vector<ASTExprPtr> arguments;
+	if (tok.peek().type != TokenType::RIGHT_PAREN) {
+		do {
+			arguments.push_back(expression());
+		} while (check(TokenType::COMMA));
+	}
+	Token t;
+	if (!check(TokenType::RIGHT_PAREN, t)) {
+		ErrorReporter::report(ctxName, t.line, "Expected ')' after arguments");
+		return nullptr;
+	}
+	// FIXME: maximum argument count
+	return std::make_shared<CallASTNode>(expr, t, arguments);
 }
 
 // NUMBER | STRING | identifier | "true" | "false" | "(" expr ")"

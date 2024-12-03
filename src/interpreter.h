@@ -2,6 +2,7 @@
 
 #include "ast.h"
 #include "environment.h"
+#include "func.h"
 
 #include <exception>
 #include <stdexcept>
@@ -9,6 +10,7 @@
 class Interpreter : public ASTStmtVisitor, public ASTExprVisitor
 {
 public:
+	Interpreter();
     Value interpret(const std::string& input, const std::string& contextName);
 
 	// ASTStmtVisitor
@@ -27,10 +29,12 @@ public:
 	void visit(const BinaryASTNode& node, int depth) override;
 	void visit(const UnaryASTNode& node, int depth) override;
 	void visit(const LogicalASTNode& node, int depth) override;
+	void visit(const CallASTNode& node, int depth) override;
 
 	void setOutput(std::string& out) { output = &out; }
 
 	std::vector<Value> stack;
+	FFI ffi;
 
 private:
 	class InterpreterError : public std::runtime_error {

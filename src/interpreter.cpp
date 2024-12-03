@@ -3,10 +3,16 @@
 #include "token.h"
 #include "parser.h"
 #include "errorreporting.h"
+#include "func.h"
+#include "scribelib.h"
 #include "astprinter.h"
-#include "bcgen.h"
 
-#define DEBUG_INTERPRETER() 0
+#define DEBUG_INTERPRETER() 1
+
+Interpreter::Interpreter()
+{
+	AttachStdLib(ffi);
+}
 
 Value Interpreter::interpret(const std::string& input, const std::string& ctxName)
 {
@@ -361,4 +367,47 @@ void Interpreter::visit(const LogicalASTNode& node, int depth)
 	}
 	node.right->accept(*this, depth + 1);
 	REQUIRE(stack.size() == stackSize + 1);
+}
+
+void Interpreter::visit(const CallASTNode& node, int depth)
+{
+	// The "function call" can itself be an expression, which leads to:
+	// foo()()
+	// for instance. Strange in C++ (although I've certainly see it) but
+	// more common in other languages.
+	
+	// callee
+	{
+		CheckStack cs(stack, 1);
+		node.callee->accept(*this, depth + 1);
+	}
+	ValueType funcType(PType::tString);
+	const Value& func = getStack(1);
+	if (func.type != funcType) {
+		internalError("func has incorrect type");
+	}
+	std::string funcName = *func.vString;
+	popStack();
+
+	// Arguments
+	{
+		CheckStack cs(stack, node.arguments.size());
+		for (size_t i = 0; i < node.arguments.size(); i++) {
+			node.arguments[i]->accept(*this, depth + 1);
+		}
+	}
+	
+	FFI::RC rc = ffi.call(funcName, stack, (int)node.arguments.size());
+	if (rc == FFI::RC::kFuncNotFound) {
+		assert(false);
+	}
+	else if (rc == FFI::RC::kIncorrectNumArgs) {
+		runtimeError(fmt::format("Incorrect num args calling '{}'", funcName));
+	}
+	else if (rc == FFI::RC::kIncorrectArgType) {
+		runtimeError(fmt::format("Incorrect arg types calling '{}'", funcName));
+	}
+	else if (rc == FFI::RC::kError) {
+		internalError("internal error from FFI");
+	}
 }

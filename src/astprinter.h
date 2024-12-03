@@ -10,6 +10,7 @@ public:
 	void visit(const BinaryASTNode& node, int depth) override;
 	void visit(const UnaryASTNode& node, int depth) override;
 	void visit(const LogicalASTNode& node, int depth) override;
+	void visit(const CallASTNode& node, int depth) override;
 
 	void visit(const ASTExprStmtNode&, int depth) override;
 	void visit(const ASTPrintStmtNode&, int depth) override;

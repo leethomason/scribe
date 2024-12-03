@@ -111,7 +111,15 @@ void ASTPrinter::visit(const LogicalASTNode& node, int depth)
 	node.right->accept(*this, depth + 1);
 }
 
+void ASTPrinter::visit(const CallASTNode& node, int depth)
+{
+	fmt::print("{: >{}}", "", depth * 2);
+	fmt::print("Call: \n");
+	node.callee->accept(*this, depth + 1);
+}
+
 void ASTPrinter::print(const ASTExprPtr& ast)
 {
 	ast->accept(*this, 0);
 }
+
