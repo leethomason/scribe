@@ -65,20 +65,6 @@ void Interpreter::visit(const ASTExprStmt& node, int depth)
     node.expr->accept(*this, depth + 1);
 }
 
-/*
-void Interpreter::visit(const ASTPrintStmtNode& node, int depth)
-{
-	REQUIRE(stack.empty());
-	node.expr->accept(*this, depth + 1);
-	REQUIRE(stack.size() == 1);
-
-	std::string s = fmt::format("{}\n", stack[0].toString());
-	if (output) *output += s;
-	fmt::print(s);
-	popStack();
-}
-*/
-
 void Interpreter::visit(const ASTReturnStmt& node, int depth)
 {
 	node.expr->accept(*this, depth + 1);

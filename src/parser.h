@@ -20,21 +20,25 @@ private:
 	Tokenizer& tok;
 	std::string ctxName;
 
+	// Consumes the token:
 	bool check(TokenType type);
 	bool check(TokenType type, Token& matched);	// returns the token, with the line #, etc.
+
+	// Just looks
+	bool peek(TokenType type);
 
 	bool match(const std::vector<TokenType>& types, Token& matched);	
 
 	ASTStmtPtr statement();
 	ASTStmtPtr declaration();
 	ASTStmtPtr varDecl();
-	ASTStmtPtr printStatement();
+	ASTStmtPtr funcDecl();
 	ASTStmtPtr expressionStatement();
 	ASTStmtPtr returnStatement();
 	ASTStmtPtr ifStatement();
 	ASTStmtPtr whileStatement();
 	ASTStmtPtr forStatement();
-	ASTStmtPtr block();				// consumes final brace but not opening one
+	ASTStmtPtr block();			// consumes final brace but not opening one
 
 	ASTExprPtr expression();
 	ASTExprPtr assignment();

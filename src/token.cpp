@@ -123,6 +123,8 @@ Token Tokenizer::innerGet()
             return Token(TokenType::WHILE, _line, t);
         if (t == "for")
             return Token(TokenType::FOR, _line, t);
+        if (t == "func")
+            return Token(TokenType::FUNC, _line, t);
 
         Token token(TokenType::IDENT, _line, t);
         return token;
@@ -187,6 +189,7 @@ std::string Token::toString(TokenType type)
 		"ELSE",
         "WHILE",
         "FOR",
+        "FUNC",
 
         "PLUS",
         "MINUS",

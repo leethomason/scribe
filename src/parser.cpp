@@ -5,8 +5,12 @@
 /*
 	program -> declaration* EOF
 
-	declaration ->   varDecl 
+	declaration ->   funcDecl
+				   | varDecl 
 				   | statement
+	funcDecl ->  "func" function
+	function -> IDENTIFIER "(" parameters? ")" ( ":" IDENTIFIER )? block
+	parameters -> IDENTIFIER ( "," IDENTIFIER )* 
 	varDecl ->   "var" IDENTIFIER "=" expression						// must be able to duck type
 	           | "var" IDENTIFIER ":" IDENTIFIER ( "=" expression )?
 	assignment ->   IDENTIFIER "=" expression
@@ -59,6 +63,14 @@ bool Parser::check(TokenType type, Token& t)
 	return false;
 }
 
+bool Parser::peek(TokenType type)
+{
+	if (tok.peek().type == type) {
+		return true;
+	}
+	return false;
+}
+
 bool Parser::match(const std::vector<TokenType>& types, Token& t)
 {
 	Token peek = tok.peek();
@@ -86,9 +98,71 @@ std::vector<ASTStmtPtr>  Parser::parseStmts()
 
 ASTStmtPtr Parser::declaration()
 {
+	if (check(TokenType::FUNC))
+		return funcDecl();
 	if (check(TokenType::VAR))
 		return varDecl();
 	return statement();
+}
+
+ASTStmtPtr Parser::funcDecl()
+{
+	Token name = tok.get();
+	if (name.type != TokenType::IDENT) {
+		ErrorReporter::report(ctxName, name.line, "Expected function name");
+		return nullptr;
+	}
+	if (!check(TokenType::LEFT_PAREN)) {
+		ErrorReporter::report(ctxName, tok.peek().line, "Expected '('");
+		return nullptr;
+	}
+
+	// Params
+	std::vector<Param> params;
+	if (!peek(TokenType::RIGHT_PAREN)) {
+		do {
+			Token param = tok.get();
+			if (param.type != TokenType::IDENT) {
+				ErrorReporter::report(ctxName, param.line, "Expected parameter name");
+				return nullptr;
+			}
+			if (!check(TokenType::COLON)) {
+				ErrorReporter::report(ctxName, tok.peek().line, "Expected ':'");
+				return nullptr;
+			}
+			Token type;
+			if (!check({ TokenType::IDENT }, type)) {
+				ErrorReporter::report(ctxName, tok.peek().line, "Expected type");
+				return nullptr;
+			}
+			ValueType vt = ValueType::fromTypeName(type.lexeme);
+			if (vt == ValueType()) {
+				ErrorReporter::report(ctxName, type.line, "Unrecognized type");
+				return nullptr;
+			}
+			params.push_back(Param{ param.lexeme, vt });
+		} while (check(TokenType::COMMA));
+	}
+	if (!check(TokenType::RIGHT_PAREN)) {
+		ErrorReporter::report(ctxName, tok.peek().line, "Expected ')'");
+		return nullptr;
+	}
+
+	ValueType rcType;
+	if (!check(TokenType::COLON)) {
+		if (!check(TokenType::IDENT)) {
+			ErrorReporter::report(ctxName, tok.peek().line, "Expected return type");
+			return nullptr;
+		}
+		rcType = ValueType::fromTypeName(tok.get().lexeme);
+		if (rcType == ValueType()) {
+			ErrorReporter::report(ctxName, name.line, "Unrecognized return type");
+			return nullptr;
+		}
+	}
+
+	ASTStmtPtr b = block();
+	return std::make_shared<ASTFuncDeclStmt>(name.lexeme, params, rcType, b);
 }
 
 ASTStmtPtr Parser::varDecl()

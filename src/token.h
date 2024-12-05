@@ -20,6 +20,7 @@ enum class TokenType {
 	ELSE,           // else statement
     WHILE,		    // while statement
     FOR,            // for statement    
+    FUNC,           // function
 
     // Sybols & operations
     PLUS,           // '+'

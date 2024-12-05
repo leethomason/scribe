@@ -34,3 +34,8 @@ public:
 	bool operator==(const ValueType& rhs) const { return rhs.pType == pType && rhs.layout == layout; }
 	bool operator!=(const ValueType& rhs) const { return !(*this == rhs); }
 };
+
+struct Param {
+	std::string name;
+	ValueType valueType;
+};

@@ -30,6 +30,7 @@ class ASTBlockStmt;
 class ASTVarDeclStmt;
 class ASTIfStmt;
 class ASTWhileStmt;
+class ASTFuncDeclStmt;
 
 using ASTStmtPtr = std::shared_ptr<ASTStmtNode>;
 
@@ -55,6 +56,7 @@ public:
     virtual void visit(const ASTVarDeclStmt&, int depth) = 0;
 	virtual void visit(const ASTIfStmt&, int depth) = 0;
     virtual void visit(const ASTWhileStmt&, int depth) = 0;
+    virtual void visit(const ASTFuncDeclStmt&, int depth) = 0;
 };
 
 class ASTStmtNode {
@@ -152,6 +154,23 @@ public:
     std::string name;
     ValueType valueType;
     ASTExprPtr expr;
+};
+
+class ASTFuncDeclStmt : public ASTStmtNode
+{
+public:
+    ASTFuncDeclStmt(const std::string& name, const std::vector<Param>& params, ValueType returnType, ASTStmtPtr body) : name(name), params(params), returnType(returnType), body(body) {
+        LOG_AST(ASTFuncDeclStmt);
+    }
+    virtual void accept(ASTStmtVisitor& visitor, int depth) const override {
+        LOG_AST_VISIT(ASTFuncDeclStmt, depth);
+        visitor.visit(*this, depth);
+    }
+
+    std::string name;
+    std::vector<Param> params;
+    ValueType returnType;
+    ASTStmtPtr body;
 };
 
 // -------- Expressions ----------
